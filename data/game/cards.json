@@ -2,90 +2,97 @@
 	"squirrel": {},
 	"rabbit": {},
 	"skeleton": {
-		"stat": [1,1,0],
+		"stats": [1,1,0],
 		"sigils": ["fragile"]
 	},
 	"empty_vessel": {
-		"stat": [0,2,0],
-		"sigils": ["no_sacrifice", "conduit"]
+		"stats": [0,2,0],
+		"sigils": ["conduit"],
+		"no_sacrifice": true
 	},
 	"stoat": {
-		"stat": [1,2,1],
+		"stats": [1,2,1],
 		"cost": "blood"
 	},
+	"ant": {
+		"stats": [0,2,1],
+		"cost": "blood",
+		"class": "bug",
+		"power_calc": "ant"
+	},
 	"bullfrog": {
-		"stat": [1,2,1],
+		"stats": [1,2,1],
 		"cost": "blood",
 		"sigils": ["leaping"],
 		"class": "reptile"
 	},
 	"wolf": {
-		"stat": [3,2,2],
+		"stats": [3,2,2],
 		"cost": "blood",
 		"class": "canine"
 	},
 	"wolf_pup": {
-		"stat": [1,1,1],
+		"stats": [1,1,1],
 		"cost": "blood",
 		"sigils": ["fledgling"],
 		"class": "canine",
 		"grows_into": "wolf"
 	},
 	"river_snapper": {
-		"stat": [1,6,2],
+		"stats": [1,6,2],
 		"cost": "blood",
 		"class": "reptile"
 	},
 	"otter": {
-		"stat": [1,1,1],
+		"stats": [1,1,1],
 		"cost": "blood",
 		"sigils": ["waterborne"]
 	},
 	"sparrow": {
-		"stat": [1,1,1],
+		"stats": [1,1,1],
 		"cost": "blood",
 		"sigils": ["flying"],
 		"class": "bird"
 	},
 	"raven": {
-		"stat": [2,3,2],
+		"stats": [2,3,2],
 		"cost": "blood",
 		"sigils": ["flying"],
 		"class": "bird"
 	},
 	"raven_egg": {
-		"stat": [0,2,1],
+		"stats": [0,2,1],
 		"cost": "blood",
 		"sigils": ["fledgling"],
 		"grows_into": "raven",
 		"class": "bird"
 	},
 	"mantis": {
-		"stat": [1,1,1],
+		"stats": [1,1,1],
 		"cost": "blood",
 		"sigils": ["bifurcated"],
 		"class": "bug"
 	},
 	"opossum": {
-		"stat": [1,1,2],
+		"stats": [1,1,2],
 		"cost": "bones"
 	},
 	"coyote": {
-		"stat": [2,1,4],
+		"stats": [2,1,4],
 		"cost": "bones"
 	},
 	"cockroach": {
-		"stat": [1,1,4],
+		"stats": [1,1,4],
 		"cost": "bones",
 		"sigils": ["undying"]
 	},
 	"leapbot": {
-		"stat": [0,2,1],
+		"stats": [0,2,1],
 		"cost": "energy",
 		"sigils": ["leaping"]
 	},
 	"energy_bot": {
-		"stat": [0,1,1],
+		"stats": [0,1,1],
 		"cost": "energy",
 		"sigils": ["battery"]
 	},
