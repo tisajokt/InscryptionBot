@@ -1,14 +1,381 @@
 {
-	"squirrel": {},
-	"rabbit": {},
+	"squirrel": {
+		"grows_into": "rabid_squirrel",
+		"tribe": "squirrel",
+		"event": "none",
+		"#comment": "gave grown form special name"
+	},
+	"rabid_squirrel": {
+		"stats": [1,3,0],
+		"tribe": "squirrel",
+		"event": "none"
+	},
 	"skeleton": {
 		"stats": [1,1,0],
-		"sigils": ["fragile"]
+		"sigils": ["brittle"],
+		"no_sacrifice": true,
+		"event": "none",
+		"#comment": "now cannot be sacrificed (would be superior to squirrel as sidedeck)"
 	},
 	"empty_vessel": {
+		"stats": [0,2,1],
+		"is_conduit": true,
+		"no_bones": true,
+		"event": "none"
+	},
+	"gem_vessel": {
+		"stats": [0,2,1],
+		"sigils": ["random_mox"],
+		"is_conduit": true,
+		"no_sacrifice": true,
+		"no_bones": true,
+		"event": "none"
+	},
+	"mox_crystal": {
+		"stats": [0,1,0],
+		"sigils": ["magic_armor"],
+		"is_mox": true,
+		"no_sacrifice": true,
+		"no_bones": true,
+		"event": "none",
+		"#comment": "gains armored if not opposed by anything when it's played (to help balance in duels)"
+	},
+	"rabbit": {
+		"sigils": ["jumper"],
+		"#comment": "added jumper sigil"
+	},
+	"warren": {
+		"stats": [0,2,1],
+		"cost": "blood",
+		"sigils": ["rabbit_hole"]
+	},
+	"geck": {
+		"stats": [1,1,0],
+		"tribe": "reptile",
+		"rare": true
+	},
+	"skink": {
+		"stats": [1,1,1],
+		"cost": "blood",
+		"sigils": ["loose_tail"],
+		"tribe": "reptile"
+	},
+	"tail": {
 		"stats": [0,2,0],
-		"sigils": ["conduit"],
+		"event": "none"
+	},
+	"wriggling_tail": {
+		"stats": [0,2,0],
+		"tribe": "reptile",
+		"event": "none"
+	},
+	"wriggling_leg": {
+		"stats": [0,2,0],
+		"tribe": "insect",
+		"event": "none"
+	},
+	"tail_feathers": {
+		"stats": [0,2,0],
+		"tribe": "avian",
+		"event": "none"
+	},
+	"furry_tail": {
+		"stats": [0,2,0],
+		"event": "none"
+	},
+	"black_goat": {
+		"stats": [0,1,1],
+		"cost": "blood",
+		"sigils": ["worthy_sacrifice"],
+		"tribe": "hooved"
+	},
+	"elk": {
+		"stats": [2,4,2],
+		"cost": "blood",
+		"sigils": ["sprinter"],
+		"tribe": "hooved"
+	},
+	"elk_fawn": {
+		"stats": [1,1,1],
+		"cost": "blood",
+		"sigils": ["sprinter", "fledgling"],
+		"grows_into": "elk",
+		"tribe": "hooved"
+	},
+	"long_elk": {
+		"stats": [1,2,4],
+		"cost": "bones",
+		"sigils": ["sprinter", "death_touch"],
+		"tribe": "hooved",
+		"trail": "vertebrae",
+		"rare": true
+	},
+	"pronghorn": {
+		"stats": [1,3,2],
+		"cost": "blood",
+		"sigils": ["sprinter", "bifurcated"],
+		"tribe": "hooved"
+	},
+	"moose_buck": {
+		"stats": [3,7,3],
+		"cost": "blood",
+		"sigils": ["hefty"],
+		"tribe": "hooved"
+	},
+	"wild_bull": {
+		"stats": [2,3,2],
+		"cost": "blood",
+		"sigils": ["rampager"],
+		"tribe": "hooved"
+	},
+	"stinkbug": {
+		"stats": [1,2,2],
+		"cost": "bones",
+		"sigils": ["stinky"],
+		"tribe": "insect"
+	},
+	"cat": {
+		"stats": [0,1,1],
+		"cost": "blood",
+		"sigils": ["many_lives"],
+		"9lives": "undead_cat"
+	},
+	"undead_cat": {
+		"stats": [3,6,2],
+		"cost": "bones",
+		"event": "none",
+		"#comment": "costs bones instead (barely matters since it's so rare)"
+	},
+	"bee": {
+		"stats": [1,1,0],
+		"sigils": ["flying"],
+		"tribe": "insect",
+		"event": "none"
+	},
+	"beehive": {
+		"stats": [0,2,1],
+		"cost": "blood",
+		"sigils": ["beehive"],
+		"tribe": "insect"
+	},
+	"great_white": {
+		"stats": [4,2,3],
+		"cost": "blood",
+		"sigils": ["waterborne"]
+	},
+	"grizzly": {
+		"stats": [4,6,3],
+		"cost": "blood"
+	},
+	"urayuli": {
+		"stats": [7,7,4],
+		"cost": "blood",
+		"rare": true
+	},
+	"turkey_vulture": {
+		"stats": [3,3,8],
+		"cost": "bones",
+		"sigils": ["flying"],
+		"tribe": "avian"
+	},
+	"rat_king": {
+		"stats": [2,1,2],
+		"cost": "blood",
+		"sigils": ["four_bones"]
+	},
+	"porcupine": {
+		"stats": [1,1,1],
+		"cost": "blood",
+		"sigils": ["spikey"]
+	},
+	"pack_mule": {
+		"stats": [0,5,0],
+		"tribe": "hooved",
+		"event": "none"
+	},
+	"mole": {
+		"stats": [0,4,1],
+		"cost": "blood",
+		"sigils": ["burrower"],
+		"grows_into": "moleman"
+	},
+	"moleman": {
+		"stats": [0,6,1],
+		"cost": "blood",
+		"sigils": ["burrower", "leaping"],
+		"rare": true
+	},
+	"magpie": {
+		"stats": [1,1,2],
+		"cost": "blood",
+		"sigils": ["flying", "hoarder"],
+		"tribe": "avian"
+	},
+	"corpse_maggots": {
+		"stats": [1,2,4],
+		"cost": "bones",
+		"sigils": ["corpse_eater"],
+		"tribe": "insect"
+	},
+	"kingfisher": {
+		"stats": [1,1,1],
+		"cost": "blood",
+		"sigils": ["waterborne", "flying"],
+		"tribe": "avian"
+	},
+	"field_mice": {
+		"stats": [2,2,2],
+		"cost": "blood",
+		"sigils": ["fecundity"]
+	},
+	"bat": {
+		"stats": [2,1,4],
+		"cost": "bones",
+		"sigils": ["flying"]
+	},
+	"adder": {
+		"stats": [1,1,2],
+		"cost": "blood",
+		"sigils": ["death_touch"],
+		"tribe": "reptile"
+	},
+	"alpha": {
+		"stats": [1,2,4],
+		"cost": "bones",
+		"sigils": ["leader"],
+		"tribe": "canine"
+	},
+	"child_13": {
+		"stats": [0,1,1],
+		"cost": "blood",
+		"sigils": ["many_lives"],
+		"tribe": "hooved",
+		"rare": true
+	},
+	"frozen_opossum": {
+		"stats": [0,5,0],
+		"sigils": ["sealed_away"],
+		"sealed_away": "opossum",
 		"no_sacrifice": true
+	},
+	"caged_wolf": {
+		"stats": [0,6,2],
+		"cost": "blood",
+		"sigils": ["sealed_away"],
+		"sealed_away": "wolf",
+		"tribe": "canine",
+		"no_sacrifice": true
+	},
+	"rabbit_pelt": {
+		"stats": [0,1,0],
+		"no_sacrifice": true,
+		"pelt_value": 1,
+		"event": "pelt"
+	},
+	"wolf_pelt": {
+		"stats": [0,2,0],
+		"no_sacrifice": true,
+		"tribe": "canine",
+		"pelt_value": 2,
+		"#comment": "canine tribe added because lol",
+		"event": "pelt"
+	},
+	"golden_pelt": {
+		"stats": [0,3,0],
+		"no_sacrifice": true,
+		"pelt_value": 3,
+		"event": "pelt"
+	},
+	"boulder": {
+		"stats": [0,5,0],
+		"sigils": ["stone"],
+		"no_sacrifice": true,
+		"event": "none"
+	},
+	"broken_bot": {
+		"stats": [0,1,0],
+		"sigils": ["detonator"],
+		"no_sacrifice": true,
+		"event": "none"
+	},
+	"stump": {
+		"stats": [0,3,0],
+		"no_sacrifice": true,
+		"event": "none"
+	},
+	"dam": {
+		"stats": [0,2,0],
+		"no_sacrifice": true,
+		"event": "none"
+	},
+	"the_smoke": {
+		"stats": [0,1,0],
+		"sigils": ["four_bones"],
+		"grows_into": "greater_smoke",
+		"event": "none"
+	},
+	"greater_smoke": {
+		"stats": [1,3,0],
+		"sigils": ["four_bones"],
+		"event": "none",
+		"rare": true
+	},
+	"starvation": {
+		"stats": [1,1,0],
+		"sigils": ["repulsive"],
+		"event": "none"
+	},
+	"amalgam": {
+		"stats": [3,3,2],
+		"tribe": "all",
+		"rare": true
+	},
+	"chime": {
+		"stats": [0,1,0],
+		"no_sacrifice": true,
+		"chime_trigger": "the_daus",
+		"event": "none"
+	},
+	"skunk": {
+		"stats": [0,3,1],
+		"cost": "blood",
+		"sigils": ["stinky"]
+	},
+	"the_daus": {
+		"stats": [2,2,2],
+		"cost": "blood",
+		"sigils": ["bellist"],
+		"rare": true
+	},
+	"bell_tentacle": {
+		"stats": [0,3,2],
+		"cost": "blood",
+		"power_calc": "bell",
+		"chime_trigger": "the_daus"
+	},
+	"mirror_tentacle": {
+		"stats": [0,3,1],
+		"cost": "blood",
+		"power_calc": "mirror"
+	},
+	"hand_tentacle": {
+		"stats": [0,1,1],
+		"cost": "blood",
+		"power_calc": "hand"
+	},
+	"grand_fir": {
+		"stats": [0,3,0],
+		"sigils": ["leaping"],
+		"no_sacrifice": true,
+		"event": "none"
+	},
+	"broken_egg": {
+		"stats": [0,1,0],
+		"tribe": "bird",
+		"no_sacrifice": true,
+		"no_bones": true,
+		"event": "none",
+		"#comment": "now gives no bones, since cuckoo is significantly weaker against humans since they have hammer"
 	},
 	"stoat": {
 		"stats": [1,2,1],
@@ -17,61 +384,115 @@
 	"ant": {
 		"stats": [0,2,1],
 		"cost": "blood",
-		"class": "bug",
+		"tribe": "insect",
+		"power_calc": "ant",
+		"grows_into": "queen_ant"
+	},
+	"flying_ant": {
+		"stats": [0,1,1],
+		"cost": "blood",
+		"sigils": ["flying"],
+		"tribe": "insect",
+		"power_calc": "ant",
+		"grows_into": "queen_ant"
+	},
+	"queen_ant": {
+		"stats": [0,3,2],
+		"cost": "blood",
+		"sigils": ["spawn_ant"],
+		"tribe": "insect",
 		"power_calc": "ant"
+	},
+	"tadpole": {
+		"stats": [0,1,0],
+		"sigils": ["waterborne", "fledgling"],
+		"tribe": "reptile",
+		"grows_into": "bullfrog"
 	},
 	"bullfrog": {
 		"stats": [1,2,1],
 		"cost": "blood",
 		"sigils": ["leaping"],
-		"class": "reptile"
+		"tribe": "reptile"
 	},
 	"wolf": {
 		"stats": [3,2,2],
 		"cost": "blood",
-		"class": "canine"
+		"tribe": "canine"
 	},
 	"wolf_pup": {
 		"stats": [1,1,1],
 		"cost": "blood",
 		"sigils": ["fledgling"],
-		"class": "canine",
+		"tribe": "canine",
 		"grows_into": "wolf"
 	},
 	"river_snapper": {
 		"stats": [1,6,2],
 		"cost": "blood",
-		"class": "reptile"
+		"tribe": "reptile"
 	},
-	"otter": {
+	"river_otter": {
 		"stats": [1,1,1],
 		"cost": "blood",
 		"sigils": ["waterborne"]
 	},
 	"sparrow": {
-		"stats": [1,1,1],
+		"stats": [1,2,1],
 		"cost": "blood",
 		"sigils": ["flying"],
-		"class": "bird"
+		"tribe": "avian"
 	},
 	"raven": {
 		"stats": [2,3,2],
 		"cost": "blood",
 		"sigils": ["flying"],
-		"class": "bird"
+		"tribe": "avian"
 	},
 	"raven_egg": {
 		"stats": [0,2,1],
 		"cost": "blood",
 		"sigils": ["fledgling"],
 		"grows_into": "raven",
-		"class": "bird"
+		"tribe": "avian"
 	},
 	"mantis": {
 		"stats": [1,1,1],
 		"cost": "blood",
 		"sigils": ["bifurcated"],
-		"class": "bug"
+		"tribe": "insect"
+	},
+	"mantis_god": {
+		"stats": [1,1,1],
+		"cost": "blood",
+		"sigils": ["trifurcated"],
+		"tribe": "insect",
+		"rare": true
+	},
+	"strange_larva": {
+		"stats": [0,3,1],
+		"cost": "blood",
+		"sigils": ["fledgling"],
+		"tribe": "insect",
+		"grows_into": "strange_pupa",
+		"rare": true
+	},
+	"strange_pupa": {
+		"stats": [0,3,1],
+		"cost": "blood",
+		"sigils": ["fledgling"],
+		"tribe": "insect",
+		"grows_into": "mothman",
+		"rare": true,
+		"event": "none"
+	},
+	"mothman": {
+		"stats": [7,3,1],
+		"cost": "blood",
+		"sigils": ["flying"],
+		"tribe": "insect",
+		"rare": true,
+		"event": "none"
 	},
 	"opossum": {
 		"stats": [1,1,2],
@@ -79,24 +500,832 @@
 	},
 	"coyote": {
 		"stats": [2,1,4],
-		"cost": "bones"
+		"cost": "bones",
+		"tribe": "canine"
+	},
+	"mealworm": {
+		"stats": [0,2,2],
+		"cost": "bones",
+		"sigils": ["morsel"],
+		"tribe": "insect"
+	},
+	"dire_wolf_pup": {
+		"stats": [1,1,2],
+		"cost": "blood",
+		"sigils": ["fledgling", "digger"],
+		"tribe": "canine",
+		"grows_into": "dire_wolf"
+	},
+	"dire_wolf": {
+		"stats": [2,5,3],
+		"cost": "blood",
+		"sigils": ["double_strike"],
+		"tribe": "canine"
 	},
 	"cockroach": {
 		"stats": [1,1,4],
 		"cost": "bones",
+		"tribe": "insect",
 		"sigils": ["undying"]
 	},
-	"leapbot": {
+	"cuckoo": {
+		"stats": [1,1,1],
+		"cost": "blood",
+		"sigils": ["flying", "cuckoo"],
+		"tribe": "avian"
+	},
+	"lammergeier": {
+		"stats": [0,3,4],
+		"cost": "blood",
+		"sigils": ["flying"],
+		"tribe": "avian",
+		"power_calc": "bones"
+	},
+	"bloodhound": {
+		"stats": [2,3,2],
+		"cost": "blood",
+		"sigils": ["guardian"],
+		"tribe": "canine"
+	},
+	"mud_turtle": {
+		"stats": [2,2,2],
+		"cost": "blood",
+		"sigils": ["armored"],
+		"tribe": "reptile"
+	},
+	"raccoon": {
+		"stats": [1,1,1],
+		"cost": "blood",
+		"sigils": ["scavenger"]
+	},
+	"red_hart": {
+		"stats": [0,1,2],
+		"cost": "blood",
+		"sigils": ["sprinter"],
+		"power_calc": "sacrifices",
+		"tribe": "hooved"
+	},
+	"strange_frog": {
+		"stats": [1,2,1],
+		"cost": "blood",
+		"sigils": ["leaping", "sealed_away"],
+		"tribe": "reptile",
+		"sealed_away": "leaping_trap",
+		"no_sacrifice": true
+	},
+	"leaping_trap": {
+		"stats": [0,1,0],
+		"sigils": ["leaping", "steel_trap"],
+		"no_sacrifice": true,
+		"event": "none"
+	},
+	"bait_bucket": {
+		"stats": [0,1,0],
+		"sigils": ["sealed_away"],
+		"sealed_away": "great_white",
+		"no_sacrifice": true
+	},
+	"wolverine": {
+		"stats": [1,3,5],
+		"cost": "bones",
+		"sigils": ["blood_lust"]
+	},
+	"hodag": {
+		"stats": [1,5,2],
+		"cost": "blood",
+		"sigils": ["blood_lust"],
+		"rare": true
+	},
+	"great_kraken": {
+		"stats": [1,1,1],
+		"cost": "blood",
+		"sigils": ["waterborne"],
+		"rare": true,
+		"kraken": true
+	},
+	"pelt_lice": {
+		"stats": [1,1,4],
+		"cost": "blood",
+		"sigils": ["double_strike"],
+		"tribe": "insect",
+		"rare": true,
+		"is_pelt_lice": true
+	},
+	"vertebrae": {
+		"stats": [0,1,0],
+		"tribe": "hooved",
+		"event": "none"
+	},
+	"curious_egg": {
+		"stats": [0,1,1],
+		"cost": "bones",
+		"sigils": ["hydra_egg"],
+		"rare": true,
+		"#comment": "todo: properly implement hydra, except only applying to the field & hand"
+	},
+	"hydra": {
+		"stats": [1,5,1],
+		"cost": "bones",
+		"sigils": ["bifurcated", "trifurcated"],
+		"tribe": "all",
+		"rare": true,
+		"event": "none"
+	},
+	"ring_worm": {
+		"stats": [0,1,1],
+		"cost": "blood",
+		"tribe": "insect",
+		"is_ring": true
+	},
+	"rattler": {
+		"stats": [3,1,6],
+		"cost": "bones",
+		"tribe": "reptile"
+	},
+
+
+
+	"skel-e-_latcher": {
+		"stats": [1,1,3],
+		"cost": "energy",
+		"sigils": ["brittle_latch"],
+		"no_sacrifice": true
+	},
+	"bomb_latcher": {
+		"stats": [0,1,1],
+		"cost": "energy",
+		"sigils": ["bomb_latch"],
+		"no_sacrifice": true
+	},
+	"shield_latcher": {
+		"stats": [0,1,2],
+		"cost": "energy",
+		"sigils": ["shield_latch"],
+		"no_sacrifice": true
+	},
+	"gem_detonator": {
+		"stats": [1,2,3],
+		"cost": "energy",
+		"sigils": ["gem_detonator", "gemified"],
+		"#comment": "gemified by default"
+	},
+	"squirrel_ball": {
+		"stats": [0,1,1],
+		"cost": "blood",
+		"sigils": ["sprinter"],
+		"tribe": "squirrel",
+		"trail": "squirrel"
+	},
+	"burrowing_trap": {
+		"stats": [0,5,0],
+		"sigils": ["burrower", "steel_trap"],
+		"no_sacrifice": true,
+		"event": "none"
+	},
+	"magnus_mox": {
+		"stats": [0,9,0],
+		"cost": "mox",
+		"sigils": ["blue_mox", "orange_mox", "green_mox", "magic_armor"],
+		"mox": ["blue", "orange", "green"],
+		"rare": true,
+		"#comment": "now requires all mox to be played"
+	},
+	"draugr": {
+		"stats": [0,1,0],
+		"sigils": ["sealed_away"],
+		"sealed_away": "skeleton",
+		"no_sacrifice": true,
+		"#comment": "removed cost"
+	},
+	"gravedigger": {
+		"stats": [0,3,1],
+		"cost": "bones",
+		"sigils": ["digger"]
+	},
+	"49er": {
+		"stats": [1,1,2],
+		"cost": "energy",
+		"sigils": ["sprinter"]
+	},
+	"bonelord's_horn": {
+		"stats": [1,1,3],
+		"cost": "bones",
+		"sigils": ["bonehorn"],
+		"rare": true
+	},
+	"insectodrone": {
+		"stats": [1,1,3],
+		"cost": "energy",
+		"sigils": ["flying"],
+		"tribe": "insect",
+		"#comment": "added insect tribe"
+	},
+	"3D_printer": {
+		"stats": [0,3,3],
+		"cost": "energy",
+		"sigils": ["vessel_printer"]
+	},
+	"alarm_clock": {
+		"stats": [2,1,3],
+		"cost": "energy",
+		"sigils": ["annoying"]
+	},
+	"son1a": {
+		"stats": [1,1,3],
+		"cost": "energy",
+		"sigils": ["transformer"],
+		"transformer_attack": 1,
+		"transformer_sigil": "flying"
+	},
+	"qu177": {
+		"stats": [2,2,5],
+		"cost": "energy",
+		"sigils": ["transformer"],
+		"transformer_attack": -1,
+		"transformer_sigil": "spikey"
+	},
+	"gr1zz": {
+		"stats": [0,4,6],
+		"cost": "energy",
+		"sigils": ["transformer"],
+		"transformer_attack": 4
+	},
+	"ghost_ship": {
+		"stats": [0,1,4],
+		"cost": "bones",
+		"sigils": ["waterborne", "sprinter"],
+		"trail": "skeleton"
+	},
+	"bonehound": {
+		"stats": [2,3,7],
+		"cost": "bones",
+		"sigils": ["guardian"],
+		"tribe": "canine"
+	},
+	"bolthound": {
+		"stats": [2,2,6],
+		"cost": "energy",
+		"sigils": ["guardian"],
+		"tribe": "canine"
+	},
+	"automaton": {
+		"stats": [1,1,2],
+		"cost": "energy",
+		"#comment": "reduced cost from 3 to 2"
+	},
+	"l33pb0t": {
 		"stats": [0,2,1],
 		"cost": "energy",
 		"sigils": ["leaping"]
 	},
+	"explode_bot": {
+		"stats": [1,1,2],
+		"cost": "energy",
+		"sigils": ["detonator"],
+		"no_sacrifice": true
+	},
+	"mrs._bomb": {
+		"stats": [1,2,3],
+		"cost": "energy",
+		"sigils": ["bomb_spewer"],
+		"rare": true
+	},
+	"gamblobot": {
+		"stats": [0,1,3],
+		"cost": "energy",
+		"sigils": ["power_dice"]
+	},
 	"energy_bot": {
-		"stats": [0,1,1],
+		"stats": [0,1,2],
 		"cost": "energy",
 		"sigils": ["battery"]
 	},
-	"custom": {
+	"shieldbot": {
+		"stats": [1,1,3],
+		"cost": "energy",
+		"sigils": ["armored"]
+	},
+	"sentry_drone": {
+		"stats": [0,1,1],
+		"cost": "energy",
+		"sigils": ["sentry"]
+	},
+	"plasma_jimmy": {
+		"stats": [0,3,2],
+		"cost": "energy",
+		"sigils": ["energy_gun"],
+		"rare": true
+	},
+	"null_conduit": {
+		"stats": [0,1,1],
+		"cost": "energy",
+		"is_conduit": true
+	},
+	"buff_conduit": {
+		"stats": [0,2,2],
+		"cost": "energy",
+		"sigils": ["buff_conduit"],
+		"is_conduit": true
+	},
+	"factory_conduit": {
+		"stats": [0,2,3],
+		"cost": "energy",
+		"sigils": ["factory_conduit"],
+		"is_conduit": true
+	},
+	"energy_conduit": {
+		"stats": [1,2,3],
+		"cost": "energy",
+		"sigils": ["energy_conduit"],
+		"is_conduit": true,
+		"#comment": "is now an active ability (and has cooldown)"
+	},
+	"double_gunner": {
+		"stats": [2,1,6],
+		"cost": "energy",
+		"sigils": ["bifurcated"]
+	},
+	"mox_module": {
+		"stats": [0,3,3],
+		"cost": "energy",
+		"sigils": ["green_mox", "blue_mox", "orange_mox"],
+		"is_mox": true,
+		"rare": true
+	},
+	"shutterbug": {
+		"stats": [1,1,5],
+		"cost": "energy",
+		"sigils": ["death_touch", "sentry"],
+		"tribe": "insect",
+		"rare": true,
+		"#comment": "added insect tribe"
+	},
+	"curve_hopper": {
+		"stats": [2,3,4],
+		"cost": "energy",
+		"rare": true
+	},
+	"thick_droid": {
+		"stats": [1,4,5],
+		"cost": "energy",
+		"#comment": "buffed health from 3 to 4"
+	},
+	"sniper_bot": {
+		"stats": [1,1,3],
+		"cost": "energy",
+		"sigils": ["sniper"]
+	},
+	"steambot": {
+		"stats": [3,2,6],
+		"cost": "energy",
+		"#comment": "buffed power from 2 to 3"
+	},
+	"amoeba": {
+		"stats": [1,2,2],
+		"cost": "bones",
+		"sigils": ["amorphous"],
+		"rare": true
+	},
+	"amoebot": {
+		"stats": [1,1,2],
+		"cost": "energy",
+		"sigils": ["amorphous"],
+		"rare": true
+	},
+	"pack_rat": {
+		"stats": [2,2,2],
+		"cost": "blood",
+		"sigils": ["item_bearer"],
+		"event": "pack"
+	},
+	"gift_bot": {
+		"stats": [0,2,2],
+		"cost": "energy",
+		"sigils": ["item_bearer"]
+	},
+	"mage_pupil": {
+		"stats": [1,1,0],
+		"sigils": ["gem_dependent"]
+	},
+	"blue_mage": {
+		"stats": [0,1,0],
+		"cost": "mox",
+		"sigils": ["gemnastics"],
+		"mox": ["blue"]
+	},
+	"gem_fiend": {
+		"stats": [2,1,0],
+		"cost": "mox",
+		"sigils": ["gem_dependent"],
+		"mox": ["blue"]
+	},
+	"hover_mage": {
+		"stats": [1,1,0],
+		"cost": "mox",
+		"sigils": ["hovering"],
+		"mox": ["blue"],
+		"#comment": "now has hovering instead, which is toggleable"
+	},
+	"force_mage": {
+		"stats": [0,1,0],
+		"cost": "mox",
+		"sigils": ["repulsive"],
+		"mox": ["blue"]
+	},
+	"muscle_mage": {
+		"stats": [1,1,0],
+		"cost": "mox",
+		"sigils": ["hefty"],
+		"mox": ["green"]
+	},
+	"orange_mage": {
+		"stats": [0,1,0],
+		"cost": "mox",
+		"sigils": ["gem_animator"],
+		"mox": ["orange"]
+	},
+	"mage_knight": {
+		"stats": [1,3,0],
+		"cost": "mox",
+		"sigils": ["gem_dependent"],
+		"mox": ["orange"]
+	},
+	"ruby_golem": {
+		"stats": [1,1,0],
+		"cost": "mox",
+		"sigils": ["sealed_away"],
+		"mox": ["orange"],
+		"sealed_away": "ruby_mox",
+		"no_sacrifice": true
+	},
+	"ruby_mox": {
+		"stats": [0,1,0],
+		"sigils": ["orange_mox"],
+		"is_mox": true,
+		"no_sacrifice": true,
+		"event": "none"
+	},
+	"sapphire_mox": {
+		"stats": [0,1,0],
+		"sigils": ["blue_mox"],
+		"is_mox": true,
+		"no_sacrifice": true,
+		"event": "none"
+	},
+	"emerald_mox": {
+		"stats": [0,1,0],
+		"sigils": ["green_mox"],
+		"is_mox": true,
+		"no_sacrifice": true,
+		"event": "none"
+	},
+	"practice_wizard": {
+		"stats": [0,3,0],
+		"cost": "mox",
+		"mox": ["orange"],
+		"power_calc": "damage",
+		"#comment": "powers up from receiving damage"
+	},
+	"green_mage": {
+		"stats": [0,2,0],
+		"cost": "mox",
+		"mox": ["green"],
+		"power_calc": "mox",
+		"#comment": "now powered by all mox, not just green"
+	},
+	"junior_sage": {
+		"stats": [1,2,0],
+		"cost": "mox",
+		"mox": ["green"]
+	},
+	"stim_mage": {
+		"stats": [0,2,0],
+		"cost": "mox",
+		"sigils": ["stimulate"],
+		"mox": ["green"]
+	},
+	"gourmage": {
+		"stats": [0,2,0],
+		"cost": "mox",
+		"sigils": ["enlarge"],
+		"mox": ["green"]
+	},
+	"bleene's_mox": {
+		"stats": [0,2,0],
+		"sigils": ["blue_mox", "green_mox"],
+		"is_mox": true,
+		"no_sacrifice": true,
+		"rare": true
+	},
+	"bleene's_vessel": {
+		"stats": [0,1,2],
+		"sigils": ["gemified", "blue_mox", "green_mox"],
+		"is_mox": true,
+		"no_sacrifice": true
+	},
+	"master_bleene": {
+		"stats": [0,4,0],
+		"cost": "mox",
+		"sigils": ["scholar"],
+		"mox": ["blue", "green"],
+		"rare": true
+	},
+	"goranj's_mox": {
+		"stats": [0,2,0],
+		"sigils": ["orange_mox", "green_mox"],
+		"is_mox": true,
+		"no_sacrifice": true,
+		"rare": true
+	},
+	"goranj's_vessel": {
+		"stats": [0,1,2],
+		"sigils": ["gemified", "orange_mox", "green_mox"],
+		"is_mox": true,
+		"no_sacrifice": true
+	},
+	"master_goranj": {
+		"stats": [2,6,0],
+		"cost": "mox",
+		"sigils": ["gem_dependent"],
+		"mox": ["orange", "green"],
+		"rare": true
+	},
+	"orlu's_mox": {
+		"stats": [0,2,0],
+		"sigils": ["blue_mox", "orange_mox"],
+		"is_mox": true,
+		"no_sacrifice": true,
+		"rare": true
+	},
+	"orlu's_vessel": {
+		"stats": [0,1,2],
+		"sigils": ["gemified", "blue_mox", "orange_mox"],
+		"is_mox": true,
+		"no_sacrifice": true
+	},
+	"master_orlu": {
+		"stats": [1,1,0],
+		"cost": "mox",
+		"sigils": ["flying", "looter"],
+		"mox": ["blue", "orange"],
+		"rare": true
+	},
+	"skelemagus": {
+		"stats": [4,1,2],
+		"cost": "bones",
+		"sigils": ["brittle", "gem_dependent"],
+		"mox": ["any"]
+	},
+	"revenant": {
+		"stats": [3,1,3],
+		"cost": "bones",
+		"sigils": ["brittle"]
+	},
+	"bone_heap": {
+		"sigils": ["enlarge"]
+	},
+	"sarcophagus": {
+		"stats": [0,2,3],
+		"cost": "bones",
+		"sigils": ["fledgling"],
+		"grows_into": "mummy_lord"
+	},
+	"mummy_lord": {
+		"stats": [3,3,8],
+		"cost": "bones"
+	},
+	"the_walkers": {
+		"stats": [1,2,4],
+		"cost": "bones",
+		"sigils": ["four_bones"]
+	},
+	"frank_&stein": {
+		"stats": [2,2,5],
+		"cost": "bones"
+	},
+	"zombie": {
+		"stats": [1,1,2],
+		"cost": "bones"
+	},
+	"tomb_robber": {
+		"stats": [0,2,0],
+		"sigils": ["disentomb"],
+		"rare": true
+	},
+	"drowned_soul": {
+		"stats": [1,1,4],
+		"cost": "bones",
+		"sigils": ["waterborne", "death_touch"],
+		"rare": true
+	},
+	"banshee": {
+		"stats": [1,1,2],
+		"cost": "bones",
+		"sigils": ["flying"]
+	},
+	"headless_horseman": {
+		"stats": [5,5,13],
+		"cost": "bones",
+		"sigils": ["flying", "sprinter"],
+		"tribe": "hooved",
+		"rare": true,
+		"#comment": "added hooved tribe"
+	},
+	"obol": {
+		"stats": [0,2,3],
+		"cost": "bones",
+		"sigils": ["spikey", "four_bones"],
+		"grows_into": "bonelord's_horn",
+		"#comment": "combined broken obols together"
+	},
+	"pharaoh_pets": {
+		"stats": [0,1,6],
+		"cost": "bones",
+		"sigils": ["many_lives", "worthy_sacrifice"],
+		"tribe": "hooved",
+		"#comment": "added hooved tribe"
+	},
+	"m3atb0t": {
+		"stats": [0,1,2],
+		"cost": "energy",
+		"sigils": ["worthy_sacrifice"]
+	},
+	"steel_mice": {
+		"stats": [1,1,4],
+		"cost": "energy",
+		"sigils": ["fecundity"]
+	},
+	"hrokall": {
+		"stats": [1,1,1],
+		"cost": "blood",
+		"sigils": ["waterborne", "battery"],
+		"rare": true
+	},
+	"ouroboros": {
+		"stats": [1,1,2],
+		"cost": "blood",
+		"sigils": ["undying"],
+		"tribe": "reptile",
+		"undying_powerup": true,
+		"rare": true
+	},
+	"hawk": {
+		"stats": [3,1,2],
+		"cost": "blood",
+		"sigils": ["flying"],
+		"tribe": "avian"
+	},
+	"salmon": {
+		"stats": [2,2,2],
+		"cost": "blood",
+		"sigils": ["waterborne", "sprinter"]
+	},
+	"gem_guardian": {
+		"stats": [1,2,3],
+		"cost": "energy",
+		"sigils": ["gem_guardian", "gemified"],
+		"#comment": "gemified by default"
+	},
+	"gembound_ripper": {
+		"stats": [3,1,5],
+		"cost": "energy",
+		"sigils": ["gemified"],
+		"#comment": "gemified by default"
+	},
+	"exeskeleton": {
+		"stats": [2,2,2],
+		"cost": "energy",
+		"sigils": ["brittle"]
+	},
+	"touch_cell": {
+		"stats": [1,2,3],
+		"cost": "energy",
+		"sigils": ["powered_buff"]
+	},
+	"splinter_cell": {
+		"stats": [1,2,4],
+		"cost": "energy",
+		"sigils": ["powered_trifurcated"]
+	},
+	"dead_hand": {
+		"stats": [1,1,5],
+		"cost": "bones",
+		"sigils": ["handy"],
+		"#comment": "is now an active ability"
+	},
+	"necromancer": {
+		"stats": [1,2,3],
+		"cost": "bones",
+		"sigils": ["double_death"]
+	},
 
+
+
+	"omni_squirrel": {
+		"stats": [0,1,0],
+		"sigils": ["random_mox"],
+		"tribe": "squirrel",
+		"is_conduit": true,
+		"modded": "Omnisquirrels",
+		"#comment": "combines the functionality of gem vessels and squirrels"
+	},
+	"crystal_bud": {
+		"stats": [0,1,0],
+		"sigils": ["fledgling", "random_mox"],
+		"grows_into": "crystal_growth",
+		"rare": true,
+		"modded": "MoxExpansion"
+	},
+	"crystal_growth": {
+		"stats": [0,1,0],
+		"sigils": ["fledgling"],
+		"grows_into": "magnus_mox",
+		"rare": true,
+		"modded": "MoxExpansion",
+		"event": "none"
+	},
+	"dormant_mox": {
+		"stats": [0,3,0],
+		"is_mox": true,
+		"no_sacrifice": true,
+		"modded": "MoxExpansion",
+		"#comment": "once any two mox colors are on the field, this gem adopts the remaining color and gains gem animator"
+	},
+	"blood_mage": {
+		"stats": [0,2,0],
+		"cost": "mox",
+		"sigils": ["many_lives"],
+		"mox": ["any"],
+		"modded": "MoxExpansion"
+	},
+	"leshy": {
+		"stats": [2,6,4],
+		"cost": "blood",
+		"sigils": ["many_lives", "worthy_sacrifice"],
+		"power_calc": "sacrifices",
+		"tribe": "all",
+		"modded": "Scrybes",
+		"event": "scrybe"
+	},
+	"grimora": {
+		"stats": [2,4,8],
+		"cost": "bones",
+		"sigils": ["stinky", "digger", "undying", "four_bones"],
+		"power_calc": "bones",
+		"modded": "Scrybes",
+		"event": "scrybe"
+	},
+	"po3": {
+		"stats": [2,4,6],
+		"cost": "energy",
+		"sigils": ["energy_gun", "buff_conduit", "battery"],
+		"is_conduit": true,
+		"modded": "Scrybes",
+		"event": "scrybe"
+	},
+	"magnificus": {
+		"stats": [0,3,0],
+		"cost": "mox",
+		"mox": ["blue", "orange", "green"],
+		"sigils": ["blue_mox", "orange_mox", "green_mox", "gem_animator", "gemified"],
+		"modded": "Scrybes",
+		"event": "scrybe"
+	},
+	"vampire": {
+		"stats": [2,1,5],
+		"cost": "bones",
+		"sigils": ["blood_guzzler"],
+		"modded": "GrimoraRulebook",
+		"#comment": "(as seen in grimora's rulebook) gains health from dealing damage"
+	},
+	"spirit": {
+		"stats": [0,1,3],
+		"cost": "bones",
+		"sigils": ["haunter"],
+		"power_calc": "sigils",
+		"modded": "GrimoraRulebook",
+		"#comment": "(similar to as seen in grimora's rulebook) when sacrificed for something, transfers its sigils; upon death, a card with this sigil returns to the hand as a spirit"
+	},
+	"guts": {
+		"modded": "GrimoraRulebook",
+		"event": "none"
+	},
+	"bloated_corpse": {
+		"stats": [0,3,2],
+		"cost": "bones",
+		"sigils": ["exploding_guts"],
+		"no_sacrifice": true,
+		"modded": "GrimoraRulebook",
+		"#comment": "(as seen in grimora's rulebook) fills the field with guts upon death"
+	},
+	"custom": {
+		"modded": true,
+		"event": "custom",
+		"#comment": "card name used for player-made cards"
+	},
+	"bug_tester": {
+		"stats": [1,1,0],
+		"sigils": ["guardian", "burrower", "sentry", "death_touch", "detonator", "undying", "fecundity", "beehive", "steel_trap", "spikey", "hefty"],
+		"modded": "debug"
 	}
 }
