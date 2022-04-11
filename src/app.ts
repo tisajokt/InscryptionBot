@@ -1,9 +1,9 @@
 import { stringify } from "querystring";
 
-const card_models: Map<cardName, CardModel> = require("./data/game/cards.json");
-const sigil_data = require("./data/game/sigils.json");
-const app_config = require("./config.json");
-const game_config = require("./data/game/config.json");
+const card_models: Map<cardName, CardModel> = require("../data/game/cards.json");
+const sigil_data = require("../data/game/sigils.json");
+const app_config = require("../config.json");
+const game_config = require("../data/game/config.json");
 const default_deck: cardName[] = [];
 const default_auto: cardName[] = [];
 const terrains: cardName[] = ["practice_wizard"]//["", "boulder", "stump", "grand_fir", "frozen_opossum", "moleman", "broken_bot"];
@@ -1369,7 +1369,7 @@ class SoloBattle extends Battle {
 	}
 }
 class DuelBattle extends Battle {
-	players: PlayerBattler[];
+	players: PlayerBattler[]=[];
 	constructor(player1: Player, player2: Player, options={}) {
 		super(options);
 		this.players = [player1.battlerInstance(this, 0), player2.battlerInstance(this, 1)];
