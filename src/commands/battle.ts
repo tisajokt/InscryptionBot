@@ -1,6 +1,6 @@
 import { Client, BaseCommandInteraction, MessageActionRow, MessageButton, ButtonInteraction } from "discord.js";
 import { SlashCommand } from "../Command";
-import { SoloBattle, DuelBattle, Battle, Player, terrains } from "../Game";
+import { SoloBattle, DuelBattle, Battle, Player, Card, terrains } from "../Game";
 import { User } from "../User";
 import { pickRandom } from "../util";
 
@@ -109,6 +109,7 @@ export const battle: SlashCommand = {
 		}
 	],
 	run: async(client: Client, interaction: BaseCommandInteraction) => {
+		const user = User.get(interaction.member.user.id);
 		const actions = new MessageActionRow().addComponents(
 			new MessageButton().setCustomId("battle.exit").setLabel("Exit").setStyle("SECONDARY"),
 			new MessageButton().setCustomId("battle.new").setLabel("New").setStyle("PRIMARY").setDisabled()
@@ -127,13 +128,47 @@ export const battle: SlashCommand = {
 		};
 		const battle: Battle = interaction.options.get("type")?.value == "solo" ? new SoloBattle(player1, battleOptions) : new DuelBattle(player1, new Player(), battleOptions);
 
+		const opossum = new Card("opossum");
+		opossum.onDraw(battle, 0);
+
 		await interaction.reply({
-			content: `\`\`\`${battle.display}\`\`\``
+			//content: `\`\`\`${battle.display}\`\`\``,
+			embeds: [{
+				title: "Battle",
+				description: "Demo battle!",
+				fields: [
+					opossum.getEmbedDisplay(0),
+					{
+						name: "(empty)",
+						value: "",
+						inline: true
+					},
+					{
+						name: "Ruby Mox",
+						value: "`0/1`\n__Orange Mox__",
+						inline: true
+					},
+					{
+						name: "Wolf Pup",
+						value: "`1/1`\n1 blood\n__Fledgling__",
+						inline: true
+					},
+					{
+						name: "Double Gunner",
+						value: "`2/2`\n5 energy\n__Bifurcated__",
+						inline: true
+					}
+				]
+			}]
 		});
 		await battle.awaitCompletion(async(display) => {
-			await interaction.editReply({
-				content: `\`\`\`${display}\`\`\``
-			})
+			/*await interaction.editReply({
+				content: `\`\`\`${display}\`\`\``,
+				embeds: [{
+					title: "Battle",
+					description: "description"
+				}]
+			})*/
 		})
 	},
 	button: async(client: Client, interaction: ButtonInteraction, id: string) => {

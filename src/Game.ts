@@ -3,6 +3,7 @@ import sigil_data from "../data/game/sigils.json";
 import card_models from "../data/game/cards.json";
 import game_config from "../data/game/config.json";
 import { padTrim, pickRandom, sleep, randomSelectionFrom } from "./util";
+import { arrayBuffer } from "stream/consumers";
 
 const default_deck: cardName[] = [];
 const default_auto: cardName[] = [];
@@ -33,6 +34,8 @@ type moxColor = "blue"|"green"|"orange"|"any";
 type sigil = "rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder";
 type playerIndex = 0|1;
 type Totem = {tribe: cardTribe, sigil: sigil};
+type EmbedField = {name: string, value: string, inline?: boolean}
+type Embed = {title: string, description: string, fields?: EmbedField[]}
 
 export interface Drawable {
 	draw(): Card;
@@ -52,16 +55,16 @@ export class Card {
 	baseHP: number;
 
 	/* Assigned under certain circumstances */
-	cooldown: number;
-	_ability: sigil;
-	target: number;
-	sprintToLeft: boolean;
-	awakened: boolean;
-	sacrifices: number;
+	cooldown?: number;
+	_ability?: sigil;
+	target?: number;
+	sprintToLeft?: boolean;
+	awakened?: boolean;
+	sacrifices?: number;
 
 	/* Assigned temporarily */
-	moved: boolean;
-	sigilActivations: number;
+	moved?: boolean;
+	sigilActivations?: number;
 	constructor(model: Card|cardName) {
 		if (typeof model == "string") {
 			this.name = model;
@@ -128,6 +131,19 @@ export class Card {
 ${border}`;
 		}
 		return display.split("\n");
+	}
+	getEmbedDisplay(i: number, inline: boolean=true): EmbedField {
+		const stats = `\`${this.getPower(i)}/${this.stats[1]}\``;
+		var arr = [stats];
+		if (this.cost != "free") arr.push(this.costEmbedDisplay);
+		this.sigils.forEach(s => {
+			arr.push(`__${s.split("_").join(" ")}__`)
+		});
+		return {
+			name: this.name.split("_").map(c => c.toUpperCase()).join(" "),
+			value: arr.join("\n"),
+			inline: inline
+		}
 	}
 	get fullDisplay(): string[] {
 		var display = ["", this.name.replace("_", " "), this.stats[2] ? `${this.stats[2]} ${this.cost}` : "free", this.getModelProp("tribe") || "no tribe"];
@@ -799,6 +815,18 @@ ${border}`;
 				return "".padEnd(4, " ");
 		}
 	}
+	get costEmbedDisplay(): string {
+		switch (this.cost) {
+			case "blood":
+			case "bones":
+			case "energy":
+				return `${this.stats[2]} ${this.cost}`;
+			case "mox":
+				return `${this.mox.join(", ")} mox`;
+			case "free":
+				return "";
+		}
+	}
 	get cardPlayerSigilValue(): number {
 		return [...this.sigils].map(c => {
 			return sigil_data.__player_sigils.includes(c) ? sigil_data[c].power : 0;
@@ -1305,6 +1333,14 @@ export abstract class Battle {
 		}
 		display += this.players[0].display;
 		return display;
+	}
+	get embedDisplay(): Embed {
+		var fields: Embed[] = [];
+		return {
+			title: "Battle",
+			description: "",
+			fields: []
+		}
 	}
 	async awaitCompletion(displayCallback=console.log): Promise<playerIndex> {
 		if (this.terrain) await this.placeTerrain(this.terrain);
