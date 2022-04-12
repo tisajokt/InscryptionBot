@@ -1,7 +1,7 @@
 import { Client, BaseCommandInteraction, MessageActionRow, MessageButton, ButtonInteraction } from "discord.js";
-import { Command } from "../Command";
+import { SlashCommand } from "../Command";
 
-export const ping: Command = {
+export const ping: SlashCommand = {
 	name: "ping",
 	description: "Pings the bot",
 	run: async(client: Client, interaction: BaseCommandInteraction) => {

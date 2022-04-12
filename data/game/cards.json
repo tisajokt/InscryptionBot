@@ -202,7 +202,7 @@
 	"moleman": {
 		"stats": [0,6,1],
 		"cost": "blood",
-		"sigils": ["burrower", "leaping"],
+		"sigils": ["burrower", "mighty_leap"],
 		"rare": true
 	},
 	"magpie": {
@@ -365,7 +365,7 @@
 	},
 	"grand_fir": {
 		"stats": [0,3,0],
-		"sigils": ["leaping"],
+		"sigils": ["mighty_leap"],
 		"no_sacrifice": true,
 		"event": "none"
 	},
@@ -412,7 +412,7 @@
 	"bullfrog": {
 		"stats": [1,2,1],
 		"cost": "blood",
-		"sigils": ["leaping"],
+		"sigils": ["mighty_leap"],
 		"tribe": "reptile"
 	},
 	"wolf": {
@@ -568,14 +568,14 @@
 	"strange_frog": {
 		"stats": [1,2,1],
 		"cost": "blood",
-		"sigils": ["leaping", "sealed_away"],
+		"sigils": ["mighty_leap", "sealed_away"],
 		"tribe": "reptile",
 		"sealed_away": "leaping_trap",
 		"no_sacrifice": true
 	},
 	"leaping_trap": {
 		"stats": [0,1,0],
-		"sigils": ["leaping", "steel_trap"],
+		"sigils": ["mighty_leap", "steel_trap"],
 		"no_sacrifice": true,
 		"event": "none"
 	},
@@ -776,7 +776,7 @@
 	"l33pb0t": {
 		"stats": [0,2,1],
 		"cost": "energy",
-		"sigils": ["leaping"]
+		"sigils": ["mighty_leap"]
 	},
 	"explode_bot": {
 		"stats": [1,1,2],

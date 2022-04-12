@@ -1,10 +1,10 @@
 import { Client, BaseCommandInteraction, MessageActionRow, MessageButton, ButtonInteraction } from "discord.js";
-import { Command } from "../Command";
+import { SlashCommand } from "../Command";
 import { SoloBattle, DuelBattle, Battle, Player, terrains } from "../Game";
 import { User } from "../User";
 import { pickRandom } from "../util";
 
-export const battle: Command = {
+export const battle: SlashCommand = {
 	name: "battle",
 	description: "Battling commands",
 	options: [

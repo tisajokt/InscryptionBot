@@ -1,8 +1,8 @@
 import { Client, Interaction, BaseCommandInteraction, ButtonInteraction, SelectMenuInteraction } from "discord.js";
-import { Commands } from "../Commands";
+import { SlashCommands } from "../Commands";
 
 async function handleCommand(client: Client, interaction: BaseCommandInteraction): Promise<void> {
-	const command = Commands.find(c => c.name === interaction.commandName);
+	const command = SlashCommands.find(c => c.name === interaction.commandName);
 	if (!command) {
 		interaction.followUp({content: "An error has occurred!"});
 		return;
@@ -10,12 +10,12 @@ async function handleCommand(client: Client, interaction: BaseCommandInteraction
 	await command.run(client, interaction);
 }
 async function handleButton(client: Client, interaction: ButtonInteraction): Promise<void> {
-	const command = Commands.find(c => c.name === interaction.customId.split(".")[0]);
+	const command = SlashCommands.find(c => c.name === interaction.customId.split(".")[0]);
 	if (!command?.button) return;
 	await command.button(client, interaction, interaction.customId.split(".")[1]);
 }
 async function handleSelectMenu(client: Client, interaction: SelectMenuInteraction): Promise<void> {
-	const command = Commands.find(c => c.name === interaction.customId.split(".")[0]);
+	const command = SlashCommands.find(c => c.name === interaction.customId.split(".")[0]);
 	if (!command?.menu) return;
 	await command.menu(client, interaction, interaction.customId.split(".")[1]);
 }

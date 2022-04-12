@@ -1,5 +1,5 @@
-import { Command } from "./Command";
+import { SlashCommand } from "./Command";
 import { ping } from "./commands/ping";
 import { battle } from "./commands/battle";
 
-export const Commands: Command[] = [ping, battle];
+export const SlashCommands: SlashCommand[] = [ping, battle];
