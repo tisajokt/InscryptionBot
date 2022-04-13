@@ -1,5 +1,5 @@
 
-import app_config from "../config.json";
+import app_config from "../app_config.json";
 
 import onReady from "./listeners/ready";
 import onInteractionCreate from "./listeners/interactionCreate";

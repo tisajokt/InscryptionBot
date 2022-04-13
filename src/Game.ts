@@ -2,8 +2,7 @@
 import sigil_data from "../data/game/sigils.json";
 import card_models from "../data/game/cards.json";
 import game_config from "../data/game/config.json";
-import { padTrim, pickRandom, sleep, randomSelectionFrom } from "./util";
-import { arrayBuffer } from "stream/consumers";
+import { padTrim, pickRandom, sleep, randomSelectionFrom, toProperCase } from "./util";
 
 const default_deck: cardName[] = [];
 const default_auto: cardName[] = [];
@@ -132,15 +131,15 @@ ${border}`;
 		}
 		return display.split("\n");
 	}
-	getEmbedDisplay(i: number, inline: boolean=true): EmbedField {
+	getEmbedDisplay(i: number, inline: boolean=false): EmbedField {
 		const stats = `\`${this.getPower(i)}/${this.stats[1]}\``;
 		var arr = [stats];
 		if (this.cost != "free") arr.push(this.costEmbedDisplay);
 		this.sigils.forEach(s => {
-			arr.push(`__${s.split("_").join(" ")}__`)
+			arr.push(`_${s.split("_").join(" ")}_`)
 		});
 		return {
-			name: this.name.split("_").map(c => c.toUpperCase()).join(" "),
+			name: this.name.split("_").map(c => toProperCase(c)).join(" "),
 			value: arr.join("\n"),
 			inline: inline
 		}

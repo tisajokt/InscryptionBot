@@ -13,3 +13,6 @@ export function randomSelectionFrom(arr: any[], num: number): any[] {
 	while (num--) out.push(pickRandom(arr));
 	return out;
 }
+export function toProperCase(str: string): string {
+	return `${str[0].toUpperCase()}${str.substring(1).toLowerCase()}`;
+}

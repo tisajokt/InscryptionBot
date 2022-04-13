@@ -109,7 +109,7 @@ export const battle: SlashCommand = {
 		}
 	],
 	run: async(client: Client, interaction: BaseCommandInteraction) => {
-		const user = User.get(interaction.member.user.id);
+		const user = User.get(interaction.user.id);
 		const actions = new MessageActionRow().addComponents(
 			new MessageButton().setCustomId("battle.exit").setLabel("Exit").setStyle("SECONDARY"),
 			new MessageButton().setCustomId("battle.new").setLabel("New").setStyle("PRIMARY").setDisabled()
@@ -130,6 +130,14 @@ export const battle: SlashCommand = {
 
 		const opossum = new Card("opossum");
 		opossum.onDraw(battle, 0);
+		const wolf_pup = new Card("wolf_pup");
+		wolf_pup.onDraw(battle, 0);
+		const gunner = new Card("double_gunner");
+		gunner.onDraw(battle, 0);
+		const fiend = new Card("gem_fiend");
+		fiend.onDraw(battle, 0);
+		const mox = new Card("ruby_mox");
+		mox.onDraw(battle, 0);
 
 		await interaction.reply({
 			//content: `\`\`\`${battle.display}\`\`\``,
@@ -137,39 +145,23 @@ export const battle: SlashCommand = {
 				title: "Battle",
 				description: "Demo battle!",
 				fields: [
-					opossum.getEmbedDisplay(0),
-					{
-						name: "(empty)",
-						value: "",
-						inline: true
-					},
-					{
-						name: "Ruby Mox",
-						value: "`0/1`\n__Orange Mox__",
-						inline: true
-					},
-					{
-						name: "Wolf Pup",
-						value: "`1/1`\n1 blood\n__Fledgling__",
-						inline: true
-					},
-					{
-						name: "Double Gunner",
-						value: "`2/2`\n5 energy\n__Bifurcated__",
-						inline: true
-					}
+					opossum.getEmbedDisplay(0, true),
+					wolf_pup.getEmbedDisplay(1, true),
+					gunner.getEmbedDisplay(2, true),
+					fiend.getEmbedDisplay(3, true),
+					mox.getEmbedDisplay(4, true)
 				]
 			}]
 		});
-		await battle.awaitCompletion(async(display) => {
-			/*await interaction.editReply({
+		/*await battle.awaitCompletion(async(display) => {
+			await interaction.editReply({
 				content: `\`\`\`${display}\`\`\``,
 				embeds: [{
 					title: "Battle",
 					description: "description"
 				}]
-			})*/
-		})
+			})
+		})*/
 	},
 	button: async(client: Client, interaction: ButtonInteraction, id: string) => {
 		

@@ -1,5 +1,5 @@
 node_modules/
-config.json
+app_config.json
 package-lock.json
-data/users/
+data/user/
 dist/

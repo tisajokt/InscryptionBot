@@ -1,4 +1,4 @@
-import users from "../data/users/users.json";
+import users from "../data/user/users.json";
 
 export class User {
 	constructor(userId: string) {
