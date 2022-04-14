@@ -772,16 +772,20 @@ ${border}`;
 				return true;
 		}
 	}
-	get isUnmodified(): boolean {
+	get hasModifiedSigils(): boolean {
 		const model = getModel(this.name);
-		if (this.stats[0] != model.stats[0] || this.stats[1] != model.stats[1]) return false;
 		for (const sigil of this.sigils) {
-			if (!model.sigils.includes(sigil)) return false;
+			if (!model.sigils.includes(sigil)) return true;
 		}
 		for (const sigil of model.sigils) {
-			if (!this.sigils.has(sigil)) return false;
+			if (!this.sigils.has(sigil)) return true;
 		}
-		return true;
+		return false;
+	}
+	get isModified(): boolean {
+		const model = getModel(this.name);
+		if (this.stats[0] != model.stats[0] || this.stats[1] != model.stats[1]) return true;
+		return this.hasModifiedSigils;
 	}
 	get abbrev(): string {
 		if (this.getModelProp("abbrev")) return this.getModelProp("abbrev");
@@ -1683,7 +1687,7 @@ export class Player {
 		// Guaranteed to draw at least one low-cost card
 		player.drawFrom(player.deck, true, 1, (card: Card|cardName): boolean => {
 			if (card instanceof Card) {
-				return card.stats[2] <= 1 && card.isUnmodified;
+				return card.stats[2] <= 1 && !card.isModified;
 			} else {
 				return getModel(card).stats[2] <= 1;
 			}
