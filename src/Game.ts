@@ -26,6 +26,24 @@ export const FECUNDITY_NERF: boolean = game_config.fecundityNerf;
 export const slow_mode = true;
 export const AI_SPEED: number = slow_mode ? 500 : 0;
 
+export type CardModel = {
+	name?: string,
+	abbrev?: string,
+	stats?: number[],
+	cost?: cardCost,
+	sigils?: sigil[],
+	mox?: moxColor[],
+	tribe?: cardTribe,
+	grows_into?: cardName,
+	rare?: boolean,
+	no_sacrifice?: boolean,
+	no_bones?: boolean,
+	is_conduit?: boolean,
+	playerValue?: number,
+	nonplayerValue?: number,
+	modded?: boolean|string,
+	event?: string
+};
 export type cardName = string;
 export type cardTribe = "canine"|"insect"|"reptile"|"avian"|"hooved"|"squirrel"|"all";
 export type cardCost = "free"|"blood"|"bones"|"energy"|"mox";
@@ -34,6 +52,10 @@ export type moxColor = "blue"|"green"|"orange"|"any";
 export type sigil = "rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder";
 export type playerIndex = 0|1;
 export type Totem = {tribe: cardTribe, sigil: sigil};
+
+function getModel(card: cardName): CardModel {
+	return card_models[card];
+}
 
 export interface Drawable {
 	draw(): Card;
@@ -102,7 +124,7 @@ export class Card {
 		const name = this.name.replace("_", " ");
 		const name1 = padTrim(name.length <= size ? name : name.split(" ")[0], size);
 		const name2 = padTrim(name.length <= size ? "" : name.split(" ")[1] || "", size);
-		const sigils = [...this.sigils].map(s => (s == this.ability ? "@" : (card_models[this.name].sigils.includes(s) ? "*" : "+")));
+		const sigils = [...this.sigils].map(s => (s == this.ability ? "@" : (getModel(this.name).sigils.includes(s) ? "*" : "+")));
 		//const sigil = padTrim((this.ability ? "@" : "").padEnd([...this.sigils].length, "*"), size, this.isConduit ? "~-" : " ");
 		const sigil = padTrim(sigils.join(""), size, this.isConduit ? "~―" : " ");
 		//const sigil = padTrim([...this.sigils].map(s => sigilSymbols[s] || "*").join(""), size);
@@ -342,7 +364,7 @@ ${border}`;
 			if (this.sigils.has("rabbit_hole")) {
 				const rabbit = new Card("rabbit");
 				for (const sigil of this.sigils) {
-					if (!card_models[this.name].sigils || card_models[this.name].sigils.indexOf(sigil) < 0) {
+					if (getModel(this.name).sigils.indexOf(sigil) < 0) {
 						rabbit.sigils.add(sigil);
 					}
 				}
@@ -473,11 +495,11 @@ ${border}`;
 			}
 			if (this.sigils.has("haunter")) {
 				this.name = "spirit";
-				this.stats = [...card_models["spirit"].stats];
+				this.stats = [...getModel("spirit").stats];
 				await this.battle.addToHand(this, this.owner);
 				deaths = 1;
 			} else if (this.sigils.has("undying")) {
-				this.stats[1] = this.baseHP || card_models[this.name].stats[1];
+				this.stats[1] = this.baseHP || getModel(this.name).stats[1];
 				if (this.getModelProp("undying_powerup")) {
 					this.stats[0] += deaths;
 					this.stats[1] += deaths;
@@ -554,7 +576,7 @@ ${border}`;
 			this.sacrifices = (this.sacrifices || 0) + 1;
 			if (this.sacrifices == 9) {
 				this.name = this.getModelProp("9lives");
-				this.stats = [...card_models[this.name].stats];
+				this.stats = [...getModel(this.name).stats];
 				this.sigils.delete("many_lives");
 			}
 		}
@@ -568,11 +590,11 @@ ${border}`;
 		if (this.sigils.has("waterborne") && this.getModelProp("kraken")) {
 			const tentacles = ["bell_tentacle", "hand_tentacle", "mirror_tentacle"];
 			this.name = pickRandom(tentacles);
-			this.stats = [...card_models[this.name].stats];
+			this.stats = [...getModel(this.name).stats];
 			this.sigils.delete("waterborne");
 		}
 		if (this.sigils.has("fledgling")) {
-			const base_model = card_models[this.name];
+			const base_model = getModel(this.name);
 			const grows_into = base_model.grows_into;
 			this.sigils.delete("fledgling");
 			if (grows_into) {
@@ -599,8 +621,8 @@ ${border}`;
 		this.moved = false;
 	}
 	transformInto(card: cardName): void {
-		const old_model = card_models[this.name];
-		const new_model = card_models[card];
+		const old_model = getModel(this.name);
+		const new_model = getModel(card);
 		this.name = card;
 		this.stats[0] += (new_model.stats[0] - old_model.stats[0]);
 		this.stats[1] += (new_model.stats[1] - old_model.stats[1]);
@@ -644,7 +666,7 @@ ${border}`;
 	}
 	copyExtraSigils(target: Card): void {
 		for (const sigil of this.sigils) {
-			if (!card_models[this.name].sigils.includes(sigil)) {
+			if (!getModel(this.name).sigils.includes(sigil)) {
 				target.sigils.add(sigil);
 			}
 		}
@@ -706,10 +728,10 @@ ${border}`;
 				power = [...this.sigils].length;
 				break;
 			case "damage":
-				power = Math.max(0, (this.baseHP || card_models[this.name].stats[1]) - this.stats[1]);
+				power = Math.max(0, (this.baseHP || getModel(this.name).stats[1]) - this.stats[1]);
 				break;
 		}
-		if (powerCalc) power += card_models[this.name].stats[0]; // in all vanilla cases, this does nothing
+		if (powerCalc) power += getModel(this.name).stats[0]; // in all vanilla cases, this does nothing
 		if (this.battle.field[this.owner][i-1]?.sigils.has("leader")) power++;
 		if (this.battle.field[this.owner][i+1]?.sigils.has("leader")) power++;
 		if (this.battle.field[other][i]?.sigils.has("annoying")) power++;
@@ -725,7 +747,7 @@ ${border}`;
 		return Math.max(0, power);
 	}
 	getModelProp(prop: string) {
-		return card_models[this.name][prop];
+		return getModel(this.name)[prop];
 	}
 	isPlayable(maxRawValue: number=Infinity): boolean {
 		const cost = this.getCost();
@@ -750,12 +772,23 @@ ${border}`;
 				return true;
 		}
 	}
+	get isUnmodified(): boolean {
+		const model = getModel(this.name);
+		if (this.stats[0] != model.stats[0] || this.stats[1] != model.stats[1]) return false;
+		for (const sigil of this.sigils) {
+			if (!model.sigils.includes(sigil)) return false;
+		}
+		for (const sigil of model.sigils) {
+			if (!this.sigils.has(sigil)) return false;
+		}
+		return true;
+	}
 	get abbrev(): string {
 		if (this.getModelProp("abbrev")) return this.getModelProp("abbrev");
 		return this.getModelProp("abbrev") || (this.name.match(" ") ? this.name.split(" ").map(c => c[0]).join("") : this.name.substring(0, 3));
 	}
 	get rare(): boolean {
-		return !!card_models[this.name].rare;
+		return !!getModel(this.name).rare;
 	}
 	get blood(): number {
 		if (this.noSacrifice) return 0;
@@ -763,19 +796,19 @@ ${border}`;
 		else return 1;
 	}
 	get noBones(): boolean {
-		return !!card_models[this.name].no_bones;
+		return !!getModel(this.name).no_bones;
 	}
 	get noSacrifice(): boolean {
-		return !!card_models[this.name].no_sacrifice;
+		return !!getModel(this.name).no_sacrifice;
 	}
 	get isConduit(): boolean {
-		return !!card_models[this.name].is_conduit;
+		return !!getModel(this.name).is_conduit;
 	}
 	get mox(): moxColor[] {
-		return card_models[this.name].mox;
+		return getModel(this.name).mox;
 	}
 	get tribe(): cardTribe {
-		return card_models[this.name].tribe;
+		return getModel(this.name).tribe;
 	}
 	get tail(): cardName {
 		switch (this.tribe) {
@@ -801,7 +834,7 @@ ${border}`;
 		}
 	}
 	get cost(): cardCost {
-		return card_models[this.name].cost || "free";
+		return getModel(this.name).cost || "free";
 	}
 	get costDisplay(): string {
 		switch (this.cost) {
@@ -885,6 +918,13 @@ export class Deck implements Drawable {
 		} else {
 			return null;
 		}
+	}
+	drawFromFilter(filter: (card: Card|cardName) => boolean): Card {
+		const filtered = this.cards.filter(filter);
+		if (!filtered.length) return this.draw();
+		const card = pickRandom(filtered);
+		this.cards.splice(this.cards.indexOf(card), 1);
+		return Card.castCardName(card);
 	}
 	pick(): Card {
 		if (this.cards.length > 0) {
@@ -1456,11 +1496,11 @@ export class PlayerBattler implements Battler {
 		if (!this.battle.isHuman(1)) return;
 		this.overkill[i] += amount;
 	}
-	async drawFrom(src: Drawable, force: boolean=false, count: number=1): Promise<number> {
+	async drawFrom(src: Drawable, force: boolean=false, count: number=1, filter: (card: Card|cardName) => boolean=null): Promise<number> {
 		if (!force && this.drawn || count <= 0) return 0;
 		var cardsDrawn = 0;
 		while (count > 0) {
-			const card = src.draw();
+			const card = (filter && src instanceof Deck) ? src.drawFromFilter(filter) : src.draw();
 			if (!card) break;
 			await this.addToHand(card);
 			cardsDrawn++;
@@ -1550,7 +1590,7 @@ export class AutoBattler implements Battler {
 		this.backfield = Array(battle.fieldSize).fill(null);
 		if (!cardPool.length) {
 			const selection = default_auto.filter(c => {
-				const model = card_models[c];
+				const model = getModel(c);
 				return model.nonplayerValue >= 3;
 			});
 			cardPool = randomSelectionFrom(selection, 3 + Math.floor(Math.random() * 6));
@@ -1623,7 +1663,7 @@ export class Player {
 		// Selects 50 random cards from the given sidedeck theme (10% for out-of-theme cards, 100% for rare cards)
 		// Then sorts by player value and returns deck with N most valuable cards
 		const selection = randomSelectionFrom(default_deck.filter(c => {
-			const model = card_models[c];
+			const model = getModel(c);
 			if (!model.cost && !model.mox || model.rare || Math.random() < 0.1) return true;
 			switch (sidedeck) {
 				case "squirrel": return model.cost == "blood";
@@ -1633,27 +1673,35 @@ export class Player {
 				default: return true;
 			}
 		}), 50).sort((a,b) => {
-			return card_models[b].playerValue - card_models[a].playerValue;
+			return getModel(b).playerValue - getModel(a).playerValue;
 		});
 		return new Deck(selection.slice(0, 20 + Math.floor(Math.random() * 20)));
 	}
 	battlerInstance(battle: Battle, index: playerIndex): PlayerBattler {
 		var player = new PlayerBattler(battle, index, new Deck(this.deck.cards), new SideDeck(this.sidedeck), [], this.totem);
 		player.drawFrom(player.sidedeck, true);
-		player.drawFrom(player.deck, true, 3);
+		// Guaranteed to draw at least one low-cost card
+		player.drawFrom(player.deck, true, 1, (card: Card|cardName): boolean => {
+			if (card instanceof Card) {
+				return card.stats[2] <= 1 && card.isUnmodified;
+			} else {
+				return getModel(card).stats[2] <= 1;
+			}
+		})
+		player.drawFrom(player.deck, true, 2);
 		player.drawn = true;
-		player.bones += this.boonBones;
+		player.bones += this.boonBones || (this.sidedeck.noSacrifice ? 1 : 0);
 		return player;
 	}
 }
 
 for (const name in card_models) {
-	const model = card_models[name];
+	const model = getModel(name);
 	model.stats = model.stats || [0,1,0];
 	model.sigils = model.sigils || [];
 	model.playerValue = (new Card(name)).cardPlayerValue;
 	model.nonplayerValue = (new Card(name)).cardNonplayerValue;
-	model.abbrev = model.abbrev || abbreviate(model.name, 6);
+	model.abbrev = model.abbrev || abbreviate(name, 6);
 	
 	if (model.modded) continue;
 	default_auto.push(name);

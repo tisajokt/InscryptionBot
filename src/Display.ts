@@ -1,5 +1,5 @@
 
-import { AutoBattler, Battle, Card, MAX_ENERGY, moxColor, PlayerBattler } from 'src/Game';
+import { AutoBattler, Battle, Card, MAX_ENERGY, moxColor, PlayerBattler } from './Game';
 import { padTrim } from './util';
 
 const defaultDisplayMode: displayMode = "mini-mono";
