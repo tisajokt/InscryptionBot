@@ -17,13 +17,13 @@ for (let p = 0; p < sigil_data.__powers.length; p++) {
 }
 
 export const terrains: cardName[] = ["", "boulder", "stump", "grand_fir", "frozen_opossum", "moleman", "broken_bot"];
-export const sidedecks: cardName[] = ["empty_vessel"]//["squirrel", "empty_vessel", "skeleton", "mox_crystal"];
+export const sidedecks: cardName[] = ["squirrel", "empty_vessel", "skeleton", "mox_crystal"];
 
 export const MAX_ENERGY: number = game_config.maxEnergy;
 export const ITEM_LIMIT: number = game_config.itemLimit;
 export const FECUNDITY_NERF: boolean = game_config.fecundityNerf;
 
-export const slow_mode = true;
+export const slow_mode = false;
 export const AI_SPEED: number = slow_mode ? 500 : 0;
 
 export type CardModel = {
@@ -1053,6 +1053,7 @@ export abstract class Battle {
 		this.terrain = terrain;
 	}
 	async placeTerrain(terrain: cardName): Promise<void> {
+		if (!terrain) return;
 		await this.playCard(new Card(terrain), Math.floor(Math.random() * this.fieldSize), 0);
 		await this.playCard(new Card(terrain), Math.floor(Math.random() * this.fieldSize), 1);
 	}

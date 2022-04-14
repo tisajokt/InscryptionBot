@@ -17,8 +17,8 @@ export const ping: SlashCommand = {
 			content: `Pong! (delay: ${delay}ms)`
 		})
 	},
-	button: async(client: Client, interaction: ButtonInteraction, id: string) => {
-		switch (id) {
+	button: async(client: Client, interaction: ButtonInteraction, args: string[]) => {
+		switch (args[0]) {
 			case "hello":
 				interaction.update({
 					content: "Hello!!! :D",

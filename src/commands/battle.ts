@@ -1,9 +1,125 @@
-import { Client, BaseCommandInteraction, MessageActionRow, MessageButton, ButtonInteraction } from "discord.js";
+import { Client, BaseCommandInteraction, MessageActionRow, MessageButton, ButtonInteraction, MessageButtonStyle, CommandInteraction, Interaction, MessageInteraction, InteractionResponseType } from "discord.js";
 import { SlashCommand } from "../Command";
-import { SoloBattle, DuelBattle, Battle, Player, Card, terrains } from "../Game";
+import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName } from "../Game";
 import { Display } from "../Display";
 import { User } from "../User";
-import { pickRandom } from "../util";
+import { pickRandom, sleep, toProperCase } from "../util";
+
+type battleMode = "demo"|"solo"|"duel";
+type battleAction = "bell"|"inspect"|"hand"|"resign";
+type BattleOptions = {
+	candles: number,
+	fieldSize: 4|5,
+	goal: number,
+	scale: number,
+	terrain: cardName
+};
+
+class BattleInteraction {
+	static nextId=0;
+	static list: Map<string, BattleInteraction> = new Map();
+	id: number;
+	battle: Battle;
+	interaction: CommandInteraction;
+	mode: battleMode;
+	edit: boolean=false;
+	user: string;
+	players: string[];
+	bellMutex: boolean;
+	constructor(interaction: CommandInteraction) {
+		this.id = BattleInteraction.nextId++;
+		this.interaction = interaction;
+		this.mode = <battleMode>interaction.options.getSubcommand();
+		this.user = interaction.user.id;
+		BattleInteraction.list[this.id] = this;
+	}
+	makeButton(action: battleAction, label?: string, style: MessageButtonStyle="SECONDARY"): MessageButton {
+		return new MessageButton().setCustomId(`battle.${this.id}.${action}`).setLabel(label || toProperCase(action)).setStyle(style);
+	}
+	get options(): BattleOptions {
+		let terrain = this.interaction.options.getString("terrain");
+		if (!terrain || terrain == "random") terrain = pickRandom(terrains);
+		else if (terrain == "none") terrain = "";
+		return {
+			candles: this.interaction.options.getInteger("candles") || 3,
+			fieldSize: this.interaction.options.getBoolean("big_field") ? 5 : 4,
+			goal: this.interaction.options.getInteger("goal") || 5,
+			scale: this.interaction.options.getInteger("scale") || 0,
+			terrain: terrain
+		}
+	}
+	async init(): Promise<Battle> {
+		const options = this.options;
+		switch (this.mode) {
+			case "demo":
+				this.battle = this.interaction.options.getString("type") == "solo" ? new SoloBattle(new Player(), options) : new DuelBattle(new Player(), new Player(), options);
+				break;
+			case "solo":
+				this.battle = new SoloBattle(new Player(), options);
+				break;
+			case "duel":
+				this.battle = new DuelBattle(new Player(), new Player(), options);
+				break;
+		}
+		await this.battle.placeTerrain(this.battle.terrain);
+		await this.battle.setupTurn();
+		return this.battle;
+	}
+	static get(id: string): BattleInteraction {
+		return this.list[id];
+	}
+	async receiveAction(interaction: ButtonInteraction, action: battleAction, args: string[]=[]): Promise<boolean> {
+		switch (action) {
+			case "bell":
+				await this.ringBell(interaction);
+				break;
+			case "inspect":
+				break;
+			case "hand":
+				break;
+			case "resign":
+				break;
+		}
+		return true;
+	}
+	async ringBell(interaction: ButtonInteraction): Promise<void> {
+		const battle = this.battle;
+		if (this.bellMutex) return;
+		this.bellMutex = true;
+		if (this.mode == "demo") {
+			while (await battle.players[battle.actor].performAction());
+		}
+		await battle.executeTurn();
+		await battle.setupTurn();
+		await this.reply(interaction);
+		if (!battle.isHuman(battle.actor)) {
+			await sleep(500);
+			while (await battle.players[battle.actor].performAction());
+			await battle.executeTurn();
+			await battle.setupTurn();
+			await this.reply(interaction);
+		}
+		this.bellMutex = false;
+		if (this.battle.ended) {
+
+		}
+	}
+	async reply(interaction?: ButtonInteraction): Promise<void> {
+		const disabled = !this.battle.isHuman(this.battle.actor);
+		const actions = new MessageActionRow().addComponents(
+			this.makeButton("bell").setStyle("PRIMARY").setDisabled(disabled),
+			this.makeButton("hand").setDisabled(disabled),
+			this.makeButton("inspect"),
+			this.makeButton("resign").setStyle("DANGER")
+		)
+		if (this.edit) {
+			await interaction.editReply(Display.displayBattle(this.battle, "mini-mono", this.battle.ended ? [] : [actions]));
+		} else {
+			await this.interaction.reply(Display.displayBattle(this.battle, "mini-mono", [actions]));
+			this.edit = true;
+		}
+	}
+}
 
 export const battle: SlashCommand = {
 	name: "battle",
@@ -20,6 +136,11 @@ export const battle: SlashCommand = {
 					type: 3,
 					choices: [{name: "Solo", value: "solo"}, {name: "PvP", value: "duel"}],
 					required: true
+				},
+				{
+					name: "auto",
+					description: "Automatically run the battle? (default true)",
+					type: 5
 				},
 				{
 					name: "candles",
@@ -109,32 +230,16 @@ export const battle: SlashCommand = {
 			]
 		}
 	],
-	run: async(client: Client, interaction: BaseCommandInteraction) => {
+	run: async(client: Client, interaction: CommandInteraction) => {
 		const user = User.get(interaction.user.id);
-		const actions = new MessageActionRow().addComponents(
-			new MessageButton().setCustomId("battle.exit").setLabel("Exit").setStyle("SECONDARY"),
-			new MessageButton().setCustomId("battle.new").setLabel("New").setStyle("PRIMARY").setDisabled()
-		);
-		
-		const player1 = new Player();
-		let terrain = interaction.options.get("terrain")?.value;
-		if (!terrain || terrain == "random") terrain = pickRandom(terrains);
-		else if (terrain == "none") terrain = "";
-		const battleOptions = {
-			candles: interaction.options.get("candles")?.value || 3,
-			fieldSize: interaction.options.get("big_field")?.value ? 5 : 4,
-			goal: interaction.options.get("goal")?.value || 5,
-			scale: interaction.options.get("scale")?.value || 0,
-			terrain: terrain
-		};
-		const battle: Battle = interaction.options.get("type")?.value == "solo" ? new SoloBattle(player1, battleOptions) : new DuelBattle(player1, new Player(), battleOptions);
-
-		await interaction.reply(Display.displayBattle(battle, "mini-mono"));
-		await battle.awaitCompletion(async(display) => {
-			await interaction.editReply(Display.displayBattle(battle, "mini-mono"));
-		})
+		const battleInteraction = new BattleInteraction(interaction);
+		await battleInteraction.init();
+		await battleInteraction.reply();
 	},
-	button: async(client: Client, interaction: ButtonInteraction, id: string) => {
-		
+	button: async(client: Client, interaction: ButtonInteraction, args: string[]) => {
+		const battleInteraction = BattleInteraction.get(args[0]);
+		if (!battleInteraction) return;
+		await interaction.deferUpdate();
+		await battleInteraction.receiveAction(interaction, <battleAction>args[1], args.slice(2));
 	}
 }

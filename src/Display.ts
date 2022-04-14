@@ -1,4 +1,5 @@
 
+import { MessageActionRow } from 'discord.js';
 import { AutoBattler, Battle, Card, MAX_ENERGY, moxColor, PlayerBattler } from './Game';
 import { padTrim } from './util';
 
@@ -7,11 +8,12 @@ const defaultDisplayMode: displayMode = "mini-mono";
 export type displayMode = "full-mono"|"mini-mono"|"emoji-mono"|"embed-inline";
 export type EmbedField = {name: string, value: string, inline?: boolean}
 export type Embed = {title: string, description: string, fields?: EmbedField[]}
-export type Reply = {content?: string, embeds?: Embed[]};
+export type Reply = {content?: string, embeds?: Embed[], components?: MessageActionRow[]};
 
 const fullMonoSize = 10;
 const miniMonoSize = 6;
 const lineMiniMono = "".padEnd(miniMonoSize, "―");
+const myTurnMiniMono = "".padEnd(miniMonoSize, "═");
 const emptyMiniMono = "".padEnd(miniMonoSize, " ");
 
 export class Display {
@@ -50,23 +52,24 @@ export class Display {
 		const header = battle.candleDisplay;
 		const player1Info = battle.isHuman(1) ? this.displayPlayer(battle.getPlayer(1)) : this.displayBackfield(<AutoBattler>battle.players[1], "mini-mono");
 		const separator = Array(battle.fieldSize).fill(lineMiniMono).join("+");
+		const turnSeparator = Array(battle.fieldSize).fill(myTurnMiniMono).join("#");
 		const player1Names = battle.field[1].map(c => c ? padTrim(c.abbrev, miniMonoSize) : emptyMiniMono).join("|");
 		const player1Stats = battle.field[1].map((c,i) => c ? this.cardStatsMiniMono(c, i) : emptyMiniMono).join("|");
 		const player0Names = battle.field[0].map(c => c ? padTrim(c.abbrev, miniMonoSize) : emptyMiniMono).join("|");
 		const player0Stats = battle.field[0].map((c,i) => c ? this.cardStatsMiniMono(c, i) : emptyMiniMono).join("|");
 		const player0Info = this.displayPlayer(battle.getPlayer(0));
-		return `\`\`\`${header}\n${player1Info}\n${separator}\n${player1Names}\n${player1Stats}\n${separator}\n${player0Names}\n${player0Stats}\n${separator}\n${player0Info}\`\`\``;
+		return `\`\`\`${header}\n${player1Info}\n${battle.actor ? turnSeparator : separator}\n${player1Names}\n${player1Stats}\n${separator}\n${player0Names}\n${player0Stats}\n${battle.actor ? separator : turnSeparator}\n${player0Info}\`\`\``;
 	}
-	static displayBattle(battle: Battle, displayMode: displayMode=defaultDisplayMode): Reply {
+	static displayBattle(battle: Battle, displayMode: displayMode=defaultDisplayMode, actions?: MessageActionRow[]): Reply {
 		switch (displayMode) {
 			case "full-mono":
-				return {content: this.displayBattleFullMono(battle)};
+				return {content: this.displayBattleFullMono(battle), components: actions};
 			case "mini-mono":
-				return {content: this.displayBattleMiniMono(battle)};
+				return {content: this.displayBattleMiniMono(battle), components: actions};
 			case "emoji-mono":
-				return {content: ``};
+				return {content: ``, components: actions};
 			case "embed-inline":
-				return {embeds: []};
+				return {embeds: [], components: actions};
 		}
 	}
 }
