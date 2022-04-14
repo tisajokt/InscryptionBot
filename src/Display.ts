@@ -34,10 +34,11 @@ export class Display {
 				return ai.backfield.map(c => c ? padTrim(c.abbrev, miniMonoSize) : emptyMiniMono).join("|");
 		}
 	}
-	static cardStatsMiniMono(card: Card): string {
+	static cardStatsMiniMono(card: Card, i: number): string {
 		const numSigils = [...card.sigils].length;
+		const conduit = (card.isConduit ? "~" : " ");
 		const sigilIcon = numSigils ? (card.hasModifiedSigils ? (card.ability ? `@${numSigils}` : `+${numSigils}`) : (card.ability ? " @" : " *")) : "  ";
-		return padTrim(`${this.singleCharStat(card.stats[0])}/${this.singleCharStat(card.stats[1])}`, miniMonoSize-2) + sigilIcon;
+		return (padTrim(`${this.singleCharStat(card.getPower(i))}${card.noSacrifice ? ":" : "/"}${this.singleCharStat(card.stats[1])}`, miniMonoSize-2) + sigilIcon).replaceAll(" ", conduit);
 	}
 	static displayBattleFullMono(battle: Battle): string {
 		const header = ``;
@@ -50,9 +51,9 @@ export class Display {
 		const player1Info = battle.isHuman(1) ? this.displayPlayer(battle.getPlayer(1)) : this.displayBackfield(<AutoBattler>battle.players[1], "mini-mono");
 		const separator = Array(battle.fieldSize).fill(lineMiniMono).join("+");
 		const player1Names = battle.field[1].map(c => c ? padTrim(c.abbrev, miniMonoSize) : emptyMiniMono).join("|");
-		const player1Stats = battle.field[1].map(c => c ? this.cardStatsMiniMono(c) : emptyMiniMono).join("|");
+		const player1Stats = battle.field[1].map((c,i) => c ? this.cardStatsMiniMono(c, i) : emptyMiniMono).join("|");
 		const player0Names = battle.field[0].map(c => c ? padTrim(c.abbrev, miniMonoSize) : emptyMiniMono).join("|");
-		const player0Stats = battle.field[0].map(c => c ? this.cardStatsMiniMono(c) : emptyMiniMono).join("|");
+		const player0Stats = battle.field[0].map((c,i) => c ? this.cardStatsMiniMono(c, i) : emptyMiniMono).join("|");
 		const player0Info = this.displayPlayer(battle.getPlayer(0));
 		return `\`\`\`${header}\n${player1Info}\n${separator}\n${player1Names}\n${player1Stats}\n${separator}\n${player0Names}\n${player0Stats}\n${separator}\n${player0Info}\`\`\``;
 	}

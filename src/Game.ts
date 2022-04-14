@@ -17,7 +17,7 @@ for (let p = 0; p < sigil_data.__powers.length; p++) {
 }
 
 export const terrains: cardName[] = ["", "boulder", "stump", "grand_fir", "frozen_opossum", "moleman", "broken_bot"];
-export const sidedecks: cardName[] = ["squirrel", "empty_vessel", "skeleton", "mox_crystal"];
+export const sidedecks: cardName[] = ["empty_vessel"]//["squirrel", "empty_vessel", "skeleton", "mox_crystal"];
 
 export const MAX_ENERGY: number = game_config.maxEnergy;
 export const ITEM_LIMIT: number = game_config.itemLimit;
