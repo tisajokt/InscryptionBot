@@ -21,7 +21,7 @@ export class Display {
 		return stat < 10 ? `${stat}` : "!";
 	}
 	static displayPlayer(player: PlayerBattler): string {
-		const cards = `Cards: ${player.hand.length.toString().padStart(2, " ")}/${player.deck.cards.length.toString().padEnd(2, " ")}`;
+		const cards = `[P${player.index+1}] ${player.hand.length.toString().padStart(2, " ")}/${player.deck.cards.length.toString().padEnd(2, " ")}`;
 		const mox = `m(${["blue", "green", "orange"].map(c => player.battle.hasMoxColor(player.index, <moxColor>c) ? c[0].toUpperCase() : " ").join("")})`;
 		const energy = `[${"".padStart(player.energy, "#").padStart(player.capacity, "0").padStart(MAX_ENERGY, ".")}]`;
 		const bones = `${player.bones}//`;

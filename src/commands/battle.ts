@@ -33,8 +33,8 @@ class BattleInteraction {
 		this.user = interaction.user.id;
 		BattleInteraction.list[this.id] = this;
 	}
-	makeButton(action: battleAction, label?: string, style: MessageButtonStyle="SECONDARY"): MessageButton {
-		return new MessageButton().setCustomId(`battle.${this.id}.${action}`).setLabel(label || toProperCase(action)).setStyle(style);
+	makeButton(action: battleAction, label?: string, args?: string[]): MessageButton {
+		return new MessageButton().setCustomId(`battle.${this.id}.${action}${args?`.${args.join(".")}`:""}`).setLabel(label || toProperCase(action)).setStyle("SECONDARY");
 	}
 	get options(): BattleOptions {
 		let terrain = this.interaction.options.getString("terrain");
@@ -68,16 +68,44 @@ class BattleInteraction {
 	static get(id: string): BattleInteraction {
 		return this.list[id];
 	}
+	async inspect(interaction: ButtonInteraction, args: string[]): Promise<void> {
+		var firstInspect = !args.length;
+		if (firstInspect) {
+			args = ["0", "0"];
+		}
+		const field = parseInt(args[0]);
+		const nextField = (field+1)%3;
+		const nextCard = (parseInt(args[1])+1)%(field < 2 ? this.battle.fieldSize : this.battle.getPlayer(this.battle.actor).hand.length);
+		const actions = new MessageActionRow().addComponents(
+			this.makeButton("inspect", "Next Card", [args[0], nextCard.toString()]),
+			this.makeButton("inspect", "Next Field", [nextField.toString(), "0"])
+		)
+		const message = {
+			embeds: [{
+				title: "INSPECT: " + (field < 2 ? `Player ${field+1}'s Field` : "Hand")
+			}],
+			components: [actions],
+			ephemeral: true
+		};
+		if (firstInspect) {
+			interaction.followUp(message);
+		} else {
+			interaction.editReply(message);
+		}
+	}
 	async receiveAction(interaction: ButtonInteraction, action: battleAction, args: string[]=[]): Promise<boolean> {
 		switch (action) {
 			case "bell":
 				await this.ringBell(interaction);
 				break;
 			case "inspect":
+				await this.inspect(interaction, args);
 				break;
 			case "hand":
 				break;
 			case "resign":
+				this.battle.ended = true;
+				await this.reply(interaction);
 				break;
 		}
 		return true;
@@ -101,7 +129,7 @@ class BattleInteraction {
 		}
 		this.bellMutex = false;
 		if (this.battle.ended) {
-
+			delete BattleInteraction[this.id];
 		}
 	}
 	async reply(interaction?: ButtonInteraction): Promise<void> {
