@@ -2,7 +2,8 @@
 import sigil_data from "../data/game/sigils.json";
 import card_models from "../data/game/cards.json";
 import game_config from "../data/game/config.json";
-import { padTrim, pickRandom, sleep, randomSelectionFrom, toProperCase } from "./util";
+import { padTrim, pickRandom, sleep, randomSelectionFrom, toProperCase, abbreviate } from "./util";
+import { EmbedField, Embed } from "src/Display";
 
 const default_deck: cardName[] = [];
 const default_auto: cardName[] = [];
@@ -18,23 +19,21 @@ for (let p = 0; p < sigil_data.__powers.length; p++) {
 export const terrains: cardName[] = ["", "boulder", "stump", "grand_fir", "frozen_opossum", "moleman", "broken_bot"];
 export const sidedecks: cardName[] = ["squirrel", "empty_vessel", "skeleton", "mox_crystal"];
 
-const MAX_ENERGY: number = game_config.maxEnergy;
-const ITEM_LIMIT: number = game_config.itemLimit;
-const FECUNDITY_NERF: boolean = game_config.fecundityNerf;
+export const MAX_ENERGY: number = game_config.maxEnergy;
+export const ITEM_LIMIT: number = game_config.itemLimit;
+export const FECUNDITY_NERF: boolean = game_config.fecundityNerf;
 
-const slow_mode = true;
+export const slow_mode = true;
 export const AI_SPEED: number = slow_mode ? 500 : 0;
 
-type cardName = string;
-type cardTribe = "canine"|"insect"|"reptile"|"avian"|"hooved"|"squirrel"|"all";
-type cardCost = "free"|"blood"|"bones"|"energy"|"mox";
-type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"bones"|"battery"|"armor"|"pliers"|"hourglass"|"fan"|"wiseclock"|"skinning_knife"|"lens";
-type moxColor = "blue"|"green"|"orange"|"any";
-type sigil = "rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder";
-type playerIndex = 0|1;
-type Totem = {tribe: cardTribe, sigil: sigil};
-type EmbedField = {name: string, value: string, inline?: boolean}
-type Embed = {title: string, description: string, fields?: EmbedField[]}
+export type cardName = string;
+export type cardTribe = "canine"|"insect"|"reptile"|"avian"|"hooved"|"squirrel"|"all";
+export type cardCost = "free"|"blood"|"bones"|"energy"|"mox";
+export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"bones"|"battery"|"armor"|"pliers"|"hourglass"|"fan"|"wiseclock"|"skinning_knife"|"lens";
+export type moxColor = "blue"|"green"|"orange"|"any";
+export type sigil = "rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder";
+export type playerIndex = 0|1;
+export type Totem = {tribe: cardTribe, sigil: sigil};
 
 export interface Drawable {
 	draw(): Card;
@@ -751,6 +750,10 @@ ${border}`;
 				return true;
 		}
 	}
+	get abbrev(): string {
+		if (this.getModelProp("abbrev")) return this.getModelProp("abbrev");
+		return this.getModelProp("abbrev") || (this.name.match(" ") ? this.name.split(" ").map(c => c[0]).join("") : this.name.substring(0, 3));
+	}
 	get rare(): boolean {
 		return !!card_models[this.name].rare;
 	}
@@ -1315,8 +1318,11 @@ export abstract class Battle {
 		}
 		return leftCard && rightCard ? [leftCard, rightCard] : null;
 	}
+	get candleDisplay(): string {
+		return `${"".padEnd(this.candles[0], "i")}(${("").padStart(Math.min(this.goal, Math.max(0, this.scale)), "*").padStart(this.goal, " ")}/${("").padEnd(Math.min(this.goal, Math.max(0, -this.scale)), "*").padEnd(this.goal, " ")})${"".padEnd(this.candles[1], "i")}${Math.abs(this.scale)>this.goal?` +${Math.abs(this.scale)-this.goal}`:""}`;
+	}
 	get display(): string {
-		var display = `${"".padEnd(this.candles[0], "i")}(${("").padStart(Math.min(this.goal, Math.max(0, this.scale)), "*").padStart(this.goal, " ")}/${("").padEnd(Math.min(this.goal, Math.max(0, -this.scale)), "*").padEnd(this.goal, " ")})${"".padEnd(this.candles[1], "i")}${Math.abs(this.scale)>this.goal?` +${Math.abs(this.scale)-this.goal}`:""}\n${this.players[1].display}\n`;
+		var display = `${this.candleDisplay}\n${this.players[1].display}\n`;
 		for (let p = 1; p >= 0; p--) {
 			let arr: string[][] = [];
 			for (let i = 0; i < this.fieldSize; i++) {
@@ -1647,6 +1653,8 @@ for (const name in card_models) {
 	model.sigils = model.sigils || [];
 	model.playerValue = (new Card(name)).cardPlayerValue;
 	model.nonplayerValue = (new Card(name)).cardNonplayerValue;
+	model.abbrev = model.abbrev || abbreviate(model.name, 6);
+	
 	if (model.modded) continue;
 	default_auto.push(name);
 	if (model.event == "none") continue;

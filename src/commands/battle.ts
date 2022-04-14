@@ -1,6 +1,7 @@
 import { Client, BaseCommandInteraction, MessageActionRow, MessageButton, ButtonInteraction } from "discord.js";
 import { SlashCommand } from "../Command";
 import { SoloBattle, DuelBattle, Battle, Player, Card, terrains } from "../Game";
+import { Display } from "../Display";
 import { User } from "../User";
 import { pickRandom } from "../util";
 
@@ -128,40 +129,10 @@ export const battle: SlashCommand = {
 		};
 		const battle: Battle = interaction.options.get("type")?.value == "solo" ? new SoloBattle(player1, battleOptions) : new DuelBattle(player1, new Player(), battleOptions);
 
-		const opossum = new Card("opossum");
-		opossum.onDraw(battle, 0);
-		const wolf_pup = new Card("wolf_pup");
-		wolf_pup.onDraw(battle, 0);
-		const gunner = new Card("double_gunner");
-		gunner.onDraw(battle, 0);
-		const fiend = new Card("gem_fiend");
-		fiend.onDraw(battle, 0);
-		const mox = new Card("ruby_mox");
-		mox.onDraw(battle, 0);
-
-		await interaction.reply({
-			//content: `\`\`\`${battle.display}\`\`\``,
-			embeds: [{
-				title: "Battle",
-				description: "Demo battle!",
-				fields: [
-					opossum.getEmbedDisplay(0, true),
-					wolf_pup.getEmbedDisplay(1, true),
-					gunner.getEmbedDisplay(2, true),
-					fiend.getEmbedDisplay(3, true),
-					mox.getEmbedDisplay(4, true)
-				]
-			}]
-		});
-		/*await battle.awaitCompletion(async(display) => {
-			await interaction.editReply({
-				content: `\`\`\`${display}\`\`\``,
-				embeds: [{
-					title: "Battle",
-					description: "description"
-				}]
-			})
-		})*/
+		await interaction.reply(Display.displayBattle(battle, "mini-mono"));
+		await battle.awaitCompletion(async(display) => {
+			await interaction.editReply(Display.displayBattle(battle, "mini-mono"));
+		})
 	},
 	button: async(client: Client, interaction: ButtonInteraction, id: string) => {
 		
