@@ -1768,9 +1768,6 @@ export class Player {
 			}
 		})
 		player.drawFrom(player.deck, true, 2);
-		player.addToHand(new Card("long_elk"));
-		player.bones += 4;
-		player.items.push(new Item("wiseclock"));
 		player.drawn = true;
 		player.bones += this.boonBones || (this.sidedeck.noSacrifice ? 1 : 0);
 		return player;

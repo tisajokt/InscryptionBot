@@ -338,11 +338,11 @@ class BattleInteraction {
 			const player = this.getPlayer(interaction.user.id)
 			if (type == "i") {
 				const item = player.items[index];
-				item?.use(this.battle, player.index);
+				await item?.use(this.battle, player.index);
 				player.items.splice(index, 1);
 			} else if (type == "f") {
 				const card = this.battle.field[player.index][index];
-				card.activate(index);
+				await card.activate(index);
 			}
 		}
 		await this.reply(interaction);
