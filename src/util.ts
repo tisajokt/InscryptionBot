@@ -17,6 +17,9 @@ export function randomSelectionFrom(arr: any[], num: number): any[] {
 export function toProperCase(str: string): string {
 	return `${str.substring(0,1).toUpperCase()}${str.substring(1).toLowerCase()}`;
 }
+export function toProperFormat(str: string): string {
+	return str.split(/[ _]/).map(s => toProperCase(s)).join(" ");
+}
 export function abbreviate(str: string, len: number): string {
 	str = str.split(/[ _]/).map(s => toProperCase(s)).join(" ");
 	if (str.length <= len) return str;

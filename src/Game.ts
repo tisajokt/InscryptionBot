@@ -18,7 +18,7 @@ for (let p = 0; p < sigil_data.__powers.length; p++) {
 }
 
 export const terrains: cardName[] = ["", "boulder", "stump", "grand_fir", "frozen_opossum", "moleman", "broken_bot"];
-export const sidedecks: cardName[] = ["squirrel", "empty_vessel", "skeleton", "mox_crystal"];
+export const sidedecks: cardName[] = ["squirrel", "empty_vessel", "skeleton"]//, "mox_crystal"];
 
 export const MAX_ENERGY: number = game_config.maxEnergy;
 export const ITEM_LIMIT: number = game_config.itemLimit;
@@ -224,6 +224,22 @@ ${border}`;
 	resetSigilLoop(): void {
 		delete this.sigilActivations;
 	}
+	abilityCost(): string {
+		switch (this.ability) {
+			case "bonehorn":
+			case "power_dice":
+			case "energy_gun":
+				return "1x🔋 energy";
+			case "stimulate":
+				return "2x🔋 energy";
+			case "disentomb":
+				return "1x🦴 bones";
+			case "enlarge":
+				return "2x🦴 bones";
+			default:
+				return "";
+		}
+	}
 	canActivate(i: number): boolean {
 		if (this.cooldown >= 3) return false;
 		switch (this.ability) {
@@ -332,7 +348,7 @@ ${border}`;
 		this.owner = owner;
 		this.humanOwner = battle.isHuman(owner);
 		if (this.sigils.has("amorphous")) {
-			const possibleSigils: sigil[] = ["rabbit_hole", "fecundity", "battery", "item_bearer", "dam_builder", "bellist", "beehive", "spikey", "swapper", "corpse_eater", "undying", "steel_trap", "four_bones", "scavenger", "blood_lust", "fledgling", "armored", "death_touch", "stone", "piercing", "leader", "annoying", "stinky", "mighty_leap", "waterborne", "flying", "brittle", "sentry", "trifurcated", "bifurcated", "double_strike", "looter", "many_lives", "worthy_sacrifice", "gem_animator", "gemified", "random_mox", "digger", "morsel", "repulsive", "cuckoo", "guardian", "sealed_away", "sprinter", "scholar", "gemnastics", "stimulate", "enlarge", "energy_gun", "disentomb", "powered_buff", "powered_trifurcated", "gem_guardian", "sniper", "transformer", "burrower", "vessel_printer", "bonehorn", "skeleton_crew", "rampager", "detonator", "bomb_spewer", "power_dice", "gem_detonator", "brittle_latch", "bomb_latch", "shield_latch", "hefty", "jumper", "loose_tail", "hovering", "energy_conduit", "magic_armor", "handy", "double_death"];
+			const possibleSigils: sigil[] = ["rabbit_hole", "fecundity", "battery", "item_bearer", "dam_builder", "bellist", "beehive", "spikey", "swapper", "corpse_eater", "undying", "steel_trap", "four_bones", "scavenger", "blood_lust", "fledgling", "armored", "death_touch", "stone", "piercing", "leader", "annoying", "stinky", "mighty_leap", "waterborne", "flying", "brittle", "sentry", "trifurcated", "bifurcated", "double_strike", "looter", "many_lives", "worthy_sacrifice", "gem_animator", "gemified", "random_mox", "digger", "morsel", "repulsive", "cuckoo", "guardian", "sealed_away", "sprinter", "scholar", "gemnastics", "stimulate", "enlarge", "energy_gun", "disentomb", "powered_buff", "powered_trifurcated", "gem_guardian", "sniper", "transformer", "burrower", "vessel_printer", "bonehorn", "skeleton_crew", "rampager", "detonator", "bomb_spewer", "power_dice", "gem_detonator", "brittle_latch", "bomb_latch", "shield_latch", "hefty", "jumper", "loose_tail", "hovering", "energy_conduit", "magic_armor", "handy", "double_death", "gift_bearer"];
 			do {
 				this.sigils.add(pickRandom(possibleSigils));
 			} while (Math.random() < 0.1);
@@ -1582,9 +1598,7 @@ export class PlayerBattler implements Battler {
 	}
 	async playFromHand(h: number, i: number): Promise<boolean> {
 		const card = this.hand[h];
-		console.log(`Trying to play a card from hand #${h} to ${i}`);
 		if (!card || !card.isPlayable(card.cardRawValue) || this.battle.field[this.index][i]) return false;
-		console.log(`Card should be playable`);
 		const cost = card.getCost();
 		switch (card.cost) {
 			case "blood":
@@ -1608,7 +1622,6 @@ export class PlayerBattler implements Battler {
 			this.hand.splice(h, 1);
 			return true;
 		} else {
-			console.log(`Failed to play card ${card.nameSummary}`);
 			return false;
 		}
 	}
@@ -1755,6 +1768,7 @@ export class Player {
 			}
 		})
 		player.drawFrom(player.deck, true, 2);
+		player.items.push(new Item("wiseclock"));
 		player.drawn = true;
 		player.bones += this.boonBones || (this.sidedeck.noSacrifice ? 1 : 0);
 		return player;

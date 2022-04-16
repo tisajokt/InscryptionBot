@@ -1,9 +1,9 @@
 import { Client, BaseCommandInteraction, MessageActionRow, MessageButton, ButtonInteraction, MessageButtonStyle, CommandInteraction, Interaction, MessageInteraction, InteractionResponseType, MessagePayload, InteractionReplyOptions, MessageSelectMenu, SelectMenuInteraction, Message } from "discord.js";
 import { SlashCommand } from "../Command";
-import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex } from "../Game";
+import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, Item } from "../Game";
 import { Display } from "../Display";
 import { User } from "../User";
-import { generateRandomID, numberEmoji, pickRandom, sleep, toProperCase } from "../util";
+import { generateRandomID, numberEmoji, pickRandom, sleep, toProperCase, toProperFormat } from "../util";
 
 type battleMode = "demo"|"solo"|"duel";
 type battleAction = "draw"|"bell"|"play"|"activate"|"inspect"|"resign"|"blood";
@@ -93,6 +93,7 @@ class BattleInteraction {
 				await this.chooseBlood(interaction, args);
 				break;
 			case "activate":
+				await this.activate(interaction);
 				break;
 			case "inspect":
 				await this.inspect(interaction);
@@ -110,6 +111,9 @@ class BattleInteraction {
 				break;
 			case "inspect":
 				await this.inspectCard(interaction, args);
+				break;
+			case "activate":
+				await this.activateSelect(interaction, args);
 				break;
 		}
 		return true;
@@ -150,7 +154,7 @@ class BattleInteraction {
 				this.makeButton("draw", "", ["deck"]).setDisabled(!this.battle.hasDrawOption("deck")).setEmoji("🃏"),
 				this.makeButton("draw", "", ["sidedeck"]).setDisabled(!this.battle.hasDrawOption("sidedeck")).setEmoji(this.battle.getPlayer(this.battle.actor).sidedeckIcon),
 				this.makeButton("draw", "", ["hammer"]).setDisabled(!this.battle.hasDrawOption("hammer")).setEmoji("🔨")
-			)
+			);
 			const message = {
 				content: interaction.message.content,
 				embeds: interaction.message.embeds,
@@ -235,17 +239,11 @@ class BattleInteraction {
 		) : null;
 	}
 	async chooseBlood(interaction: ButtonInteraction, args: string[]): Promise<void> {
-		console.log("Choose blood");
 		if (args.length < 2) return;
-		console.log("Enough args");
 		const player = this.getPlayer(interaction.user.id);
 		const field = this.battle.field[player.index];
 		const card = player.hand[parseInt(args[0])];
-		if (!card || card.cost != "blood") {
-			console.log("Blood card doesn't exist!");
-			return;
-		}
-		console.log("Blood card exists");
+		if (!card || card.cost != "blood") return;
 		const target = parseInt(args[1]);
 		var sacrifices = [];
 		if (!args[2]) {
@@ -257,14 +255,12 @@ class BattleInteraction {
 		var blood = 0;
 		sacrifices.map(k => field[k]?.blood || 0).forEach(n => {blood += n});
 		if (player.blood + blood >= card.getCost()) {
-			console.log("Sacrificial needs met, sacrificing...");
 			sacrifices.forEach(k => {
 				field[k]?.onSacrifice(k, card);
 			});
 			await this.play(interaction, args);
 			return;
 		}
-		console.log(`Insufficient blood, select more...`);
 		const actions = new MessageActionRow();
 		for (let i = 0; i < field.length; i++) {
 			const card = field[i];
@@ -275,14 +271,13 @@ class BattleInteraction {
 					.setEmoji(pendingSacrifice ? "🩸" : numberEmoji[i+1])
 			)
 		}
-		console.log("Editing reply");
 		await interaction.editReply({
 			embeds: [{
 				title: `🩸 Sacrifice`,
 				description: `Choose sacrifices to yield ${card.getCost()} blood`
 			}],
 			components: [actions]
-		})
+		});
 	}
 	async play(interaction: ButtonInteraction, args: string[]): Promise<void> {
 		if (args.length >= 2) {
@@ -334,6 +329,53 @@ class BattleInteraction {
 			components: [actions]
 		});
 	}
+	async activateSelect(interaction: SelectMenuInteraction, args: string[]): Promise<void> {
+		if (!args[0]) return;
+		args = args[0].split(".");
+		if (args.length == 2) {
+			const type = args[0];
+			const index = parseInt(args[1]);
+			const player = this.getPlayer(interaction.user.id)
+			if (type == "i") {
+				const item = player.items[index];
+				item?.use(this.battle, player.index);
+				player.items.splice(index, 1);
+			} else if (type == "f") {
+				const card = this.battle.field[player.index][index];
+				card.activate(index);
+			}
+		}
+		await this.reply(interaction);
+	}
+	async activate(interaction: ButtonInteraction): Promise<void> {
+		const options: any = [{
+			label: "Return",
+			value: "none"
+		}];
+		const player = this.getPlayer(interaction.user.id);
+		player.items.forEach((item,i) => {
+			options.push({
+				label: toProperCase(item.type),
+				value: `i.${i}`
+			})
+		});
+		this.battle.field[player.index].forEach((card,i) => {
+			if (!card || !card.ability) return;
+			options.push({
+				label: `${card.nameSummary}: ${toProperFormat(card.ability)}`,
+				description: `${card.abilityCost()}${card.canActivate(i) ? "" : " (can't activate)"}`,
+				value: `f.${i}`
+			})
+		});
+		const actions = new MessageActionRow().addComponents(
+			this.makeSelectMenu("activate").setPlaceholder("Select ability to activate").addOptions(options)
+		);
+		await interaction.editReply({
+			content: interaction.message.content,
+			embeds: interaction.message.embeds,
+			components: [actions]
+		});
+	}
 	async inspectCard(interaction: SelectMenuInteraction, args: string[]): Promise<void> {
 		if (!args[0]) return;
 		args = args[0].split(".");
@@ -379,11 +421,13 @@ class BattleInteraction {
 	}
 	makeReply(): InteractionReplyOptions {
 		const disabled = !this.battle.isHuman(this.battle.actor);
+		const actor = this.battle.getPlayer(this.battle.actor);
 		const bell = this.battle.mayRingBell || this.mode == "demo";
+		const hasActive = actor.items.length || this.battle.field[actor.index].filter(c => c?.ability).length;
 		const actions = new MessageActionRow().addComponents(
 			this.makeButton(bell ? "bell" : "draw","").setStyle("PRIMARY").setDisabled(disabled).setEmoji(bell ? "🔔" : "🃏"),
-			this.makeButton("play","").setDisabled(!bell || !this.battle.getPlayer(this.battle.actor).hand.length).setEmoji("🖐️"),
-			this.makeButton("activate","").setDisabled(true).setEmoji("⚡"),
+			this.makeButton("play","").setDisabled(!bell || !actor.hand.length).setEmoji("🖐️"),
+			this.makeButton("activate","").setDisabled(!hasActive).setEmoji("⚡"),
 			this.makeButton("inspect","").setEmoji("🔍"),
 			this.makeButton("resign","").setStyle("DANGER").setEmoji("🏳️")
 		);
