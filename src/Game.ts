@@ -1032,10 +1032,10 @@ export class Item {
 		let traitor1 = battle.field[1][battle.fieldSize-1];
 		let traitor2 = battle.field[0][0];
 		for (let i = 0; i < battle.fieldSize-1; i++) {
-			battle.field[1][i+1] = battle.field[1][i];
+			battle.field[0][i] = battle.field[0][i+1];
 		}
 		for (let i = battle.fieldSize-1; i > 0; i--) {
-			battle.field[0][i-1] = battle.field[0][i];
+			battle.field[1][i] = battle.field[1][i-1];
 		}
 		battle.field[0][battle.fieldSize-1] = traitor1;
 		battle.field[1][0] = traitor2;
@@ -1768,6 +1768,8 @@ export class Player {
 			}
 		})
 		player.drawFrom(player.deck, true, 2);
+		player.addToHand(new Card("long_elk"));
+		player.bones += 4;
 		player.items.push(new Item("wiseclock"));
 		player.drawn = true;
 		player.bones += this.boonBones || (this.sidedeck.noSacrifice ? 1 : 0);
