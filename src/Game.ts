@@ -160,20 +160,21 @@ ${border}`;
 		return display.split("\n");
 	}
 	get nameSummary(): string {
-		return this.name.split("_").map(s => toProperCase(s)).join(" ") + (this.isModified ? "*" : "");
+		return this.name.split("_").map(s => toProperCase(s)).join(" ") + (this.hasModifiedSigils ? "*" : "");
 	}
 	getEmbedDisplay(i: number, inline: boolean=false): EmbedField {
-		const stats = `Stats: \`${i >= 0 ? this.getPower(i) : this.stats[0]}/${this.stats[1]}\``;
-		var arr = [stats];
-		arr.push(this.costEmbedDisplay);
+		const stats = `Stats: \`${i >= 0 ? this.getPower(i) : (this.powerCalc ? "*" : this.stats[0])}/${this.stats[1]}\``;
+		var arr = [stats, this.costEmbedDisplay];
 		if (this.tribe) arr.push(`Tribe: ${this.tribe}`);
+		if (this.powerCalc) arr.push(`*${this.powerString}`);
 		if (this.noSacrifice) arr.push("Cannot be sacrificed");
+		if (this.noBones) arr.push("Yields no bones on death");
 		if (this.isConduit) arr.push("Acts as a conduit");
 		this.sigils.forEach(s => {
 			arr.push(`_${s.split("_").join(" ")}_`)
 		});
 		return {
-			name: `${this.nameSummary}`,
+			name: `${this.rare ? "✨ " : ""}${this.nameSummary}`,
 			value: arr.join("\n"),
 			inline: inline
 		}
@@ -200,7 +201,7 @@ ${border}`;
 	}
 	get ability(): sigil {
 		if (!this._ability) {
-			const abilities: sigil[] = ["scholar", "stimulate", "enlarge", "energy_gun", "disentomb", "sniper", "bonehorn", "power_dice", "hovering", "energy_conduit"];
+			const abilities: sigil[] = ["scholar", "stimulate", "enlarge", "energy_gun", "disentomb", "sniper", "bonehorn", "power_dice", "hovering", "energy_conduit", "handy"];
 			for (const ability of abilities) {
 				if (this.sigils.has(ability)) {
 					this._ability = ability;
@@ -723,6 +724,33 @@ ${border}`;
 		}
 		return Math.max(0, cost);
 	}
+	get powerCalc(): string {
+		return card_models[this.name].power_calc;
+	}
+	get powerString(): string {
+		switch (this.powerCalc) {
+			case "ant":
+				return "Power equal to # ants on your side of the field"
+			case "mirror":
+				return "Power equal to that of the opposing creature"
+			case "bell":
+				return "More powerful when closer to the bell"
+			case "hand":
+				return "Power equal to # cards in your hand"
+			case "bones":
+				return "Power equal to half your # of bones"
+			case "sacrifices":
+				return "Power equal to # of sacrifices made this turn"
+			case "mox":
+				return "Power equal to # mox on your side of the field"
+			case "sigils":
+				return "Power equal to # sigils this card has"
+			case "damage":
+				return "More powerful as this card takes damage"
+			default:
+				return ""
+		}
+	}
 	getPower(i: number): number {
 		if (!this.battle) {
 			console.log(this.fullDisplay.join("\n"));
@@ -730,10 +758,9 @@ ${border}`;
 
 		const other = (this.owner ? 0 : 1);
 		var power: number = this.stats[0];
-		const powerCalc: string = this.getModelProp("power_calc");
-		switch (powerCalc) {
+		switch (this.powerCalc) {
 			case "ant":
-				power = this.battle.field[this.owner].filter(c => (c?.getModelProp("power_calc") == "ant")).length;
+				power = this.battle.field[this.owner].filter(c => c?.powerCalc == "ant").length;
 				break;
 			case "mirror":
 				const otherCard = this.battle.field[other][i];
@@ -763,7 +790,7 @@ ${border}`;
 				power = Math.max(0, (this.baseHP || getModel(this.name).stats[1]) - this.stats[1]);
 				break;
 		}
-		if (powerCalc) power += getModel(this.name).stats[0]; // in all vanilla cases, this does nothing
+		if (this.powerCalc) power += getModel(this.name).stats[0]; // in all vanilla cases, this does nothing
 		if (this.battle.field[this.owner][i-1]?.sigils.has("leader")) power++;
 		if (this.battle.field[this.owner][i+1]?.sigils.has("leader")) power++;
 		if (this.battle.field[other][i]?.sigils.has("annoying")) power++;
@@ -1279,6 +1306,7 @@ export abstract class Battle {
 					d = -d;
 					t = i + d;
 				}
+				if (t < 0 || t >= this.fieldSize) continue;
 				if (jumper) {
 					t = this.emptySpaceInDirection(actor, i, d);
 					if (t > -1) {
