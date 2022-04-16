@@ -135,7 +135,10 @@ class BattleInteraction {
 		const field = this.battle.field[idx];
 		if (arg && field[choice]) {
 			const player = this.getPlayer(interaction.user.id);
-			await player.useHammer(choice);
+			let i = 0;
+			while (field[choice] && i++ < 30) {
+				await player.useHammer(choice);
+			}
 			await this.reply(interaction);
 			return;
 		}
@@ -167,7 +170,16 @@ class BattleInteraction {
 		if (player.index != this.battle.actor) return;
 		switch (choice) {
 			case "deck":
-				await player.drawFrom(player.deck);
+				const num = await player.drawFrom(player.deck);
+				if (num) {
+					await interaction.followUp({
+						embeds: [{
+							title: "🃏 Drew from deck:",
+							fields: [player.hand[player.hand.length-1].getEmbedDisplay(-1)]
+						}],
+						ephemeral: true
+					})
+				}
 				break;
 			case "sidedeck":
 				await player.drawFrom(player.sidedeck);
