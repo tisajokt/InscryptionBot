@@ -26,6 +26,7 @@
 	},
 	"gem_vessel": {
 		"stats": [0,2,1],
+		"cost": "energy",
 		"sigils": ["random_mox"],
 		"is_conduit": true,
 		"no_sacrifice": true,
@@ -1021,6 +1022,7 @@
 	},
 	"bleene's_vessel": {
 		"stats": [0,1,2],
+		"cost": "energy",
 		"sigils": ["gemified", "blue_mox", "green_mox"],
 		"is_mox": true,
 		"no_sacrifice": true
@@ -1041,6 +1043,7 @@
 	},
 	"goranj's_vessel": {
 		"stats": [0,1,2],
+		"cost": "energy",
 		"sigils": ["gemified", "orange_mox", "green_mox"],
 		"is_mox": true,
 		"no_sacrifice": true
@@ -1061,6 +1064,7 @@
 	},
 	"orlu's_vessel": {
 		"stats": [0,1,2],
+		"cost": "energy",
 		"sigils": ["gemified", "blue_mox", "orange_mox"],
 		"is_mox": true,
 		"no_sacrifice": true
