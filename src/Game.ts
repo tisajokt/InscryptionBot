@@ -504,9 +504,6 @@ ${border}`;
 					break;
 				}
 			}
-			if (this.sigils.has("gift_bearer")) {
-				await this.battle.addToHand(new Card(pickRandom(default_deck)), this.owner);
-			}
 			if (this.sigils.has("haunter")) {
 				this.name = "spirit";
 				this.stats = [...getModel("spirit").stats];
@@ -523,6 +520,9 @@ ${border}`;
 			}
 		}
 		while (deaths--) {
+			if (this.sigils.has("gift_bearer")) {
+				await this.battle.addToHand(new Card(pickRandom(default_deck)), this.owner);
+			}
 			if (this.activeSigil("steel_trap")) {
 				const otherCard = this.battle.field[other][i];
 				Item.skinningKnife(otherCard, i);
