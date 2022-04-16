@@ -3,6 +3,7 @@
 		"grows_into": "rabid_squirrel",
 		"tribe": "squirrel",
 		"event": "none",
+		"vanilla_cabin": true,
 		"#comment": "gave grown form special name"
 	},
 	"rabid_squirrel": {
@@ -44,65 +45,77 @@
 	},
 	"rabbit": {
 		"sigils": ["jumper"],
+		"vanilla_cabin": true,
 		"#comment": "added jumper sigil"
 	},
 	"warren": {
 		"stats": [0,2,1],
 		"cost": "blood",
-		"sigils": ["rabbit_hole"]
+		"sigils": ["rabbit_hole"],
+		"vanilla_cabin": true
 	},
 	"geck": {
 		"stats": [1,1,0],
 		"tribe": "reptile",
-		"rare": true
+		"rare": true,
+		"vanilla_cabin": true
 	},
 	"skink": {
 		"stats": [1,1,1],
 		"cost": "blood",
 		"sigils": ["loose_tail"],
-		"tribe": "reptile"
+		"tribe": "reptile",
+		"vanilla_cabin": true
 	},
 	"tail": {
 		"stats": [0,2,0],
-		"event": "none"
+		"event": "none",
+		"vanilla_cabin": true
 	},
 	"wriggling_tail": {
 		"stats": [0,2,0],
 		"tribe": "reptile",
-		"event": "none"
+		"event": "none",
+		"vanilla_cabin": true
 	},
 	"wriggling_leg": {
 		"stats": [0,2,0],
 		"tribe": "insect",
-		"event": "none"
+		"event": "none",
+		"vanilla_cabin": true
 	},
 	"tail_feathers": {
 		"stats": [0,2,0],
 		"tribe": "avian",
-		"event": "none"
+		"event": "none",
+		"vanilla_cabin": true
 	},
 	"furry_tail": {
 		"stats": [0,2,0],
-		"event": "none"
+		"event": "none",
+		"vanilla_cabin": true
 	},
 	"black_goat": {
 		"stats": [0,1,1],
 		"cost": "blood",
 		"sigils": ["worthy_sacrifice"],
-		"tribe": "hooved"
+		"tribe": "hooved",
+		"vanilla_cabin": true
 	},
 	"elk": {
 		"stats": [2,4,2],
 		"cost": "blood",
 		"sigils": ["sprinter"],
-		"tribe": "hooved"
+		"tribe": "hooved",
+		"vanilla_cabin": true
 	},
 	"elk_fawn": {
 		"stats": [1,1,1],
 		"cost": "blood",
 		"sigils": ["sprinter", "fledgling"],
 		"grows_into": "elk",
-		"tribe": "hooved"
+		"tribe": "hooved",
+		"vanilla_cabin": true
 	},
 	"long_elk": {
 		"stats": [1,2,4],
@@ -110,19 +123,22 @@
 		"sigils": ["sprinter", "death_touch"],
 		"tribe": "hooved",
 		"trail": "vertebrae",
-		"rare": true
+		"rare": true,
+		"vanilla_cabin": true
 	},
 	"pronghorn": {
 		"stats": [1,3,2],
 		"cost": "blood",
 		"sigils": ["sprinter", "bifurcated"],
-		"tribe": "hooved"
+		"tribe": "hooved",
+		"vanilla_cabin": true
 	},
 	"moose_buck": {
 		"stats": [3,7,3],
 		"cost": "blood",
 		"sigils": ["hefty"],
-		"tribe": "hooved"
+		"tribe": "hooved",
+		"vanilla_cabin": true
 	},
 	"wild_bull": {
 		"stats": [2,3,2],
@@ -134,131 +150,154 @@
 		"stats": [1,2,2],
 		"cost": "bones",
 		"sigils": ["stinky"],
-		"tribe": "insect"
+		"tribe": "insect",
+		"vanilla_cabin": true
 	},
 	"cat": {
 		"stats": [0,1,1],
 		"cost": "blood",
 		"sigils": ["many_lives"],
-		"9lives": "undead_cat"
+		"9lives": "undead_cat",
+		"vanilla_cabin": true
 	},
 	"undead_cat": {
 		"stats": [3,6,2],
 		"cost": "bones",
 		"event": "none",
+		"vanilla_cabin": true,
 		"#comment": "costs bones instead (barely matters since it's so rare)"
 	},
 	"bee": {
 		"stats": [1,1,0],
 		"sigils": ["flying"],
 		"tribe": "insect",
-		"event": "none"
+		"event": "none",
+		"vanilla_cabin": true
 	},
 	"beehive": {
 		"stats": [0,2,1],
 		"cost": "blood",
 		"sigils": ["beehive"],
-		"tribe": "insect"
+		"tribe": "insect",
+		"vanilla_cabin": true
 	},
 	"great_white": {
 		"stats": [4,2,3],
 		"cost": "blood",
-		"sigils": ["waterborne"]
+		"sigils": ["waterborne"],
+		"vanilla_cabin": true
 	},
 	"grizzly": {
 		"stats": [4,6,3],
-		"cost": "blood"
+		"cost": "blood",
+		"vanilla_cabin": true
 	},
 	"urayuli": {
 		"stats": [7,7,4],
 		"cost": "blood",
-		"rare": true
+		"rare": true,
+		"vanilla_cabin": true
 	},
 	"turkey_vulture": {
 		"stats": [3,3,8],
 		"cost": "bones",
 		"sigils": ["flying"],
-		"tribe": "avian"
+		"tribe": "avian",
+		"vanilla_cabin": true
 	},
 	"rat_king": {
 		"stats": [2,1,2],
 		"cost": "blood",
-		"sigils": ["four_bones"]
+		"sigils": ["four_bones"],
+		"vanilla_cabin": true
 	},
 	"porcupine": {
 		"stats": [1,1,1],
 		"cost": "blood",
-		"sigils": ["spikey"]
+		"sigils": ["spikey"],
+		"vanilla_cabin": true
 	},
 	"pack_mule": {
 		"stats": [0,5,0],
 		"tribe": "hooved",
-		"event": "none"
+		"event": "none",
+		"vanilla_cabin": true
 	},
 	"mole": {
 		"stats": [0,4,1],
 		"cost": "blood",
 		"sigils": ["burrower"],
-		"grows_into": "moleman"
+		"grows_into": "moleman",
+		"vanilla_cabin": true
 	},
 	"moleman": {
 		"stats": [0,6,1],
 		"cost": "blood",
 		"sigils": ["burrower", "mighty_leap"],
-		"rare": true
+		"rare": true,
+		"vanilla_cabin": true
 	},
 	"magpie": {
 		"stats": [1,1,2],
 		"cost": "blood",
 		"sigils": ["flying", "hoarder"],
-		"tribe": "avian"
+		"tribe": "avian",
+		"vanilla_cabin": true
 	},
 	"corpse_maggots": {
 		"stats": [1,2,4],
 		"cost": "bones",
 		"sigils": ["corpse_eater"],
-		"tribe": "insect"
+		"tribe": "insect",
+		"vanilla_cabin": true
 	},
 	"kingfisher": {
 		"stats": [1,1,1],
 		"cost": "blood",
 		"sigils": ["waterborne", "flying"],
-		"tribe": "avian"
+		"tribe": "avian",
+		"vanilla_cabin": true
 	},
 	"field_mice": {
 		"stats": [2,2,2],
 		"cost": "blood",
-		"sigils": ["fecundity"]
+		"sigils": ["fecundity"],
+		"vanilla_cabin": true
 	},
 	"bat": {
 		"stats": [2,1,4],
 		"cost": "bones",
-		"sigils": ["flying"]
+		"sigils": ["flying"],
+		"vanilla_cabin": true
 	},
 	"adder": {
 		"stats": [1,1,2],
 		"cost": "blood",
 		"sigils": ["death_touch"],
-		"tribe": "reptile"
+		"tribe": "reptile",
+		"vanilla_cabin": true
 	},
 	"alpha": {
 		"stats": [1,2,4],
 		"cost": "bones",
 		"sigils": ["leader"],
-		"tribe": "canine"
+		"tribe": "canine",
+		"vanilla_cabin": true
 	},
 	"child_13": {
 		"stats": [0,1,1],
 		"cost": "blood",
 		"sigils": ["many_lives"],
 		"tribe": "hooved",
-		"rare": true
+		"rare": true,
+		"vanilla_cabin": true
 	},
 	"frozen_opossum": {
 		"stats": [0,5,0],
 		"sigils": ["sealed_away"],
 		"sealed_away": "opossum",
-		"no_sacrifice": true
+		"no_sacrifice": true,
+		"vanilla_cabin": true
 	},
 	"caged_wolf": {
 		"stats": [0,6,2],
@@ -266,13 +305,15 @@
 		"sigils": ["sealed_away"],
 		"sealed_away": "wolf",
 		"tribe": "canine",
-		"no_sacrifice": true
+		"no_sacrifice": true,
+		"vanilla_cabin": true
 	},
 	"rabbit_pelt": {
 		"stats": [0,1,0],
 		"no_sacrifice": true,
 		"pelt_value": 1,
-		"event": "pelt"
+		"event": "pelt",
+		"vanilla_cabin": true
 	},
 	"wolf_pelt": {
 		"stats": [0,2,0],
@@ -280,19 +321,22 @@
 		"tribe": "canine",
 		"pelt_value": 2,
 		"#comment": "canine tribe added because lol",
-		"event": "pelt"
+		"event": "pelt",
+		"vanilla_cabin": true
 	},
 	"golden_pelt": {
 		"stats": [0,3,0],
 		"no_sacrifice": true,
 		"pelt_value": 3,
-		"event": "pelt"
+		"event": "pelt",
+		"vanilla_cabin": true
 	},
 	"boulder": {
 		"stats": [0,5,0],
 		"sigils": ["stone"],
 		"no_sacrifice": true,
-		"event": "none"
+		"event": "none",
+		"vanilla_cabin": true
 	},
 	"broken_bot": {
 		"stats": [0,1,0],
@@ -303,74 +347,87 @@
 	"stump": {
 		"stats": [0,3,0],
 		"no_sacrifice": true,
-		"event": "none"
+		"event": "none",
+		"vanilla_cabin": true
 	},
 	"dam": {
 		"stats": [0,2,0],
 		"no_sacrifice": true,
-		"event": "none"
+		"event": "none",
+		"vanilla_cabin": true
 	},
 	"the_smoke": {
 		"stats": [0,1,0],
 		"sigils": ["four_bones"],
 		"grows_into": "greater_smoke",
-		"event": "none"
+		"event": "none",
+		"vanilla_cabin": true
 	},
 	"greater_smoke": {
 		"stats": [1,3,0],
 		"sigils": ["four_bones"],
 		"event": "none",
-		"rare": true
+		"rare": true,
+		"vanilla_cabin": true
 	},
 	"starvation": {
 		"stats": [1,1,0],
 		"sigils": ["repulsive"],
-		"event": "none"
+		"event": "none",
+		"vanilla_cabin": true
 	},
 	"amalgam": {
 		"stats": [3,3,2],
 		"cost": "blood",
 		"tribe": "all",
-		"rare": true
+		"rare": true,
+		"vanilla_cabin": true
 	},
 	"chime": {
 		"stats": [0,1,0],
 		"no_sacrifice": true,
 		"chime_trigger": "the_daus",
-		"event": "none"
+		"event": "none",
+		"vanilla_cabin": true
 	},
 	"skunk": {
 		"stats": [0,3,1],
 		"cost": "blood",
-		"sigils": ["stinky"]
+		"sigils": ["stinky"],
+		"vanilla_cabin": true
 	},
 	"the_daus": {
 		"stats": [2,2,2],
 		"cost": "blood",
 		"sigils": ["bellist"],
-		"rare": true
+		"rare": true,
+		"vanilla_cabin": true
 	},
 	"bell_tentacle": {
 		"stats": [0,3,2],
 		"cost": "blood",
 		"power_calc": "bell",
-		"chime_trigger": "the_daus"
+		"chime_trigger": "the_daus",
+		"vanilla_cabin": true
 	},
 	"mirror_tentacle": {
 		"stats": [0,3,1],
 		"cost": "blood",
-		"power_calc": "mirror"
+		"power_calc": "mirror",
+		"vanilla_cabin": true
 	},
 	"hand_tentacle": {
 		"stats": [0,1,1],
 		"cost": "blood",
-		"power_calc": "hand"
+		"power_calc": "hand",
+		"vanilla_cabin": true
 	},
 	"grand_fir": {
 		"stats": [0,3,0],
 		"sigils": ["mighty_leap"],
 		"no_sacrifice": true,
-		"event": "none"
+		"event": "none",
+		"vanilla_cabin": true
 	},
 	"broken_egg": {
 		"stats": [0,1,0],
@@ -382,14 +439,16 @@
 	},
 	"stoat": {
 		"stats": [1,2,1],
-		"cost": "blood"
+		"cost": "blood",
+		"vanilla_cabin": true
 	},
 	"ant": {
 		"stats": [0,2,1],
 		"cost": "blood",
 		"tribe": "insect",
 		"power_calc": "ant",
-		"grows_into": "queen_ant"
+		"grows_into": "queen_ant",
+		"vanilla_cabin": true
 	},
 	"flying_ant": {
 		"stats": [0,1,1],
@@ -397,14 +456,16 @@
 		"sigils": ["flying"],
 		"tribe": "insect",
 		"power_calc": "ant",
-		"grows_into": "queen_ant"
+		"grows_into": "queen_ant",
+		"vanilla_cabin": true
 	},
 	"queen_ant": {
 		"stats": [0,3,2],
 		"cost": "blood",
 		"sigils": ["spawn_ant"],
 		"tribe": "insect",
-		"power_calc": "ant"
+		"power_calc": "ant",
+		"vanilla_cabin": true
 	},
 	"tadpole": {
 		"stats": [0,1,0],
@@ -416,61 +477,71 @@
 		"stats": [1,2,1],
 		"cost": "blood",
 		"sigils": ["mighty_leap"],
-		"tribe": "reptile"
+		"tribe": "reptile",
+		"vanilla_cabin": true
 	},
 	"wolf": {
 		"stats": [3,2,2],
 		"cost": "blood",
-		"tribe": "canine"
+		"tribe": "canine",
+		"vanilla_cabin": true
 	},
 	"wolf_pup": {
 		"stats": [1,1,1],
 		"cost": "blood",
 		"sigils": ["fledgling"],
 		"tribe": "canine",
-		"grows_into": "wolf"
+		"grows_into": "wolf",
+		"vanilla_cabin": true
 	},
 	"river_snapper": {
 		"stats": [1,6,2],
 		"cost": "blood",
-		"tribe": "reptile"
+		"tribe": "reptile",
+		"vanilla_cabin": true
 	},
 	"river_otter": {
 		"stats": [1,1,1],
 		"cost": "blood",
-		"sigils": ["waterborne"]
+		"sigils": ["waterborne"],
+		"vanilla_cabin": true
 	},
 	"sparrow": {
 		"stats": [1,2,1],
 		"cost": "blood",
 		"sigils": ["flying"],
-		"tribe": "avian"
+		"tribe": "avian",
+		"vanilla_cabin": true
 	},
 	"raven": {
 		"stats": [2,3,2],
 		"cost": "blood",
 		"sigils": ["flying"],
-		"tribe": "avian"
+		"tribe": "avian",
+		"vanilla_cabin": true
 	},
 	"raven_egg": {
 		"stats": [0,2,1],
 		"cost": "blood",
 		"sigils": ["fledgling"],
 		"grows_into": "raven",
-		"tribe": "avian"
+		"tribe": "avian",
+		"vanilla_cabin": true
 	},
 	"mantis": {
 		"stats": [1,1,1],
 		"cost": "blood",
 		"sigils": ["bifurcated"],
-		"tribe": "insect"
+		"tribe": "insect",
+		"vanilla_cabin": true
 	},
 	"mantis_god": {
 		"stats": [1,1,1],
 		"cost": "blood",
 		"sigils": ["trifurcated"],
 		"tribe": "insect",
-		"rare": true
+		"rare": true,
+		"vanilla_cabin": true
 	},
 	"strange_larva": {
 		"stats": [0,3,1],
@@ -478,7 +549,8 @@
 		"sigils": ["fledgling"],
 		"tribe": "insect",
 		"grows_into": "strange_pupa",
-		"rare": true
+		"rare": true,
+		"vanilla_cabin": true
 	},
 	"strange_pupa": {
 		"stats": [0,3,1],
@@ -487,6 +559,7 @@
 		"tribe": "insect",
 		"grows_into": "mothman",
 		"rare": true,
+		"vanilla_cabin": true,
 		"event": "none"
 	},
 	"mothman": {
@@ -495,16 +568,19 @@
 		"sigils": ["flying"],
 		"tribe": "insect",
 		"rare": true,
+		"vanilla_cabin": true,
 		"event": "none"
 	},
 	"opossum": {
 		"stats": [1,1,2],
-		"cost": "bones"
+		"cost": "bones",
+		"vanilla_cabin": true
 	},
 	"coyote": {
 		"stats": [2,1,4],
 		"cost": "bones",
-		"tribe": "canine"
+		"tribe": "canine",
+		"vanilla_cabin": true
 	},
 	"mealworm": {
 		"stats": [0,2,2],
@@ -529,7 +605,8 @@
 		"stats": [1,1,4],
 		"cost": "bones",
 		"tribe": "insect",
-		"sigils": ["undying"]
+		"sigils": ["undying"],
+		"vanilla_cabin": true
 	},
 	"cuckoo": {
 		"stats": [1,1,1],
@@ -548,7 +625,8 @@
 		"stats": [2,3,2],
 		"cost": "blood",
 		"sigils": ["guardian"],
-		"tribe": "canine"
+		"tribe": "canine",
+		"vanilla_cabin": true
 	},
 	"mud_turtle": {
 		"stats": [2,2,2],
@@ -574,19 +652,22 @@
 		"sigils": ["mighty_leap", "sealed_away"],
 		"tribe": "reptile",
 		"sealed_away": "leaping_trap",
-		"no_sacrifice": true
+		"no_sacrifice": true,
+		"vanilla_cabin": true
 	},
 	"leaping_trap": {
 		"stats": [0,1,0],
 		"sigils": ["mighty_leap", "steel_trap"],
 		"no_sacrifice": true,
+		"vanilla_cabin": true,
 		"event": "none"
 	},
 	"bait_bucket": {
 		"stats": [0,1,0],
 		"sigils": ["sealed_away"],
 		"sealed_away": "great_white",
-		"no_sacrifice": true
+		"no_sacrifice": true,
+		"vanilla_cabin": true
 	},
 	"wolverine": {
 		"stats": [1,3,5],
@@ -638,12 +719,14 @@
 		"stats": [0,1,1],
 		"cost": "blood",
 		"tribe": "insect",
-		"is_ring": true
+		"is_ring": true,
+		"vanilla_cabin": true
 	},
 	"rattler": {
 		"stats": [3,1,6],
 		"cost": "bones",
-		"tribe": "reptile"
+		"tribe": "reptile",
+		"vanilla_cabin": true
 	},
 
 

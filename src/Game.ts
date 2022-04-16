@@ -17,12 +17,13 @@ for (let p = 0; p < sigil_data.__powers.length; p++) {
 	}
 }
 
-export const terrains: cardName[] = ["", "boulder", "stump", "grand_fir", "frozen_opossum", "moleman", "broken_bot"];
-export const sidedecks: cardName[] = ["squirrel", "empty_vessel", "skeleton"]//, "mox_crystal"];
+export const terrains: cardName[] = ["", "boulder", "stump", "grand_fir", "frozen_opossum", "moleman"]//, "broken_bot"];
+export const sidedecks: cardName[] = ["squirrel"]//, "empty_vessel", "skeleton"]//, "mox_crystal"];
 
 export const MAX_ENERGY: number = game_config.maxEnergy;
 export const ITEM_LIMIT: number = game_config.itemLimit;
 export const FECUNDITY_NERF: boolean = game_config.fecundityNerf;
+export const VANILLA_CABIN_ONLY: boolean = game_config.vanillaCabinOnly;
 
 export const slow_mode = false;
 export const AI_SPEED: number = slow_mode ? 500 : 0;
@@ -42,6 +43,7 @@ export type CardModel = {
 	is_conduit?: boolean,
 	playerValue?: number,
 	nonplayerValue?: number,
+	vanilla_cabin?: boolean,
 	modded?: boolean|string,
 	event?: string
 };
@@ -1664,6 +1666,10 @@ export class AutoBattler implements Battler {
 	battle: Battle;
 	backfield: Card[];
 	cardPool: cardName[];
+
+	playRate: number=0.8;
+	smartRate: number=0.5;
+	targetPower: number=1;
 	constructor(battle: Battle, cardPool: cardName[]=[]) {
 		this.battle = battle;
 		this.backfield = Array(battle.fieldSize).fill(null);
@@ -1675,7 +1681,7 @@ export class AutoBattler implements Battler {
 			cardPool = randomSelectionFrom(selection, 3 + Math.floor(Math.random() * 6));
 		}
 		this.cardPool = cardPool;
-		this.playRandomBackfield();
+		this.playSmartBackfield();
 	}
 	get display(): string {
 		var display = "";
@@ -1691,7 +1697,10 @@ export class AutoBattler implements Battler {
 				this.backfield[i] = null;
 			}
 		}
-		if (Math.random() < 0.4) await this.playRandomBackfield();
+		if (this.battle.field[1].reduce((v,c,i) => v + c?.getPower(i), 0) < this.targetPower ||
+			Math.random() < this.playRate) {
+			await this.playSmartBackfield(this.smartRate);
+		}
 	}
 	async playBackfield(card: cardName|Card, i: number): Promise<void> {
 		if (!this.backfield[i]) {
@@ -1699,12 +1708,20 @@ export class AutoBattler implements Battler {
 			await this.backfield[i].onDraw(this.battle, 1);
 		}
 	}
-	async playRandomBackfield(): Promise<void> {
+	async playSmartBackfield(chance: number=1): Promise<void> {
 		const card = pickRandom(this.cardPool);
-		const i = this.getRandomOpenSlot();
+		var i = this.getRandomSmartSlot();
+		if (i == -1 || Math.random() < chance) i = this.getRandomOpenSlot();
 		if (i > -1) {
 			await this.playBackfield(card, i);
 		}
+	}
+	getRandomSmartSlot(): number {
+		var open: number[] = [];
+		for (let i = 0; i < this.battle.fieldSize; i++) {
+			if (!this.backfield[i] && !this.battle.field[i]) open.push(i);
+		}
+		return open.length ? pickRandom(open) : -1;
 	}
 	getRandomOpenSlot(): number {
 		var open: number[] = [];
@@ -1782,7 +1799,7 @@ for (const name in card_models) {
 	model.nonplayerValue = (new Card(name)).cardNonplayerValue;
 	model.abbrev = model.abbrev || abbreviate(name, 6);
 	
-	if (model.modded) continue;
+	if (model.modded || VANILLA_CABIN_ONLY && !model.vanilla_cabin) continue;
 	default_auto.push(name);
 	if (model.event == "none") continue;
 	default_deck.push(name);

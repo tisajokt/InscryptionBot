@@ -1,5 +1,6 @@
 {
 	"maxEnergy": 6,
 	"fecundityNerf": true,
-	"itemLimit": 3
+	"itemLimit": 3,
+	"vanillaCabinOnly": false
 }
