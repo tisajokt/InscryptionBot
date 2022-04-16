@@ -552,9 +552,9 @@ ${border}`;
 					this.battle.getPlayer(other).bones += bones;
 				}
 			}
-			this.tryLatch("brittle_latch", other);
-			this.tryLatch("bomb_latch", other);
-			this.tryLatch("shield_latch", this.owner);
+			this.tryLatch("brittle_latch", "brittle", other);
+			this.tryLatch("bomb_latch", "detonator", other);
+			this.tryLatch("shield_latch", "armored", this.owner);
 			if (this.activeSigil("detonator") || this.getModelProp("is_mox") &&
 			this.battle.getCardsWithSigil(this.owner, "gem_detonator").length + this.battle.getCardsWithSigil(other, "gem_detonator").length > 0) {
 				// shouldn't be necessary to delete the sigil, but just in case, to avoid infinite loop
@@ -709,8 +709,8 @@ ${border}`;
 		}
 		return false;
 	}
-	tryLatch(sigil: sigil, player: playerIndex): void {
-		if (this.sigils.has(sigil)) {
+	tryLatch(latch: sigil, sigil: sigil, player: playerIndex): void {
+		if (this.sigils.has(latch)) {
 			this.latchEffect(this.battle.field[player], sigil) || this.latchEffect(this.battle.field[player ? 0 : 1], sigil);
 		}
 	}
