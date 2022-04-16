@@ -453,6 +453,7 @@ class BattleInteraction {
 			case "activate":
 				return userID == this.playerIDs[this.battle.actor];
 			case "inspect":
+				return true;
 			case "resign":
 				return this.playerIDs.includes(userID);
 		}
