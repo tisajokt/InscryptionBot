@@ -20,7 +20,7 @@ async function handleButton(client: Client, interaction: ButtonInteraction): Pro
 	await command.button(client, interaction, interaction.customId.split(".").slice(1));
 }
 async function handleSelectMenu(client: Client, interaction: SelectMenuInteraction): Promise<void> {
-	console.log(`Received a "${interaction.customId}" select menu interaction`);
+	console.log(`Received a "${interaction.customId}" select menu interaction, value: ${interaction.values[0]}`);
 	const command = SlashCommands.find(c => c.name === interaction.customId.split(".")[0]);
 	if (!command?.menu) {
 		interaction.followUp({content: "An error has occurred!"});
@@ -38,7 +38,7 @@ export default (client: Client): void => {
 		} else if (interaction.isSelectMenu()) {
 			await handleSelectMenu(client, interaction);
 		} else {
-			console.log("Received an unhandled interaction");
+			console.error("Received an unhandled interaction");
 		}
 	});
 }

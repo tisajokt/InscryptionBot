@@ -19,6 +19,7 @@
 	},
 	"empty_vessel": {
 		"stats": [0,2,1],
+		"cost": "energy",
 		"is_conduit": true,
 		"no_bones": true,
 		"event": "none"
@@ -327,6 +328,7 @@
 	},
 	"amalgam": {
 		"stats": [3,3,2],
+		"cost": "blood",
 		"tribe": "all",
 		"rare": true
 	},
@@ -901,7 +903,7 @@
 	"gift_bot": {
 		"stats": [0,2,2],
 		"cost": "energy",
-		"sigils": ["item_bearer"]
+		"sigils": ["gift_bearer"]
 	},
 	"mage_pupil": {
 		"stats": [1,1,0],

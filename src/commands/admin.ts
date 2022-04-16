@@ -1,13 +1,13 @@
 import { Client, BaseCommandInteraction, MessageActionRow, MessageButton, ButtonInteraction } from "discord.js";
-import { Command } from "../Command";
+import { SlashCommand } from "../Command";
 
-export const admin: Command = {
+export const admin: SlashCommand = {
 	name: "admin",
 	description: "Admin commands",
 	run: async(client: Client, interaction: BaseCommandInteraction) => {
 		await interaction.reply({
 			ephemeral: true,
-			content: `Admin`
+			content: `Admin!!`
 		})
 	},
 	defaultPermission: false

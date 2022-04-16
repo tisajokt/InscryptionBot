@@ -4,6 +4,7 @@ import card_models from "../data/game/cards.json";
 import game_config from "../data/game/config.json";
 import { padTrim, pickRandom, sleep, randomSelectionFrom, toProperCase, abbreviate } from "./util";
 import { EmbedField, Embed } from "src/Display";
+import { jsonArrayMember, jsonMember, jsonObject, jsonSetMember } from "typedjson";
 
 const default_deck: cardName[] = [];
 const default_auto: cardName[] = [];
@@ -49,7 +50,7 @@ export type cardTribe = "canine"|"insect"|"reptile"|"avian"|"hooved"|"squirrel"|
 export type cardCost = "free"|"blood"|"bones"|"energy"|"mox";
 export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"bones"|"battery"|"armor"|"pliers"|"hourglass"|"fan"|"wiseclock"|"skinning_knife"|"lens";
 export type moxColor = "blue"|"green"|"orange"|"any";
-export type sigil = "rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder";
+export type sigil = "rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer";
 export type playerIndex = 0|1;
 export type Totem = {tribe: cardTribe, sigil: sigil};
 
@@ -60,10 +61,14 @@ function getModel(card: cardName): CardModel {
 export interface Drawable {
 	draw(): Card;
 }
+@jsonObject
 export class Card {
 	/* Assigned for all cards */
+	@jsonMember
 	name: cardName; // many card properties (tribe, etc.) are deferred to a card model lookup
+	@jsonArrayMember(Number)
 	stats: number[];
+	@jsonSetMember(String)
 	sigils: Set<sigil>;
 
 	/* Assigned for any card upon being drawn in a battle or played to the backfield */
@@ -152,15 +157,21 @@ ${border}`;
 		}
 		return display.split("\n");
 	}
+	get nameSummary(): string {
+		return this.name.split("_").map(s => toProperCase(s)).join(" ") + (this.isModified ? "*" : "");
+	}
 	getEmbedDisplay(i: number, inline: boolean=false): EmbedField {
-		const stats = `\`${this.getPower(i)}/${this.stats[1]}\``;
+		const stats = `Stats: \`${i >= 0 ? this.getPower(i) : this.stats[0]}/${this.stats[1]}\``;
 		var arr = [stats];
-		if (this.cost != "free") arr.push(this.costEmbedDisplay);
+		arr.push(this.costEmbedDisplay);
+		if (this.tribe) arr.push(`Tribe: ${this.tribe}`);
+		if (this.noSacrifice) arr.push("Cannot be sacrificed");
+		if (this.isConduit) arr.push("Acts as a conduit");
 		this.sigils.forEach(s => {
 			arr.push(`_${s.split("_").join(" ")}_`)
 		});
 		return {
-			name: this.name.split("_").map(c => toProperCase(c)).join(" "),
+			name: `${this.nameSummary}`,
 			value: arr.join("\n"),
 			inline: inline
 		}
@@ -492,6 +503,9 @@ ${border}`;
 					await this.battle.playCard(card, i);
 					break;
 				}
+			}
+			if (this.sigils.has("gift_bearer")) {
+				await this.battle.addToHand(new Card(pickRandom(default_deck)), this.owner);
 			}
 			if (this.sigils.has("haunter")) {
 				this.name = "spirit";
@@ -840,6 +854,32 @@ ${border}`;
 	get cost(): cardCost {
 		return getModel(this.name).cost || "free";
 	}
+	get sidedeckIcon(): string {
+		switch (this.name) {
+			case "skeleton":
+				return "☠️";
+			case "mox_crystal":
+				return "💠";
+			case "empty_vessel":
+				return "📟";
+			case "squirrel":
+			default:
+				return "🐿️";
+		}
+	}
+	get costEmoji(): string {
+		switch (this.cost) {
+			case "blood":
+				return "🩸";
+			case "bones":
+				return "🦴";
+			case "mox":
+				return "💎";
+			case "energy":
+				return "🔋";
+		}
+		return "";
+	}
 	get costDisplay(): string {
 		switch (this.cost) {
 			case "blood":
@@ -859,11 +899,11 @@ ${border}`;
 			case "blood":
 			case "bones":
 			case "energy":
-				return `${this.stats[2]} ${this.cost}`;
+				return `Costs: ${this.getCost()}x${this.costEmoji}${this.cost}`;
 			case "mox":
-				return `${this.mox.join(", ")} mox`;
+				return `Requires: ${this.mox.join(", ")} ${this.costEmoji}mox`;
 			case "free":
-				return "";
+				return "Free to play";
 		}
 	}
 	get cardPlayerSigilValue(): number {
@@ -1300,7 +1340,8 @@ export abstract class Battle {
 	}
 	hasFreeSpace(player: playerIndex, sacrificeIsFree: boolean=false): boolean {
 		for (let i = 0; i < this.fieldSize; i++) {
-			if (!this.field[player][i] || sacrificeIsFree && this.field[player][i].blood > 0) {
+			const card = this.field[player][i];
+			if (!card || sacrificeIsFree && card.blood > 0 && !card.sigils.has("many_lives")) {
 				return true;
 			}
 		}
@@ -1362,6 +1403,20 @@ export abstract class Battle {
 			}
 		}
 		return leftCard && rightCard ? [leftCard, rightCard] : null;
+	}
+	get mayRingBell(): boolean {
+		return this.getPlayer(this.actor).drawn;
+	}
+	hasDrawOption(option: "deck"|"sidedeck"|"hammer"): boolean {
+		const player = this.getPlayer(this.actor);
+		switch (option) {
+			case "deck":
+				return player.deck.cards.length > 0;
+			case "sidedeck":
+				return true;
+			case "hammer":
+				return this.field[this.actor].some(c => c);
+		}
 	}
 	get candleDisplay(): string {
 		return `${"".padEnd(this.candles[0], "i")}(${("").padStart(Math.min(this.goal, Math.max(0, this.scale)), "*").padStart(this.goal, " ")}/${("").padEnd(Math.min(this.goal, Math.max(0, -this.scale)), "*").padEnd(this.goal, " ")})${"".padEnd(this.candles[1], "i")}${Math.abs(this.scale)>this.goal?` +${Math.abs(this.scale)-this.goal}`:""}`;
@@ -1454,7 +1509,7 @@ export class PlayerBattler implements Battler {
 	index: playerIndex;
 
 	deck: Deck;
-	sidedeck: Drawable;
+	sidedeck: SideDeck;
 	hand: Card[];
 	overkill: number[];
 	totem: Totem;
@@ -1469,7 +1524,7 @@ export class PlayerBattler implements Battler {
 	fanUsed: boolean = false;
 	hourglassUsed: boolean = false;
 
-	constructor(battle: Battle, index: playerIndex, deck: Deck, sidedeck: Drawable, hand: Card[], totem: Totem) {
+	constructor(battle: Battle, index: playerIndex, deck: Deck, sidedeck: SideDeck, hand: Card[], totem: Totem) {
 		this.battle = battle;
 		this.index = index;
 		this.deck = deck;
@@ -1486,8 +1541,11 @@ export class PlayerBattler implements Battler {
 		const bones = `${this.bones}//`;
 		return `${cards} ${mox} ${energy} ${bones}`;
 	}
+	get sidedeckIcon(): string {
+		return Card.castCardName(this.sidedeck.card).sidedeckIcon;
+	}
 	async setupTurn(): Promise<void> {
-		this.drawn = false;
+		this.drawn = (this.battle.turn < 2);
 		this.sacrifices = 0;
 		this.capacity = Math.min(MAX_ENERGY, this.capacity + 1);
 		this.energy = this.capacity;
@@ -1524,7 +1582,9 @@ export class PlayerBattler implements Battler {
 	}
 	async playFromHand(h: number, i: number): Promise<boolean> {
 		const card = this.hand[h];
+		console.log(`Trying to play a card from hand #${h} to ${i}`);
 		if (!card || !card.isPlayable(card.cardRawValue) || this.battle.field[this.index][i]) return false;
+		console.log(`Card should be playable`);
 		const cost = card.getCost();
 		switch (card.cost) {
 			case "blood":
@@ -1548,6 +1608,7 @@ export class PlayerBattler implements Battler {
 			this.hand.splice(h, 1);
 			return true;
 		} else {
+			console.log(`Failed to play card ${card.nameSummary}`);
 			return false;
 		}
 	}
@@ -1665,11 +1726,11 @@ export class Player {
 		this.deck = Player.generateDeck(sidedeck);
 	}
 	static generateDeck(sidedeck: cardName): Deck {
-		// Selects 50 random cards from the given sidedeck theme (10% for out-of-theme cards, 100% for rare cards)
+		// Selects 50 random cards from the given sidedeck theme (10% for out-of-theme cards, 25% for rare cards)
 		// Then sorts by player value and returns deck with N most valuable cards
 		const selection = randomSelectionFrom(default_deck.filter(c => {
 			const model = getModel(c);
-			if (!model.cost && !model.mox || model.rare || Math.random() < 0.1) return true;
+			if (!model.cost && !model.mox || model.rare && Math.random() < 0.25 || Math.random() < 0.1) return true;
 			switch (sidedeck) {
 				case "squirrel": return model.cost == "blood";
 				case "empty_vessel": return model.cost == "energy";
