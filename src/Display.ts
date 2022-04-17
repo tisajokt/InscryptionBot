@@ -63,13 +63,13 @@ export class Display {
 	static displayBattle(battle: Battle, displayMode: displayMode=defaultDisplayMode, actions?: MessageActionRow[]): Reply {
 		switch (displayMode) {
 			case "full-mono":
-				return {content: this.displayBattleFullMono(battle), components: actions};
+				return {content: this.displayBattleFullMono(battle), embeds: [], components: actions};
 			case "mini-mono":
-				return {content: this.displayBattleMiniMono(battle), components: actions};
+				return {content: this.displayBattleMiniMono(battle), embeds: [], components: actions};
 			case "emoji-mono":
-				return {content: ``, components: actions};
+				return {content: ``, embeds: [], components: actions};
 			case "embed-inline":
-				return {embeds: [], components: actions};
+				return {content: ``, embeds: [], components: actions};
 		}
 	}
 }

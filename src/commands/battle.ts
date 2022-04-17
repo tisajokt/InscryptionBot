@@ -155,6 +155,7 @@ class BattleInteraction {
 				this.playerIDs = [this.playerIDs[1], this.playerIDs[0]];
 			}
 			await this.init();
+			await this.reply();
 		}
 	}
 	static get(id: string): BattleInteraction {
@@ -395,7 +396,7 @@ class BattleInteraction {
 				await this.reply();
 			}
 		}
-		if (args[0]) return await this.playCard(interaction, args);
+		else if (args[0] && args.length == 1) return await this.playCard(interaction, args);
 		const options = this.getHandOptions(interaction.user.id);
 		const message: any = {
 			embeds: [{
@@ -565,6 +566,11 @@ class BattleInteraction {
 		const channel = interaction.channel;
 		await channel.send(`Interaction may have expired; try \`/battle continue ${this.id}\` to resume.`);
 	}
+	async resume(interaction: CommandInteraction): Promise<void> {
+		this.interaction.editReply({components: []}).catch();
+		this.interaction = interaction;
+		await this.reply();
+	}
 }
 
 const universalOptions: any = [
@@ -702,16 +708,16 @@ export const battle: SlashCommand = {
 	],
 	run: async(client: Client, interaction: CommandInteraction) => {
 		// const user = User.get(interaction.user.id);
-		await interaction.deferReply();
 		const cmd = interaction.options.getSubcommand();
 		if (cmd == "continue") {
 			const battle = BattleInteraction.get(interaction.options.getString("id"));
 			if (battle?.battle && battle.playerIDs.includes(interaction.user.id)
 				&& !battle.battle.ended) {
-				battle.interaction = interaction;
-				battle.reply();
+				await interaction.deferReply();
+				await battle.resume(interaction);
 			}
 		} else {
+			await interaction.deferReply();
 			await BattleInteraction.create(interaction);
 		}
 	},
