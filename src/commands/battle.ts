@@ -1,20 +1,32 @@
-import { Client, BaseCommandInteraction, MessageActionRow, MessageButton, ButtonInteraction, MessageButtonStyle, CommandInteraction, Interaction, MessageInteraction, InteractionResponseType, MessagePayload, InteractionReplyOptions, MessageSelectMenu, SelectMenuInteraction, Message } from "discord.js";
+import { Client, BaseCommandInteraction, MessageActionRow, MessageButton, ButtonInteraction, MessageButtonStyle, CommandInteraction, Interaction, MessageInteraction, InteractionResponseType, MessagePayload, InteractionReplyOptions, MessageSelectMenu, SelectMenuInteraction, Message, MessageComponentInteraction } from "discord.js";
 import { SlashCommand } from "../Command";
-import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, Item } from "../Game";
+import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, Item, sidedecks } from "../Game";
 import { Display } from "../Display";
 import { User } from "../User";
 import { generateRandomID, numberEmoji, pickRandom, sleep, toProperCase, toProperFormat } from "../util";
+import game_config from "../../data/game/config.json";
 
 type battleMode = "demo"|"solo"|"duel";
-type battleAction = "draw"|"bell"|"play"|"activate"|"inspect"|"resign"|"blood";
+type battleAction = "confirm"|"draw"|"bell"|"play"|"activate"|"inspect"|"resign"|"blood";
 export type BattleOptions = {
 	candles?: number,
-	fieldSize?: 4|5,
+	fieldSize?: number,
 	goal?: number,
 	scale?: number,
 	terrain?: cardName|"none"|"random",
 	sidedeck?: cardName|"random",
-	deckSize?: number|"random"
+	deckSize?: number|"random",
+	startKit?: cardName|"none"
+};
+const battleDefaults: BattleOptions = {
+	candles: game_config.candlesDefault,
+	fieldSize: 4,
+	goal: game_config.goalDefault,
+	scale: 0,
+	terrain: "random",
+	sidedeck: "random",
+	deckSize: "random",
+	startKit: "none"
 };
 
 class BattleInteraction {
@@ -31,13 +43,19 @@ class BattleInteraction {
 		this.interaction = interaction;
 		this.mode = <battleMode>interaction.options.getSubcommand();
 		this.userID = interaction.user.id;
-		this.playerIDs = [this.userID, interaction.options.getUser("user")?.id];
+		const other = interaction.options.getUser("user");
+		this.playerIDs = [this.userID, other?.id];
+		if (other?.bot) this.mode = "solo";
 		BattleInteraction.list[this.id] = this;
 	}
 	static async create(interaction: CommandInteraction): Promise<BattleInteraction> {
 		const battleInteraction = new BattleInteraction(interaction);
-		await battleInteraction.init();
-		await battleInteraction.reply();
+		if (battleInteraction.mode == "duel") {
+			await battleInteraction.confirmation();
+		} else {
+			await battleInteraction.init();
+			await battleInteraction.reply();
+		}
 		return battleInteraction;
 	}
 	makeSelectMenu(args: string): MessageSelectMenu {
@@ -46,19 +64,37 @@ class BattleInteraction {
 	makeButton(action: battleAction, label?: string, args?: string[]): MessageButton {
 		return new MessageButton().setCustomId(`battle.${this.id}.${action}${args?`.${args.join(".")}`:""}`).setLabel(label === undefined ? toProperCase(action) : label).setStyle("SECONDARY");
 	}
+	_rawOptions: BattleOptions;
+	get rawOptions(): BattleOptions {
+		if (this._rawOptions) return this._rawOptions;
+		const opt = this.interaction.options;
+		this._rawOptions = {
+			candles: opt.getInteger("candles"),
+			fieldSize: opt.getInteger("field_size"),
+			goal: opt.getInteger("goal"),
+			scale: opt.getInteger("scale"),
+			startKit: opt.getString("start_kit"),
+			terrain: opt.getString("terrain")
+		};
+		if (!this._rawOptions.candles) delete this._rawOptions.candles;
+		if (!this._rawOptions.fieldSize) delete this._rawOptions.fieldSize;
+		if (!this._rawOptions.goal) delete this._rawOptions.goal;
+		if (this._rawOptions.scale === undefined) delete this._rawOptions.scale;
+		if (!this._rawOptions.startKit) delete this._rawOptions.startKit;
+		if (!this._rawOptions.terrain) delete this._rawOptions.terrain;
+		return Object.freeze(this._rawOptions);
+	}
 	get options(): BattleOptions {
-		let terrain = this.interaction.options.getString("terrain");
-		if (!terrain || terrain == "random") terrain = pickRandom(terrains);
-		else if (terrain == "none") terrain = "";
-		return {
-			candles: this.interaction.options.getInteger("candles") || 3,
-			fieldSize: this.interaction.options.getBoolean("big_field") ? 5 : 4,
-			goal: this.interaction.options.getInteger("goal") || 5,
-			scale: this.interaction.options.getInteger("scale") || 0,
-			terrain: terrain
-		}
+		const user = User.get(this.userID);
+		Object.assign(user.battleOptions, this.rawOptions);
+		const result = Object.assign(Object.create(battleDefaults), user.battleOptions);
+		if (result.terrain == "random") result.terrain = pickRandom(terrains);
+		else if (result.terrain == "none") result.terrain = "";
+		if (result.sidedeck == "random") result.sidedeck = pickRandom(sidedecks);
+		return result;
 	}
 	async init(): Promise<Battle> {
+		if (this.battle) return this.battle;
 		const options = this.options;
 		switch (this.mode) {
 			case "demo":
@@ -71,15 +107,64 @@ class BattleInteraction {
 				this.battle = new DuelBattle(User.get(this.playerIDs[0]).duelPlayer, User.get(this.playerIDs[1]).duelPlayer, options);
 				break;
 		}
+		if (options.startKit != "none") {
+			for (let k=0; k<2; k++) {
+				if (!this.battle.isHuman(<playerIndex>k)) continue;
+				const card = new Card(options.startKit);
+				if (card.name == "cat") {
+					card.sigils.add("repulsive");
+				} else if (card.name == "rabbit") {
+					card.sigils.add("undying");
+					card.sigils.add("waterborne");
+				}
+				await this.battle.getPlayer(<playerIndex>k).addToHand(card);
+			}
+		}
 		await this.battle.placeTerrain(this.battle.terrain);
 		await this.battle.setupTurn();
 		return this.battle;
+	}
+	async confirmation(): Promise<void> {
+		if (this.mode != "duel") return;
+		const actions = new MessageActionRow().addComponents(
+			this.makeButton("confirm", "", ["accept", "0"]).setEmoji(numberEmoji[1]),
+			this.makeButton("confirm", "", ["accept", "1"]).setEmoji(numberEmoji[2]),
+			this.makeButton("confirm", "Decline", ["decline"]).setStyle("DANGER")
+		)
+		await this.interaction.editReply({
+			embeds: [{
+				title: "Battle request",
+				description: `<@${this.userID}> vs. <@${this.playerIDs[1]}>`
+			}],
+			components: [actions]
+		});
+	}
+	async confirmChoice(interaction: ButtonInteraction, args: string[]): Promise<void> {
+		if (!args.length) return;
+		if (args[0] == "decline") {
+			delete BattleInteraction.list[this.id];
+			await interaction.editReply({
+				embeds: [{
+					title: "Battle declined",
+					color: "RED"
+				}],
+				components: []
+			});
+		} else if (args[0] == "accept" && args[1]) {
+			if (args[1] == "1") {
+				this.playerIDs = [this.playerIDs[1], this.playerIDs[0]];
+			}
+			await this.init();
+		}
 	}
 	static get(id: string): BattleInteraction {
 		return this.list[id];
 	}
 	async receiveAction(interaction: ButtonInteraction, action: battleAction, args: string[]=[]): Promise<boolean> {
 		switch (action) {
+			case "confirm":
+				await this.confirmChoice(interaction, args);
+				break;
 			case "draw":
 				await this.chooseDraw(interaction, args);
 				break;
@@ -135,10 +220,7 @@ class BattleInteraction {
 		const field = this.battle.field[idx];
 		if (arg && field[choice]) {
 			const player = this.getPlayer(interaction.user.id);
-			let i = 0;
-			while (field[choice] && i++ < 30) {
-				await player.useHammer(choice);
-			}
+			await player.useHammer(choice);
 			await this.reply(interaction);
 			return;
 		}
@@ -172,11 +254,17 @@ class BattleInteraction {
 			case "deck":
 				const num = await player.drawFrom(player.deck);
 				if (num) {
+					const card = player.hand[player.hand.length-1];
+					const actions = new MessageActionRow().addComponents(
+						this.makeButton("play", "Play", [(player.hand.length-1).toString()])
+							.setDisabled(!card.isPlayable())
+					);
 					await interaction.followUp({
 						embeds: [{
 							title: "🃏 Drew from deck:",
-							fields: [player.hand[player.hand.length-1].getEmbedDisplay(-1)]
+							fields: [card.getEmbedDisplay(-1)]
 						}],
+						components: card.isPlayable() ? [actions] : [],
 						ephemeral: true
 					})
 				}
@@ -307,6 +395,7 @@ class BattleInteraction {
 				await this.reply();
 			}
 		}
+		if (args[0]) return await this.playCard(interaction, args);
 		const options = this.getHandOptions(interaction.user.id);
 		const message: any = {
 			embeds: [{
@@ -322,7 +411,7 @@ class BattleInteraction {
 			interaction.followUp(message);
 		}
 	}
-	async playCard(interaction: SelectMenuInteraction, args: string[]): Promise<void> {
+	async playCard(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
 		if (!args[0]) return;
 		const index = parseInt(args[0]);
 		const player = this.getPlayer(interaction.user.id);
@@ -367,7 +456,7 @@ class BattleInteraction {
 		const player = this.getPlayer(interaction.user.id);
 		player.items.forEach((item,i) => {
 			options.push({
-				label: toProperCase(item.type),
+				label: toProperFormat(item.type),
 				value: `i.${i}`
 			})
 		});
@@ -445,10 +534,10 @@ class BattleInteraction {
 		);
 		return Display.displayBattle(this.battle, "mini-mono", this.battle.ended ? [] : [actions]);
 	}
-	async reply(interaction: CommandInteraction|ButtonInteraction|SelectMenuInteraction=this.interaction): Promise<void> {
+	async reply(interaction: CommandInteraction|MessageComponentInteraction=this.interaction): Promise<void> {
 		const reply = this.makeReply();
 		if (this.mode == "duel") {
-			reply.content = `<@${this.playerIDs[this.battle.actor]}>\n${reply.content||""}`;
+			reply.content = `<@${this.playerIDs[this.battle.actor]}>'s Turn\n${reply.content||""}`;
 		}
 		await interaction.editReply(reply);
 	}
@@ -457,6 +546,8 @@ class BattleInteraction {
 	}
 	isAllowedAction(userID: string, action: battleAction): boolean {
 		switch (action) {
+			case "confirm":
+				return !this.battle && userID == this.playerIDs[1];
 			case "bell":
 				if (!this.bellMutex && this.mode == "demo") return true;
 			case "draw":
@@ -470,8 +561,69 @@ class BattleInteraction {
 				return this.playerIDs.includes(userID);
 		}
 	}
+	async tokenExpired(interaction: MessageComponentInteraction): Promise<void> {
+		const channel = interaction.channel;
+		await channel.send(`Interaction may have expired; try \`/battle continue ${this.id}\` to resume.`);
+	}
 }
 
+const universalOptions: any = [
+	{
+		name: "field_size",
+		description: `Columns on the field? (default ${battleDefaults.fieldSize})`,
+		type: 4,
+		min_value: 3,
+		max_value: 5
+	},
+	{
+		name: "candles",
+		description: `Number of candles (default ${battleDefaults.candles})`,
+		type: 4,
+		min_value: 1,
+		max_value: 5
+	},
+	{
+		name: "goal",
+		description: `Goal amount of damage (default ${battleDefaults.goal})`,
+		type: 4,
+		min_value: 3,
+		max_value: 10
+	},
+	{
+		name: "scale",
+		description: "Starting damage (+N is player 1 advantage, -N is AI/player 2 advantage)",
+		type: 4,
+		min_value: -2,
+		max_value: 2
+	},
+	{
+		name: "terrain",
+		description: `Terrain to place on the field at the start (default ${battleDefaults.terrain})`,
+		type: 3,
+		choices: [
+			{name: "None", value: "none"},
+			{name: "Random", value: "random"},
+			{name: "Boulder (0/5, stone)", value: "boulder"},
+			{name: "Stump (0/3)", value: "stump"},
+			{name: "Grand Fir (0/5, mighty leap)", value: "grand_fir"},
+			{name: "Frozen Opossum (0/5, frozen away)", value: "frozen_opossum"},
+			{name: "Moleman (0/6, burrowing, mighty leap)", value: "moleman"},
+			{name: "Broken Bot (0/1, detonator)", value: "broken_bot"}
+		]
+	},
+	{
+		name: "start_kit",
+		description: `Card(s) to give players at the start (default ${battleDefaults.startKit})`,
+		type: 3,
+		choices: [
+			{name: "None", value: "none"},
+			{name: "Black Goat", value: "black_goat"},
+			{name: "Rabbit w/ Undying & Waterborne", value: "rabbit"},
+			{name: "Cat w/ Repulsive", value: "cat"},
+			{name: "Mrs. Bomb", value: "mrs._bomb"}
+		]
+	}
+];
 export const battle: SlashCommand = {
 	name: "battle",
 	description: "Battling commands",
@@ -492,53 +644,12 @@ export const battle: SlashCommand = {
 					name: "auto",
 					description: "Automatically run the battle? (default true)",
 					type: 5
-				},
-				{
-					name: "candles",
-					description: "Number of candles (default 3)",
-					type: 4,
-					min_value: 1,
-					max_value: 5
-				},
-				{
-					name: "big_field",
-					description: "Field has 5 spaces instead of 4?",
-					type: 5
-				},
-				{
-					name: "goal",
-					description: "Goal amount of damage (default 5)",
-					type: 4,
-					min_value: 3,
-					max_value: 20
-				},
-				{
-					name: "scale",
-					description: "Starting damage (+N is player 1 advantage, -N is AI/player 2 advantage)",
-					type: 4,
-					min_value: -2,
-					max_value: 2
-				},
-				{
-					name: "terrain",
-					description: "Terrain to place on the field at the start (default random)",
-					type: 3,
-					choices: [
-						{name: "None", value: "none"},
-						{name: "Random", value: "random"},
-						{name: "Boulder (0/5, stone)", value: "boulder"},
-						{name: "Stump (0/3)", value: "stump"},
-						{name: "Grand Fir (0/5, mighty leap)", value: "grand_fir"},
-						{name: "Frozen Opossum (0/5, frozen away)", value: "frozen_opossum"},
-						{name: "Moleman (0/6, burrowing, mighty leap)", value: "moleman"},
-						{name: "Broken Bot (0/1, detonator)", value: "broken_bot"}
-					]
 				}
-			]
+			].concat(universalOptions)
 		},
 		{
 			name: "solo",
-			description: "Play a one-off battle vs. the computer (NOT IMPLEMENTED)",
+			description: "Play a one-off battle vs. the computer",
 			type: 1,
 			options: [
 				{
@@ -560,11 +671,11 @@ export const battle: SlashCommand = {
 					min_value: 20,
 					max_value: 50
 				}
-			]
+			].concat(universalOptions)
 		},
 		{
 			name: "duel",
-			description: "Play a PvP duel vs. another user (NOT IMPLEMENTED)",
+			description: "Play a PvP duel vs. another user",
 			type: 1,
 			options: [
 				{
@@ -573,26 +684,59 @@ export const battle: SlashCommand = {
 					type: 6,
 					required: true
 				}
+			].concat(universalOptions)
+		},
+		{
+			name: "continue",
+			description: "Continue a battle elsewhere or after it's expired",
+			type: 1,
+			options: [
+				{
+					name: "id",
+					description: "ID of the battle",
+					type: 3,
+					required: true
+				}
 			]
 		}
 	],
 	run: async(client: Client, interaction: CommandInteraction) => {
-		const user = User.get(interaction.user.id);
+		// const user = User.get(interaction.user.id);
 		await interaction.deferReply();
-		const battleInteraction = await BattleInteraction.create(interaction);
+		const cmd = interaction.options.getSubcommand();
+		if (cmd == "continue") {
+			const battle = BattleInteraction.get(interaction.options.getString("id"));
+			if (battle?.battle && battle.playerIDs.includes(interaction.user.id)
+				&& !battle.battle.ended) {
+				battle.interaction = interaction;
+				battle.reply();
+			}
+		} else {
+			await BattleInteraction.create(interaction);
+		}
 	},
 	button: async(client: Client, interaction: ButtonInteraction, args: string[]) => {
 		const battleInteraction = BattleInteraction.get(args[0]);
 		const action = <battleAction>args[1];
 		if (!battleInteraction?.isAllowedAction(interaction.user.id, action)) return;
 		await interaction.deferUpdate();
-		await battleInteraction.receiveAction(interaction, action, args.slice(2));
+		try {
+			await battleInteraction.receiveAction(interaction, action, args.slice(2));
+		} catch (e) {
+			console.error(e);
+			await battleInteraction.tokenExpired(interaction);
+		}
 	},
 	menu: async(client: Client, interaction: SelectMenuInteraction, args: string[]) => {
 		const battleInteraction = BattleInteraction.get(args[0]);
 		const action = <battleAction>args[1];
 		if (!battleInteraction?.isAllowedAction(interaction.user.id, action)) return;
 		await interaction.deferUpdate();
-		await battleInteraction.receiveMenu(interaction, action, interaction.values);
+		try {
+			await battleInteraction.receiveMenu(interaction, action, interaction.values);
+		} catch (e) {
+			console.error(e);
+			await battleInteraction.tokenExpired(interaction);
+		}
 	}
 }

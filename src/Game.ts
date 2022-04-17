@@ -2,7 +2,7 @@
 import sigil_data from "../data/game/sigils.json";
 import card_models from "../data/game/cards.json";
 import game_config from "../data/game/config.json";
-import { padTrim, pickRandom, sleep, randomSelectionFrom, toProperCase, abbreviate } from "./util";
+import { padTrim, pickRandom, sleep, randomSelectionFrom, toProperCase, abbreviate, toProperFormat } from "./util";
 import { EmbedField, Embed } from "src/Display";
 import { jsonArrayMember, jsonMember, jsonObject, jsonSetMember } from "typedjson";
 
@@ -45,6 +45,7 @@ export type CardModel = {
 	nonplayerValue?: number,
 	vanilla_cabin?: boolean,
 	modded?: boolean|string,
+	inspect?: string,
 	event?: string
 };
 export type cardName = string;
@@ -52,7 +53,7 @@ export type cardTribe = "canine"|"insect"|"reptile"|"avian"|"hooved"|"squirrel"|
 export type cardCost = "free"|"blood"|"bones"|"energy"|"mox";
 export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"bones"|"battery"|"armor"|"pliers"|"hourglass"|"fan"|"wiseclock"|"skinning_knife"|"lens";
 export type moxColor = "blue"|"green"|"orange"|"any";
-export type sigil = "spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer";
+export type sigil = "spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering";
 export type playerIndex = 0|1;
 export type Totem = {tribe: cardTribe, sigil: sigil};
 
@@ -92,6 +93,7 @@ export class Card {
 	/* Assigned temporarily */
 	moved?: boolean;
 	sigilActivations?: number;
+	hammered?: boolean;
 	constructor(model: Card|cardName) {
 		if (typeof model == "string") {
 			this.name = model;
@@ -160,7 +162,7 @@ ${border}`;
 		return display.split("\n");
 	}
 	get nameSummary(): string {
-		return this.name.split("_").map(s => toProperCase(s)).join(" ") + (this.hasModifiedSigils ? "*" : "");
+		return toProperFormat(this.name) + (this.hasModifiedSigils ? "*" : "");
 	}
 	getEmbedDisplay(i: number, inline: boolean=false): EmbedField {
 		const stats = `Stats: \`${i >= 0 ? this.getPower(i) : (this.powerCalc ? "*" : this.stats[0])}/${this.stats[1]}\``;
@@ -170,6 +172,7 @@ ${border}`;
 		if (this.noSacrifice) arr.push("Cannot be sacrificed");
 		if (this.noBones) arr.push("Yields no bones on death");
 		if (this.isConduit) arr.push("Acts as a conduit");
+		if (this.inspectText) arr.push(this.inspectText);
 		this.sigils.forEach(s => {
 			arr.push(`_${s.split("_").join(" ")}_`)
 		});
@@ -178,6 +181,9 @@ ${border}`;
 			value: arr.join("\n"),
 			inline: inline
 		}
+	}
+	get inspectText(): string {
+		return card_models[this.name].inspect;
 	}
 	get fullDisplay(): string[] {
 		var display = ["", this.name.replace("_", " "), this.stats[2] ? `${this.stats[2]} ${this.cost}` : "free", this.getModelProp("tribe") || "no tribe"];
@@ -266,6 +272,7 @@ ${border}`;
 				return this.player.hand.length > 0;
 			case "sniper":
 			case "hovering":
+				return true;
 			default:
 				return false;
 		}
@@ -507,7 +514,7 @@ ${border}`;
 		const player = this.player;
 		const other = (this.owner == 0) ? 1 : 0;
 		let deaths = 1 + this.battle.getCardsWithSigil(this.owner, "double_death").length;
-		if (this.activeSigil("sealed_away")) {
+		if (this.activeSigil("sealed_away") && !this.hammered) {
 			deaths = 1;
 			await this.battle.playCard(this.createWithExtraSigils(this.getModelProp("sealed_away") || "opossum", "sealed_away"), i, this.owner);
 		} else if (this.battle.isHuman(this.owner)) {
@@ -615,7 +622,7 @@ ${border}`;
 			this.stats[0]++;
 		}
 	}
-	async onSetup(): Promise<void> {
+	async onSetup(i: number): Promise<void> {
 		if (this.sigils.has("waterborne") && this.getModelProp("kraken")) {
 			const tentacles = ["bell_tentacle", "hand_tentacle", "mirror_tentacle"];
 			this.name = pickRandom(tentacles);
@@ -631,6 +638,12 @@ ${border}`;
 			} else {
 				this.stats[0] += 1;
 				this.stats[1] += 2;
+			}
+		}
+		if (this.sigils.has("withering")) {
+			this.stats[1]--;
+			if (this.stats[1] <= 0) {
+				this.onDeath(i);
 			}
 		}
 		if (this.sigils.has("transformer")) {
@@ -1171,7 +1184,7 @@ export abstract class Battle {
 		for (var i = 0; i < this.fieldSize; i++) {
 			const card = this.field[actor][i];
 			if (!card) continue;
-			await card.onSetup();
+			await card.onSetup(i);
 		}
 		await this.players[actor].setupTurn();
 	}
@@ -1657,7 +1670,10 @@ export class PlayerBattler implements Battler {
 	async useHammer(i: number): Promise<void> {
 		if (this.drawn || !this.field[i]) return;
 		this.drawn = true;
-		await this.field[i].takeDamage(i, 100);
+		const card = this.field[i];
+		card.hammered = true;
+		await card.takeDamage(i, 100);
+		delete card.hammered;
 	}
 	async performAction(): Promise<boolean> {
 		await sleep(AI_SPEED);
@@ -1773,11 +1789,11 @@ export class Player {
 	sidedeck: Card;
 	totem: Totem;
 	boonBones: number = 0;
-	constructor() {
+	constructor(sidedeck?: cardName, deck?: (cardName|Card)[]) {
 		//this.deck = new Deck(randomSelectionFrom(default_deck, 20 + Math.floor(Math.random() * 30)));
-		const sidedeck = pickRandom(sidedecks);
+		if (!sidedeck) sidedeck = pickRandom(sidedecks);
 		this.sidedeck = new Card(sidedeck);
-		this.deck = Player.generateDeck(sidedeck);
+		this.deck = deck ? new Deck(deck) : Player.generateDeck(sidedeck);
 	}
 	static generateDeck(sidedeck: cardName): Deck {
 		// Selects 50 random cards from the given sidedeck theme (10% for out-of-theme cards, 25% for rare cards)

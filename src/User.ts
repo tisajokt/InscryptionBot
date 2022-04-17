@@ -15,6 +15,7 @@ export class User {
 	_duelPlayer: Player;
 	constructor(id: string) {
 		this.id = id;
+		this.battleOptions = {};
 	}
 	get soloPlayer(): Player {
 		this._soloPlayer = this._soloPlayer || new Player();

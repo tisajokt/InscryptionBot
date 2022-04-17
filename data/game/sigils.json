@@ -1,7 +1,7 @@
 {
 	"__powers": [
 		["gem_dependent"],
-		["brittle"],
+		["brittle", "withering"],
 		["annoying"],
 		["flying", "detonator", "swapper", "clinger"],
 		["sprinter", "burrower", "waterborne", "hefty", "jumper", "guardian", "mighty_leap", "null_conduit", "shield_latch", "transformer", "gem_detonator", "rampager", "hovering", "exploding_guts"],
