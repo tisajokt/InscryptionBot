@@ -442,7 +442,7 @@
 		"cost": "blood",
 		"vanilla_cabin": true
 	},
-	"ant": {
+	"worker_ant": {
 		"stats": [0,2,1],
 		"cost": "blood",
 		"tribe": "insect",

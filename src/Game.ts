@@ -52,7 +52,7 @@ export type cardTribe = "canine"|"insect"|"reptile"|"avian"|"hooved"|"squirrel"|
 export type cardCost = "free"|"blood"|"bones"|"energy"|"mox";
 export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"bones"|"battery"|"armor"|"pliers"|"hourglass"|"fan"|"wiseclock"|"skinning_knife"|"lens";
 export type moxColor = "blue"|"green"|"orange"|"any";
-export type sigil = "rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer";
+export type sigil = "spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer";
 export type playerIndex = 0|1;
 export type Totem = {tribe: cardTribe, sigil: sigil};
 
@@ -392,14 +392,10 @@ ${border}`;
 	async onPlay(i: number): Promise<void> {
 		if (this.humanOwner) {
 			if (this.sigils.has("rabbit_hole")) {
-				const rabbit = new Card("rabbit");
-				for (const sigil of this.sigils) {
-					if (getModel(this.name).sigils.indexOf(sigil) < 0) {
-						rabbit.sigils.add(sigil);
-					}
-				}
-				rabbit.sigils.delete("rabbit_hole");
-				await this.battle.addToHand(rabbit, this.owner);
+				await this.battle.addToHand(this.createWithExtraSigils("rabbit", "rabbit_hole"), this.owner);
+			}
+			if (this.sigils.has("spawn_ant")) {
+				await this.battle.addToHand(this.createWithExtraSigils("worker_ant", "spawn_ant"), this.owner);
 			}
 			if (this.sigils.has("fecundity")) {
 				const clone = new Card(this);
