@@ -26,7 +26,9 @@ async function handleSelectMenu(client: Client, interaction: SelectMenuInteracti
 		interaction.followUp({content: "An error has occurred!"});
 		return;
 	}
-	await command.menu(client, interaction, interaction.customId.split(".").slice(1));
+	const args = interaction.customId.split(".").slice(1);
+	if (interaction.values[0]) args.push(...interaction.values[0].split("."));
+	await command.menu(client, interaction, args);
 }
 
 export default (client: Client): void => {

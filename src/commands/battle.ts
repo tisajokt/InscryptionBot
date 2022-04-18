@@ -1,4 +1,4 @@
-import { Client, BaseCommandInteraction, MessageActionRow, MessageButton, ButtonInteraction, MessageButtonStyle, CommandInteraction, Interaction, MessageInteraction, InteractionResponseType, MessagePayload, InteractionReplyOptions, MessageSelectMenu, SelectMenuInteraction, Message, MessageComponentInteraction } from "discord.js";
+import { Client, MessageActionRow, MessageButton, ButtonInteraction, CommandInteraction, InteractionReplyOptions, MessageSelectMenu, SelectMenuInteraction, MessageComponentInteraction, DiscordAPIError, TextBasedChannel } from "discord.js";
 import { SlashCommand } from "../Command";
 import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, Item, sidedecks } from "../Game";
 import { Display } from "../Display";
@@ -116,6 +116,8 @@ class BattleInteraction {
 				} else if (card.name == "rabbit") {
 					card.sigils.add("undying");
 					card.sigils.add("waterborne");
+				} else if (card.name == "omni_squirrel") {
+					card.sigils.add("item_bearer");
 				}
 				await this.battle.getPlayer(<playerIndex>k).addToHand(card);
 			}
@@ -151,7 +153,7 @@ class BattleInteraction {
 				components: []
 			});
 		} else if (args[0] == "accept" && args[1]) {
-			if (args[1] == "1") {
+			if (args[1] == "0") {
 				this.playerIDs = [this.playerIDs[1], this.playerIDs[0]];
 			}
 			await this.init();
@@ -458,6 +460,7 @@ class BattleInteraction {
 		player.items.forEach((item,i) => {
 			options.push({
 				label: toProperFormat(item.type),
+				description: item.description,
 				value: `i.${i}`
 			})
 		});
@@ -465,7 +468,7 @@ class BattleInteraction {
 			if (!card || !card.ability) return;
 			options.push({
 				label: `${card.nameSummary}: ${toProperFormat(card.ability)}`,
-				description: `${card.abilityCost()}${card.canActivate(i) ? "" : " (can't activate)"}`,
+				description: `${card.abilityDescription}${card.canActivate(i) ? "" : " (can't activate)"}`,
 				value: `f.${i}`
 			})
 		});
@@ -562,18 +565,43 @@ class BattleInteraction {
 				return this.playerIDs.includes(userID);
 		}
 	}
-	async tokenExpired(interaction: MessageComponentInteraction): Promise<void> {
-		const channel = interaction.channel;
-		await channel.send(`Interaction may have expired; try \`/battle continue ${this.id}\` to resume.`);
+	get textChannel(): Promise<TextBasedChannel> {
+		const interaction = this.interaction;
+		return new Promise((resolve, reject) => {
+			interaction.client.channels.fetch(interaction.channelId).then((channel) => {
+				if (channel.isText()) resolve(channel);
+				else reject();
+			}).catch(reject);
+		})
+	}
+	async tokenExpired(): Promise<void> {
+		await (await this.textChannel)?.send(`Interaction may have expired; try \`/battle continue id:${this.id}\` to resume.`);
+	}
+	async internalError(): Promise<void> {
+		await (await this.textChannel)?.send(`Internal application error! Please report to a developer.`);
 	}
 	async resume(interaction: CommandInteraction): Promise<void> {
-		this.interaction.editReply({components: []}).catch();
+		try {
+			await this.interaction.editReply({components: []});
+		} catch (e) {};
 		this.interaction = interaction;
 		await this.reply();
 	}
 }
 
 const universalOptions: any = [
+	{
+		name: "sidedeck",
+		description: "Sidedeck to use (default random)",
+		type: 3,
+		choices: [
+			{name: "Random", value: "random"},
+			{name: "Squirrels", value: "squirrel"},
+			{name: "Empty Vessels", value: "empty_vessel"},
+			{name: "Skeletons", value: "skeleton"},
+			{name: "Mox Crystals", value: "mox_crystal"}
+		]
+	},
 	{
 		name: "field_size",
 		description: `Columns on the field? (default ${battleDefaults.fieldSize})`,
@@ -626,7 +654,8 @@ const universalOptions: any = [
 			{name: "Black Goat", value: "black_goat"},
 			{name: "Rabbit w/ Undying & Waterborne", value: "rabbit"},
 			{name: "Cat w/ Repulsive", value: "cat"},
-			{name: "Mrs. Bomb", value: "mrs._bomb"}
+			{name: "Mrs. Bomb", value: "mrs._bomb"},
+			{name: "Omnisquirrel w/ Item Bearer", value: "omni_squirrel"}
 		]
 	}
 ];
@@ -659,23 +688,15 @@ export const battle: SlashCommand = {
 			type: 1,
 			options: [
 				{
-					name: "sidedeck",
-					description: "Sidedeck to use (default random)",
-					type: 3,
-					choices: [
-						{name: "Random", value: "random"},
-						{name: "Squirrels", value: "squirrel"},
-						{name: "Empty Vessels", value: "empty_vessel"},
-						{name: "Skeletons", value: "skeleton"},
-						{name: "Mox Crystals", value: "mox_crystal"}
-					]
-				},
-				{
-					name: "deck_size",
-					description: "Size of the deck to auto-generate (default 30)",
+					name: "difficulty",
+					description: "Difficulty level (default normal)",
 					type: 4,
-					min_value: 20,
-					max_value: 50
+					choices: [
+						{name: "Easy", value: 1},
+						{name: "Normal", value: 2},
+						{name: "Advanced", value: 3},
+						{name: "Challenging", value: 4}
+					]
 				}
 			].concat(universalOptions)
 		},
@@ -729,8 +750,13 @@ export const battle: SlashCommand = {
 		try {
 			await battleInteraction.receiveAction(interaction, action, args.slice(2));
 		} catch (e) {
-			console.error(e);
-			await battleInteraction.tokenExpired(interaction);
+			if (e instanceof DiscordAPIError) {
+				console.error(e);
+				await battleInteraction.tokenExpired();
+			} else {
+				await battleInteraction.internalError();
+				throw e;
+			}
 		}
 	},
 	menu: async(client: Client, interaction: SelectMenuInteraction, args: string[]) => {
@@ -741,8 +767,13 @@ export const battle: SlashCommand = {
 		try {
 			await battleInteraction.receiveMenu(interaction, action, interaction.values);
 		} catch (e) {
-			console.error(e);
-			await battleInteraction.tokenExpired(interaction);
+			if (e instanceof DiscordAPIError) {
+				console.error(e);
+				await battleInteraction.tokenExpired();
+			} else {
+				await battleInteraction.internalError();
+				throw e;
+			}
 		}
 	}
 }

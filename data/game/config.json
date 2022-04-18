@@ -2,7 +2,7 @@
 	"maxEnergy": 6,
 	"fecundityNerf": true,
 	"itemLimit": 3,
-	"vanillaCabinOnly": true,
+	"vanillaCabinOnly": false,
 	"candlesDefault": 3,
 	"goalDefault": 5
 }

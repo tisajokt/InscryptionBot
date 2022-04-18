@@ -1313,11 +1313,11 @@
 
 	"omni_squirrel": {
 		"stats": [0,1,0],
-		"sigils": ["random_mox"],
+		"sigils": ["random_mox", "skellify"],
 		"tribe": "squirrel",
 		"is_conduit": true,
 		"modded": "Omnisquirrels",
-		"#comment": "combines the functionality of gem vessels and squirrels"
+		"#comment": "combines the functionality of gem vessels, squirrels, & skeletons"
 	},
 	"crystal_bud": {
 		"stats": [0,1,0],
