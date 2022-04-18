@@ -1,5 +1,5 @@
 import { Client, MessageActionRow, MessageButton, ButtonInteraction, CommandInteraction, InteractionReplyOptions, MessageSelectMenu, SelectMenuInteraction, MessageComponentInteraction, DiscordAPIError, TextBasedChannel } from "discord.js";
-import { SlashCommand } from "../Command";
+import { PersistentCommandInteraction, SlashCommand } from "../Command";
 import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, Item, sidedecks } from "../Game";
 import { Display } from "../Display";
 import { User } from "../User";
@@ -52,23 +52,20 @@ const battleDefaults = {
 	startKit: "none"
 };
 
-class BattleInteraction {
+class BattleInteraction extends PersistentCommandInteraction {
 	static list: Map<string, BattleInteraction> = new Map();
-	id: string;
 	battle: Battle;
-	interaction: CommandInteraction;
 	mode: battleMode;
-	userID: string;
 	playerIDs: string[];
 	bellMutex: boolean;
 	constructor(interaction: CommandInteraction) {
-		this.id = generateRandomID(8);
-		this.interaction = interaction;
+		super(interaction);
 		this.mode = <battleMode>interaction.options.getSubcommand();
-		this.userID = interaction.user.id;
 		const other = interaction.options.getUser("user");
 		this.playerIDs = [this.userID, other?.id];
 		if (other?.bot) this.mode = "solo";
+	}
+	storeID(): void {
 		BattleInteraction.list[this.id] = this;
 	}
 	static async create(interaction: CommandInteraction): Promise<BattleInteraction> {
@@ -599,20 +596,8 @@ class BattleInteraction {
 				return this.playerIDs.includes(userID);
 		}
 	}
-	get textChannel(): Promise<TextBasedChannel> {
-		const interaction = this.interaction;
-		return new Promise((resolve, reject) => {
-			interaction.client.channels.fetch(interaction.channelId).then((channel) => {
-				if (channel.isText()) resolve(channel);
-				else reject();
-			}).catch(reject);
-		})
-	}
 	async tokenExpired(): Promise<void> {
 		await (await this.textChannel)?.send(`Interaction may have expired; try \`/battle continue id:${this.id}\` to resume.`);
-	}
-	async internalError(): Promise<void> {
-		await (await this.textChannel)?.send(`Internal application error! Please report to a developer.`);
 	}
 	async resume(interaction: CommandInteraction): Promise<void> {
 		try {
