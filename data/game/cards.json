@@ -1425,7 +1425,7 @@
 	},
 	"moon": {
 		"stats": [1,40,0],
-		"sigils": ["moon_strike", "stone", "mighty_leap"],
+		"sigils": ["moon_strike", "stone", "mighty_leap", "burrower"],
 		"modded": "special",
 		"wide": true,
 		"event": "none",

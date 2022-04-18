@@ -59,6 +59,7 @@ export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"bones
 export type moxColor = "blue"|"green"|"orange"|"any";
 export type sigil = "skellify"|"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering"|"moon_strike";
 export type playerIndex = 0|1;
+export type bossType = "prospector"|"angler"|"trader"|"moon";
 export type Totem = {tribe: cardTribe, sigil: sigil};
 
 function getModel(card: cardName): CardModel {
@@ -1200,6 +1201,10 @@ export abstract class Battle {
 		this.terrain = terrain;
 	}
 	async placeTerrain(terrain: cardName): Promise<void> {
+		if (this.isSolo() && this.candles[1] >= 3) {
+			await this.playCard(new Card("moon"), Math.floor(Math.random() * this.fieldSize), 1);
+			return;
+		}
 		if (!terrain) return;
 		await this.playCard(new Card(terrain), Math.floor(Math.random() * this.fieldSize), 0);
 		await this.playCard(new Card(terrain), Math.floor(Math.random() * this.fieldSize), 1);
@@ -1582,6 +1587,7 @@ export abstract class Battle {
 	}
 	abstract onCandleOut(player: playerIndex): Promise<void>;
 	abstract getPlayer(player: playerIndex): PlayerBattler;
+	abstract getBot(): AutoBattler;
 	abstract isHuman(player: playerIndex): boolean;
 	abstract isSolo(): boolean;
 	abstract isDuel(): boolean;
@@ -1599,13 +1605,16 @@ export class SoloBattle extends Battle {
 	}
 	async onCandleOut(player: playerIndex): Promise<void> {
 		if (player == 1) {
-			this.bot.cardsTotal += this.bot.difficulty;
-			await this.bot.bossEffect();
+			this.bot.cardsLeft += this.bot.difficulty;
+			await this.bot.doBossEffect();
 			this.player.hourglassUsed = true;
 		}
 	}
 	getPlayer(): PlayerBattler {
 		return this.player;
+	}
+	getBot(): AutoBattler {
+		return this.bot;
 	}
 	isHuman(player: playerIndex): boolean {
 		return (player == 0);
@@ -1630,6 +1639,9 @@ export class DuelBattle extends Battle {
 	getPlayer(player: playerIndex): PlayerBattler {
 		return this.players[player];
 	}
+	getBot(): AutoBattler {
+		return null;
+	}
 	isHuman(player: playerIndex): boolean {
 		return true;
 	}
@@ -1645,6 +1657,7 @@ export interface Battler {
 	setupTurn(): Promise<void>;
 	overkillDamage(amount: number, i: number): void;
 	performAction(): Promise<boolean>;
+	get candles(): number;
 	get display(): string;
 }
 export class PlayerBattler implements Battler {
@@ -1676,6 +1689,9 @@ export class PlayerBattler implements Battler {
 		this.totem = totem;
 		this.items = [];
 		this.overkill = Array(battle.fieldSize).fill(0);
+	}
+	get candles(): number {
+		return this.battle.candles[this.index];
 	}
 	get display(): string {
 		const cards = `Cards: ${this.hand.length.toString().padStart(2, " ")}/${this.deck.cards.length.toString().padEnd(2, " ")}`;
@@ -1800,16 +1816,16 @@ export class AutoBattler implements Battler {
 	backfield: Card[];
 	cardPool: cardName[];
 
-	isBoss: boolean;
+	bossEffect: bossType;
 	difficulty: number;
 	playRate: number=0.8;
 	smartRate: number=0.5;
 	targetPower: number=1;
 	playAgain: number=0;
-	cardsTotal: number=15;
+	cardsLeft: number=15;
 	constructor(battle: SoloBattle, difficulty: number, isBoss: boolean=false, cardPool: cardName[]=[]) {
 		this.battle = battle;
-		this.isBoss = isBoss;
+		if (isBoss) this.bossEffect = pickRandom(["prospector", "angler", "trader"]);
 		this.difficulty = difficulty;
 		this.backfield = Array(battle.fieldSize).fill(null);
 		if (!cardPool.length) {
@@ -1820,7 +1836,7 @@ export class AutoBattler implements Battler {
 			cardPool = randomSelectionFrom(selection, 5 + Math.floor(Math.random() * 5));
 		}
 		this.cardPool = cardPool;
-		this.cardsTotal = 10 + (difficulty - 1) * 2;
+		this.cardsLeft = 10 + (difficulty - 1) * 2;
 		for (let i = 0; i < Math.ceil(difficulty / 2); i++) {
 			this.playSmartBackfield();
 		}
@@ -1829,8 +1845,11 @@ export class AutoBattler implements Battler {
 		this.targetPower = difficulty;
 		this.playAgain = (difficulty - 1) * 0.1;
 	}
+	get candles(): number {
+		return this.battle.candles[1];
+	}
 	get display(): string {
-		var display = "";
+		var display = this.candles > 1 ? `Boss Effect: ${this.bossEffect}\n` : "";
 		for (let i = 0; i < this.backfield.length; i++) {
 			display += this.backfield[i] ? `[${padTrim(this.backfield[i].name.replace("_", ""), 8, '=')}]` : "".padEnd(10, " ");
 		}
@@ -1850,8 +1869,8 @@ export class AutoBattler implements Battler {
 		} while (Math.random() < this.playAgain);
 	}
 	async playBackfield(card: cardName|Card, i: number): Promise<void> {
-		if (this.cardsTotal <= 0) return;
-		this.cardsTotal--;
+		if (this.cardsLeft <= 0) return;
+		this.cardsLeft--;
 		if (!this.backfield[i]) {
 			this.backfield[i] = Card.castCardName(card);
 			await this.backfield[i].onDraw(this.battle, 1);
@@ -1887,15 +1906,14 @@ export class AutoBattler implements Battler {
 			}
 		}
 	}
-	async bossEffect(): Promise<void> {
-		const effect = pickRandom(["prospector", "angler", "trader"]);
+	async doBossEffect(): Promise<void> {
 		this.backfield.fill(null);
-		this.cardsTotal = Math.min(this.battle.fieldSize, this.cardsTotal);
-		switch (effect) {
+		this.cardsLeft = Math.min(this.battle.fieldSize, this.cardsLeft);
+		switch (this.bossEffect) {
 			case "prospector":
 				for (let i = 0; i < this.battle.fieldSize; i++) {
 					if (!this.battle.field[0][i]) continue;
-					await this.battle.player.useHammer(i);
+					await this.battle.field[0][i].takeDamage(i, 100);
 					await this.battle.playCard(new Card("gold_nugget"), i, 0);
 				}
 				await this.playBackfield(new Card("bloodhound"), Math.floor(Math.random() * this.battle.fieldSize));
@@ -1915,9 +1933,17 @@ export class AutoBattler implements Battler {
 					await this.playBackfield(card, i);
 				}
 				await this.battle.player.addToHand(new Card("wolf_pelt"));
-				this.cardsTotal -= this.battle.fieldSize;
+				this.cardsLeft -= this.battle.fieldSize;
 				break;
+			case "moon":
+				this.battle.field[1].fill(null);
+				this.battle.playCard(new Card("moon"), Math.floor(Math.random() * this.battle.fieldSize));
+				this.cardsLeft = 0;
+				break;
+			default:
+				return;
 		}
+		this.bossEffect = this.battle.candles[1] <= 2 ? "moon" : pickRandom(["prospector", "angler", "trader"]);
 	}
 	async performAction(): Promise<boolean> {
 		await sleep(AI_SPEED);

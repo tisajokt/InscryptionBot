@@ -77,6 +77,7 @@ class BattleInteraction {
 			startKit: opt.getString("start_kit"),
 			terrain: opt.getString("terrain")
 		};
+		if (!this._rawOptions.sidedeck) delete this._rawOptions.sidedeck;
 		if (!this._rawOptions.candles) delete this._rawOptions.candles;
 		if (!this._rawOptions.fieldSize) delete this._rawOptions.fieldSize;
 		if (!this._rawOptions.goal) delete this._rawOptions.goal;
@@ -108,7 +109,9 @@ class BattleInteraction {
 				this.battle = new SoloBattle(player/*User.get(this.userID).soloPlayer*/, this.interaction.options.getInteger("difficulty") || 2, options);
 				break;
 			case "duel":
-				this.battle = new DuelBattle(player/*User.get(this.playerIDs[0]).duelPlayer*/, player/*User.get(this.playerIDs[1]).duelPlayer*/, options);
+				const player2 = new Player(options.sidedeck);
+				console.log("Sidedecks:", player.sidedeck.name, player2.sidedeck.name);
+				this.battle = new DuelBattle(player/*User.get(this.playerIDs[0]).duelPlayer*/, player2/*User.get(this.playerIDs[1]).duelPlayer*/, options);
 				break;
 		}
 		if (options.startKit != "none") {

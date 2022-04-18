@@ -1,7 +1,7 @@
 
 import { MessageActionRow } from 'discord.js';
 import { AutoBattler, Battle, Card, MAX_ENERGY, moxColor, PlayerBattler } from './Game';
-import { padTrim } from './util';
+import { padTrim, toProperFormat } from './util';
 
 const defaultDisplayMode: displayMode = "mini-mono";
 
@@ -49,7 +49,7 @@ export class Display {
 		return `\`\`\`${header}\n${player1Info}\n${player0Info}\`\`\``;
 	}
 	static displayBattleMiniMono(battle: Battle): string {
-		const header = battle.candleDisplay;
+		const header = battle.candleDisplay + (battle.getBot()?.bossEffect ? `\nBoss effect: ${toProperFormat(battle.getBot().bossEffect)}` : "");
 		const player1Info = battle.isHuman(1) ? this.displayPlayer(battle.getPlayer(1)) : this.displayBackfield(<AutoBattler>battle.players[1], "mini-mono");
 		const separator = Array(battle.fieldSize).fill(lineMiniMono).join("+");
 		const turnSeparator = Array(battle.fieldSize).fill(myTurnMiniMono).join("#");
