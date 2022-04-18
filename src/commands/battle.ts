@@ -539,7 +539,10 @@ class BattleInteraction extends PersistentCommandInteraction {
 		});
 	}
 	async resign(interaction: ButtonInteraction, args: string[]): Promise<void> {
-		if (args[0] == "yes") {
+		if (this.battle.turn < 2) {
+			this.battle.ended = true;
+			await this.interaction.deleteReply();
+		} else if (args[0] == "yes") {
 			this.battle.ended = true;
 			await this.reply();
 		} else {
