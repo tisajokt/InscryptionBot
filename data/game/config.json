@@ -3,6 +3,7 @@
 	"fecundityNerf": true,
 	"itemLimit": 3,
 	"vanillaCabinOnly": false,
-	"candlesDefault": 3,
-	"goalDefault": 5
+	"candlesDefault": 2,
+	"goalDefault": 5,
+	"scaleDefault": -1
 }

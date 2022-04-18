@@ -8,7 +8,8 @@
 		["fledgling", "loose_tail", "four_bones", "undying", "spikey", "worthy_sacrifice", "stinky", "digger", "green_mox", "orange_mox", "blue_mox", "random_mox", "battery", "energy_conduit", "bomb_latch", "gem_guardian", "vessel_printer", "powered_buff", "stone", "scavenger", "piercing"],
 		["haunter", "blood_guzzler", "gift_bearer", "rabbit_hole", "beehive", "dam_builder", "fecundity", "corpse_eater", "spawn_ant", "sealed_away", "amorphous", "leader", "skeleton_crew", "gem_animator", "ruby_heart", "gemnastics", "buff_conduit", "factory_conduit", "sentry", "double_death", "disentomb", "scholar", "sniper", "brittle_latch", "powered_trifurcated", "blood_lust", "morsel", "gemified", "magic_armor"],
 		["death_touch", "hoarder", "many_lives", "repulsive", "bifurcated", "bellist", "handy", "bomb_spewer", "enlarge", "energy_gun", "looter", "stimulate", "bonehorn", "armored", "cuckoo", "double_strike", "hydra_egg"],
-		["trifurcated", "item_bearer", "steel_trap", "power_dice"]
+		["trifurcated", "item_bearer", "steel_trap", "power_dice"],
+		["moon_strike"]
 	],
-	"__player_sigils": ["hovering", "four_bones", "undying", "worthy_sacrifice", "digger", "battery", "energy_conduit", "vessel_printer", "scavenger", "piercing", "haunter", "rabbit_hole", "beehive", "fecundity", "corpse_eater", "spawn_ant", "gemnastics", "disentomb", "scholar", "morsel", "hoarder", "many_lives", "handy", "enlarge", "energy_gun", "looter", "stimulate", "bonehorn", "item_bearer", "power_dice"]
+	"__player_sigils": ["hovering", "four_bones", "undying", "worthy_sacrifice", "digger", "battery", "energy_conduit", "vessel_printer", "scavenger", "piercing", "haunter", "rabbit_hole", "beehive", "fecundity", "corpse_eater", "spawn_ant", "gemnastics", "disentomb", "scholar", "morsel", "hoarder", "many_lives", "handy", "enlarge", "energy_gun", "looter", "stimulate", "bonehorn", "item_bearer", "power_dice", "random_mox"]
 }

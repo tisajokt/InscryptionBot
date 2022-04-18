@@ -5,6 +5,7 @@ import game_config from "../data/game/config.json";
 import { padTrim, pickRandom, sleep, randomSelectionFrom, toProperCase, abbreviate, toProperFormat } from "./util";
 import { EmbedField, Embed } from "src/Display";
 import { jsonArrayMember, jsonMember, jsonObject, jsonSetMember } from "typedjson";
+import { BattleOptions } from "./commands/battle";
 
 const default_deck: cardName[] = [];
 const default_auto: cardName[] = [];
@@ -17,8 +18,8 @@ for (let p = 0; p < sigil_data.__powers.length; p++) {
 	}
 }
 
-export const terrains: cardName[] = ["", "boulder", "stump", "grand_fir", "frozen_opossum", "moleman"]//, "broken_bot"];
-export const sidedecks: cardName[] = ["omni_squirrel"]//, "empty_vessel", "skeleton"]//, "mox_crystal"];
+export const terrains: cardName[] = ["", "boulder", "stump", "grand_fir", "frozen_opossum", "moleman", "broken_bot"];
+export const sidedecks: cardName[] = ["squirrel", "empty_vessel", "skeleton", "mox_crystal"];
 
 export const MAX_ENERGY: number = game_config.maxEnergy;
 export const ITEM_LIMIT: number = game_config.itemLimit;
@@ -43,6 +44,7 @@ export type CardModel = {
 	no_sacrifice?: boolean,
 	no_bones?: boolean,
 	is_conduit?: boolean,
+	power_calc?: string,
 	playerValue?: number,
 	nonplayerValue?: number,
 	vanilla_cabin?: boolean,
@@ -55,11 +57,12 @@ export type cardTribe = "canine"|"insect"|"reptile"|"avian"|"hooved"|"squirrel"|
 export type cardCost = "free"|"blood"|"bones"|"energy"|"mox";
 export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"bones"|"battery"|"armor"|"pliers"|"hourglass"|"fan"|"wiseclock"|"skinning_knife"|"lens";
 export type moxColor = "blue"|"green"|"orange"|"any";
-export type sigil = "skellify"|"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering";
+export type sigil = "skellify"|"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering"|"moon_strike";
 export type playerIndex = 0|1;
 export type Totem = {tribe: cardTribe, sigil: sigil};
 
 function getModel(card: cardName): CardModel {
+	if (!card_models[card]) console.error(`${card} model not found`);
 	return card_models[card];
 }
 
@@ -238,7 +241,7 @@ ${border}`;
 	get abilityDescription(): string {
 		switch (this.ability) {
 			case "bonehorn":
-				return "Gain 3x🦴 bones for 1x🔋 energy";
+				return "Converts all energy, at 2x🦴 bones per 1x🔋 energy";
 			case "power_dice":
 				return "Reroll power (1-6) for 1x🔋 energy";
 			case "energy_gun":
@@ -254,9 +257,9 @@ ${border}`;
 			case "energy_conduit":
 				return "Refill energy when part of circuit";
 			case "handy":
-				return "Reroll hand";
+				return "Reroll hand, lose this sigil";
 			case "skellify":
-				return "Gain +1 power and brittle sigil";
+				return "Gain +1 power and brittle sigil, lose this sigil";
 			case "sniper":
 				return `Retarget (currently column ${(this.target||0)+1})`;
 			case "hovering":
@@ -326,8 +329,8 @@ ${border}`;
 				this.player.bones--;
 				break;
 			case "bonehorn":
-				this.player.energy--;
-				this.player.bones += 3;
+				this.player.bones += 2 * this.player.energy;
+				this.player.energy = 0;
 				break;
 			case "power_dice":
 				this.player.energy--;
@@ -456,8 +459,8 @@ ${border}`;
 			}
 		}
 		const other = (this.owner ? 0 : 1);
-		if (this.sigils.has("magic_armor") && !this.battle.field[other][i]) {
-			this.sigils.add("armored");
+		if (this.sigils.has("magic_armor")) {
+			if (!this.battle.field[other][i]) this.sigils.add("armored");
 			this.sigils.delete("magic_armor");
 		}
 		if (this.activeSigil("dam_builder")) {
@@ -1222,9 +1225,7 @@ export abstract class Battle {
 			return true;
 		} else {
 			this.scale = 0;
-			if (this.isHuman(1)) {
-				await this.getPlayer(player).addToHand(new Card("greater_smoke"));
-			}
+			this.onCandleOut(player);
 			return false;
 		}
 	}
@@ -1322,6 +1323,7 @@ export abstract class Battle {
 	}
 	async executeTurn(): Promise<boolean> {
 		const actor = this.actor;
+		const other = actor ? 0 : 1;
 		var damage = 0;
 		for (let i = 0; i < this.fieldSize; i++) {
 			const card = this.field[actor][i];
@@ -1333,11 +1335,24 @@ export abstract class Battle {
 			}
 			if (card.getPower(i) > 0) {
 				let subdamage = 0;
-				if (card.sigils.has("trifurcated") || card.sigils.has("powered_trifurcated") && this.getCircuit(actor, i)) {
+				if (card.sigils.has("moon_strike")) {
+					if (this.field[other].some(c => c)) {
+						for (let j = 0; j < this.fieldSize; j++) {
+							if (!this.field[other][j]) continue;
+							damage += await this.attackField(i, j);
+						}
+					} else {
+						damage += await this.attackField(i, 0);
+					}
+					continue;
+				}
+				const trifurcated = card.sigils.has("trifurcated") || card.sigils.has("powered_trifurcated") && this.getCircuit(actor, i);
+				if (trifurcated) {
 					subdamage += await this.attackField(i, i-1) + await this.attackField(i, i) + await this.attackField(i, i+1);
-				} else if (card.sigils.has("bifurcated")) {
+				}
+				if (card.sigils.has("bifurcated")) {
 					subdamage += await this.attackField(i, i-1) + await this.attackField(i, i+1);
-				} else {
+				} else if (!trifurcated) {
 					subdamage += await this.attackField(i, i);
 				}
 				if (card.sigils.has("double_strike")) {
@@ -1565,22 +1580,29 @@ export abstract class Battle {
 		await displayCallback(this.display);
 		return this.candles[0] ? 0 : 1;
 	}
+	abstract onCandleOut(player: playerIndex): Promise<void>;
 	abstract getPlayer(player: playerIndex): PlayerBattler;
 	abstract isHuman(player: playerIndex): boolean;
+	abstract isSolo(): boolean;
+	abstract isDuel(): boolean;
 }
 export class SoloBattle extends Battle {
 	player: PlayerBattler;
-	constructor(player: Player, options={}) {
+	bot: AutoBattler;
+	constructor(player: Player, difficulty: number, options: BattleOptions={}) {
 		super(options);
 		this.player = player.battlerInstance(this, 0);
-		this.players = [this.player, new AutoBattler(this)];
-		if (this.candles[1] > 1) {
-			while (this.candles[0] > 1) {
-				//this.player.addToHand(new Card("the_smoke"));
-				this.candles[0]--;
-			}
-		}
+		this.bot = new AutoBattler(this, difficulty, options.candles > 1);
+		this.players = [this.player, this.bot];
+		this.candles[0] = 1;
 		this.log.push(`Started AI battle!`);
+	}
+	async onCandleOut(player: playerIndex): Promise<void> {
+		if (player == 1) {
+			this.bot.cardsTotal += this.bot.difficulty;
+			await this.bot.bossEffect();
+			this.player.hourglassUsed = true;
+		}
 	}
 	getPlayer(): PlayerBattler {
 		return this.player;
@@ -1588,18 +1610,33 @@ export class SoloBattle extends Battle {
 	isHuman(player: playerIndex): boolean {
 		return (player == 0);
 	}
+	isSolo(): this is SoloBattle {
+		return true;
+	}
+	isDuel(): this is DuelBattle {
+		return false;
+	}
 }
 export class DuelBattle extends Battle {
 	players: PlayerBattler[]=[];
-	constructor(player1: Player, player2: Player, options={}) {
+	constructor(player1: Player, player2: Player, options: BattleOptions={}) {
 		super(options);
 		this.players = [player1.battlerInstance(this, 0), player2.battlerInstance(this, 1)];
 		this.log.push(`Started duel battle!`);
+	}
+	async onCandleOut(player: playerIndex): Promise<void> {
+		await this.players[player].addToHand(new Card("greater_smoke"));
 	}
 	getPlayer(player: playerIndex): PlayerBattler {
 		return this.players[player];
 	}
 	isHuman(player: playerIndex): boolean {
+		return true;
+	}
+	isSolo(): this is SoloBattle {
+		return false;
+	}
+	isDuel(): this is DuelBattle {
 		return true;
 	}
 }
@@ -1657,6 +1694,11 @@ export class PlayerBattler implements Battler {
 		this.energy = this.capacity;
 		this.fanUsed = false;
 		this.hourglassUsed = false;
+		if (this.battle.turn == 0 && this.battle.candles[0] < this.battle.candles[1]) {
+			for (let i = 1; i < this.battle.candles[1]; i++) {
+				await this.addToHand(new Card("the_smoke"));
+			}
+		}
 	}
 	endTurn(): void {
 		this.overkill.fill(0);
@@ -1754,25 +1796,38 @@ export class PlayerBattler implements Battler {
 	}
 }
 export class AutoBattler implements Battler {
-	battle: Battle;
+	battle: SoloBattle;
 	backfield: Card[];
 	cardPool: cardName[];
 
+	isBoss: boolean;
+	difficulty: number;
 	playRate: number=0.8;
 	smartRate: number=0.5;
 	targetPower: number=1;
-	constructor(battle: Battle, cardPool: cardName[]=[]) {
+	playAgain: number=0;
+	cardsTotal: number=15;
+	constructor(battle: SoloBattle, difficulty: number, isBoss: boolean=false, cardPool: cardName[]=[]) {
 		this.battle = battle;
+		this.isBoss = isBoss;
+		this.difficulty = difficulty;
 		this.backfield = Array(battle.fieldSize).fill(null);
 		if (!cardPool.length) {
 			const selection = default_auto.filter(c => {
 				const model = getModel(c);
-				return model.nonplayerValue >= 3;
+				return model.nonplayerValue >= 2 + difficulty;
 			});
-			cardPool = randomSelectionFrom(selection, 3 + Math.floor(Math.random() * 6));
+			cardPool = randomSelectionFrom(selection, 5 + Math.floor(Math.random() * 5));
 		}
 		this.cardPool = cardPool;
-		this.playSmartBackfield();
+		this.cardsTotal = 10 + (difficulty - 1) * 2;
+		for (let i = 0; i < Math.ceil(difficulty / 2); i++) {
+			this.playSmartBackfield();
+		}
+		
+		this.smartRate = difficulty / 4;
+		this.targetPower = difficulty;
+		this.playAgain = (difficulty - 1) * 0.1;
 	}
 	get display(): string {
 		var display = "";
@@ -1788,12 +1843,15 @@ export class AutoBattler implements Battler {
 				this.backfield[i] = null;
 			}
 		}
-		if (this.battle.field[1].reduce((v,c,i) => v + c?.getPower(i), 0) < this.targetPower ||
-			Math.random() < this.playRate) {
-			await this.playSmartBackfield(this.smartRate);
-		}
+		do {
+			if (this.battle.field[1].reduce((v,c,i) => v + c?.getPower(i), 0) < this.targetPower || Math.random() < this.playRate) {
+				await this.playSmartBackfield(this.smartRate);
+			}
+		} while (Math.random() < this.playAgain);
 	}
 	async playBackfield(card: cardName|Card, i: number): Promise<void> {
+		if (this.cardsTotal <= 0) return;
+		this.cardsTotal--;
 		if (!this.backfield[i]) {
 			this.backfield[i] = Card.castCardName(card);
 			await this.backfield[i].onDraw(this.battle, 1);
@@ -1802,7 +1860,7 @@ export class AutoBattler implements Battler {
 	async playSmartBackfield(chance: number=1): Promise<void> {
 		const card = pickRandom(this.cardPool);
 		var i = this.getRandomSmartSlot();
-		if (i == -1 || Math.random() < chance) i = this.getRandomOpenSlot();
+		if (i == -1 || Math.random() >= chance) i = this.getRandomOpenSlot();
 		if (i > -1) {
 			await this.playBackfield(card, i);
 		}
@@ -1829,6 +1887,38 @@ export class AutoBattler implements Battler {
 			}
 		}
 	}
+	async bossEffect(): Promise<void> {
+		const effect = pickRandom(["prospector", "angler", "trader"]);
+		this.backfield.fill(null);
+		this.cardsTotal = Math.min(this.battle.fieldSize, this.cardsTotal);
+		switch (effect) {
+			case "prospector":
+				for (let i = 0; i < this.battle.fieldSize; i++) {
+					if (!this.battle.field[0][i]) continue;
+					await this.battle.player.useHammer(i);
+					await this.battle.playCard(new Card("gold_nugget"), i, 0);
+				}
+				await this.playBackfield(new Card("bloodhound"), Math.floor(Math.random() * this.battle.fieldSize));
+				break;
+			case "angler":
+				for (let i = 0; i < this.battle.fieldSize; i++) {
+					if (!this.battle.field[0][i] || this.battle.field[1][i]) continue;
+					const card = new Card("bait_bucket");
+					if (this.difficulty >= 4) card.sigils.add("mighty_leap");
+					await this.battle.playCard(card, i, 1);
+				}
+				break;
+			case "trader":
+				for (let i = 0; i < this.battle.fieldSize; i++) {
+					const card = new Card(pickRandom(this.cardPool));
+					card.sigils.add("amorphous");
+					await this.playBackfield(card, i);
+				}
+				await this.battle.player.addToHand(new Card("wolf_pelt"));
+				this.cardsTotal -= this.battle.fieldSize;
+				break;
+		}
+	}
 	async performAction(): Promise<boolean> {
 		await sleep(AI_SPEED);
 		return false;
@@ -1847,23 +1937,31 @@ export class Player {
 		this.deck = deck ? new Deck(deck) : Player.generateDeck(sidedeck);
 	}
 	static generateDeck(sidedeck: cardName): Deck {
-		// Selects 50 random cards from the given sidedeck theme (10% for out-of-theme cards, 25% for rare cards)
-		// Then sorts by player value and returns deck with N most valuable cards
-		const selection = randomSelectionFrom(default_deck.filter(c => {
-			return true;
+		const _playerValueSort = (a,b) => {
+			return getModel(b).playerValue - getModel(a).playerValue;
+		};
+		const _themeFilter = (c) => {
 			const model = getModel(c);
-			if (!model.cost && !model.mox || model.rare && Math.random() < 0.25 || Math.random() < 0.1) return true;
+			if (!model.mox && !model.cost) return true;
 			switch (sidedeck) {
-				case "squirrel": return model.cost == "blood";
-				case "empty_vessel": return model.cost == "energy";
-				case "skeleton": return model.cost == "bones";
-				case "mox_crystal": return !!model.mox;
+				case "squirrel": return model.cost == "blood" || model.cost == "bones" && model.vanilla_cabin ||
+					model.sigils.includes("many_lives") || model.sigils.includes("worthy_sacrifice");
+				case "empty_vessel": return model.cost == "energy" || model.sigils.includes("battery");
+				case "skeleton": return model.cost == "bones" || model.sigils.includes("four_bones") || model.sigils.includes("scavenger") ||
+					model.power_calc == "bones";
+				case "mox_crystal": return !!model.mox || model.sigils.includes("gemified");
+				case "omnisquirrel": return true;
 				default: return true;
 			}
-		}), 70).sort((a,b) => {
-			return getModel(b).playerValue - getModel(a).playerValue;
-		});
-		return new Deck(selection.slice(0, 30 + Math.floor(Math.random() * 30)));
+		};
+		const themed: cardName[] = default_deck.filter(_themeFilter);
+		const additions: cardName[] = randomSelectionFrom(default_deck.filter(c => {
+			const model = getModel(c);
+			return !_themeFilter(c) && !model.mox && !model.is_mox && Math.random() < Math.min(0.5, (model.playerValue - 5) * 0.05);
+		}).concat(["geck"]), 5);
+		const size = 30 + Math.floor(Math.random() * 15);
+		const selection: cardName[] = randomSelectionFrom(themed, 100).sort(_playerValueSort).slice(0, size - additions.length).concat(additions);
+		return new Deck(selection);
 	}
 	battlerInstance(battle: Battle, index: playerIndex): PlayerBattler {
 		var player = new PlayerBattler(battle, index, new Deck(this.deck.cards), new SideDeck(this.sidedeck), [], this.totem);
@@ -1876,7 +1974,7 @@ export class Player {
 				return getModel(card).stats[2] <= 1;
 			}
 		})
-		player.drawFrom(player.deck, true, 3);
+		player.drawFrom(player.deck, true, 2);
 		player.drawn = true;
 		player.bones += this.boonBones || (this.sidedeck.noSacrifice ? 1 : 0);
 		return player;
@@ -1895,6 +1993,5 @@ for (const name in card_models) {
 	if (model.modded || VANILLA_CABIN_ONLY && !model.vanilla_cabin) continue;
 	default_auto.push(name);
 	if (model.event == "none") continue;
-	default_deck.push(name);
 	default_deck.push(name);//*/
 }

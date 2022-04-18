@@ -370,12 +370,6 @@
 		"rare": true,
 		"vanilla_cabin": true
 	},
-	"starvation": {
-		"stats": [1,1,0],
-		"sigils": ["repulsive"],
-		"event": "none",
-		"vanilla_cabin": true
-	},
 	"amalgam": {
 		"stats": [3,3,2],
 		"cost": "blood",
@@ -729,6 +723,11 @@
 		"tribe": "reptile",
 		"vanilla_cabin": true
 	},
+	"gold_nugget": {
+		"stats": [0,2,0],
+		"no_sacrifice": true,
+		"vanilla_cabin": true
+	},
 
 
 
@@ -798,7 +797,8 @@
 		"stats": [1,1,3],
 		"cost": "bones",
 		"sigils": ["bonehorn"],
-		"rare": true
+		"rare": true,
+		"#comment": "now forces all energy to be converted, and rate is 1 energy for 2 bones"
 	},
 	"insectodrone": {
 		"stats": [1,1,3],
@@ -1047,21 +1047,21 @@
 	},
 	"ruby_mox": {
 		"stats": [0,1,0],
-		"sigils": ["orange_mox"],
+		"sigils": ["orange_mox", "magic_armor"],
 		"is_mox": true,
 		"no_sacrifice": true,
 		"event": "none"
 	},
 	"sapphire_mox": {
 		"stats": [0,1,0],
-		"sigils": ["blue_mox"],
+		"sigils": ["blue_mox", "magic_armor"],
 		"is_mox": true,
 		"no_sacrifice": true,
 		"event": "none"
 	},
 	"emerald_mox": {
 		"stats": [0,1,0],
-		"sigils": ["green_mox"],
+		"sigils": ["green_mox", "magic_armor"],
 		"is_mox": true,
 		"no_sacrifice": true,
 		"event": "none"
@@ -1422,6 +1422,21 @@
 		"stats": [9,9,0],
 		"sigils": ["double_strike", "trifurcated", "hovering", "undying", "death_touch", "armored"],
 		"modded": "debug"
+	},
+	"moon": {
+		"stats": [1,40,0],
+		"sigils": ["moon_strike", "stone", "mighty_leap"],
+		"modded": "special",
+		"wide": true,
+		"event": "none",
+		"vanilla_cabin": true
+	},
+	"starvation": {
+		"stats": [1,1,0],
+		"sigils": ["repulsive"],
+		"modded": "special",
+		"event": "none",
+		"vanilla_cabin": true
 	},
 
 

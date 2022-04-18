@@ -69,6 +69,7 @@ class BattleInteraction {
 		if (this._rawOptions) return this._rawOptions;
 		const opt = this.interaction.options;
 		this._rawOptions = {
+			sidedeck: opt.getString("sidedeck"),
 			candles: opt.getInteger("candles"),
 			fieldSize: opt.getInteger("field_size"),
 			goal: opt.getInteger("goal"),
@@ -84,27 +85,30 @@ class BattleInteraction {
 		if (!this._rawOptions.terrain) delete this._rawOptions.terrain;
 		return Object.freeze(this._rawOptions);
 	}
+	_options: BattleOptions;
 	get options(): BattleOptions {
+		if (this._options) return this._options;
 		const user = User.get(this.userID);
 		Object.assign(user.battleOptions, this.rawOptions);
 		const result = Object.assign(Object.create(battleDefaults), user.battleOptions);
+		if (result.sidedeck == "random") result.sidedeck = pickRandom(sidedecks);
 		if (result.terrain == "random") result.terrain = pickRandom(terrains);
 		else if (result.terrain == "none") result.terrain = "";
-		if (result.sidedeck == "random") result.sidedeck = pickRandom(sidedecks);
-		return result;
+		return this._options = result;
 	}
 	async init(): Promise<Battle> {
 		if (this.battle) return this.battle;
 		const options = this.options;
+		const player = new Player(options.sidedeck);
 		switch (this.mode) {
 			case "demo":
-				this.battle = this.interaction.options.getString("type") == "solo" ? new SoloBattle(new Player(), options) : new DuelBattle(new Player(), new Player(), options);
+				this.battle = this.interaction.options.getString("type") == "solo" ? new SoloBattle(player, 2, options) : new DuelBattle(player, player, options);
 				break;
 			case "solo":
-				this.battle = new SoloBattle(User.get(this.userID).soloPlayer, options);
+				this.battle = new SoloBattle(player/*User.get(this.userID).soloPlayer*/, this.interaction.options.getInteger("difficulty") || 2, options);
 				break;
 			case "duel":
-				this.battle = new DuelBattle(User.get(this.playerIDs[0]).duelPlayer, User.get(this.playerIDs[1]).duelPlayer, options);
+				this.battle = new DuelBattle(player/*User.get(this.playerIDs[0]).duelPlayer*/, player/*User.get(this.playerIDs[1]).duelPlayer*/, options);
 				break;
 		}
 		if (options.startKit != "none") {
@@ -317,13 +321,14 @@ class BattleInteraction {
 			options.push({
 				label: card.nameSummary,
 				description: field >= 0 ? `From player ${field+1}'s field, column ${index+1}` :
-					`From your hand, card #${index+1}`,
+					(field == -1 ? `From your hand, card #${index+1}` : `From opponent's backfield, column ${index+1}`),
 				value: `${field}.${index}`
 			})
 		};
+		this.getPlayer(userID).hand.forEach(_toOption(-1));
+		if (this.battle.isSolo()) (<SoloBattle>this.battle).bot.backfield.forEach(_toOption(-2));
 		this.battle.field[0].forEach(_toOption(0));
 		this.battle.field[1].forEach(_toOption(1));
-		this.getPlayer(userID).hand.forEach(_toOption(-1));
 		return new MessageActionRow().addComponents(
 			this.makeSelectMenu("inspect").setPlaceholder("Pick a card").addOptions(options)
 		);
@@ -486,7 +491,7 @@ class BattleInteraction {
 		args = args[0].split(".");
 		const field = parseInt(args[0]);
 		const index = parseInt(args[1]);
-		const card = (field >= 0 ? this.battle.field[field] : this.getPlayer(interaction.user.id).hand)[index];
+		const card = (field >= 0 ? this.battle.field[field] : (field == -1 ? this.getPlayer(interaction.user.id).hand : (<SoloBattle>this.battle).bot.backfield))[index];
 		if (card) {
 			await interaction.editReply({
 				embeds: [{
@@ -599,7 +604,8 @@ const universalOptions: any = [
 			{name: "Squirrels", value: "squirrel"},
 			{name: "Empty Vessels", value: "empty_vessel"},
 			{name: "Skeletons", value: "skeleton"},
-			{name: "Mox Crystals", value: "mox_crystal"}
+			{name: "Mox Crystals", value: "mox_crystal"},
+			{name: "Omnisquirrels", value: "omni_squirrel"}
 		]
 	},
 	{
@@ -695,7 +701,8 @@ export const battle: SlashCommand = {
 						{name: "Easy", value: 1},
 						{name: "Normal", value: 2},
 						{name: "Advanced", value: 3},
-						{name: "Challenging", value: 4}
+						{name: "Hard", value: 4},
+						{name: "Challenging", value: 5}
 					]
 				}
 			].concat(universalOptions)
