@@ -28,7 +28,6 @@ export const VANILLA_CABIN_ONLY: boolean = game_config.vanillaCabinOnly;
 
 export const slow_mode = false;
 export const AI_SPEED: number = slow_mode ? 500 : 0;
-type no_boolean = boolean;
 
 export type CardModel = {
 	name?: string,
@@ -60,7 +59,14 @@ export type moxColor = "blue"|"green"|"orange"|"any";
 export type sigil = "skellify"|"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering"|"moon_strike";
 export type playerIndex = 0|1;
 export type bossType = "prospector"|"angler"|"trader"|"moon";
-export type Totem = {tribe: cardTribe, sigil: sigil};
+
+@jsonObject
+export class Totem {
+	@jsonMember
+	tribe: cardTribe
+	@jsonMember
+	sigil: sigil
+};
 
 function getModel(card: cardName): CardModel {
 	if (!card_models[card]) console.error(`${card} model not found`);
@@ -353,7 +359,7 @@ ${border}`;
 				const discards = this.player.hand;
 				this.player.hand = [];
 				this.player.drawFrom(this.player.deck, true, discards.length);
-				this.player.deck.cards = this.player.deck.cards.concat(discards.filter(c => c.name != (<SideDeck>this.player.sidedeck).card));
+				this.player.deck.cards = this.player.deck.cards.concat(discards.filter(c => c.name != this.player.sidedeck.card.name));
 				delete this._ability;
 				this.sigils.delete("handy");
 				break;
@@ -1032,10 +1038,31 @@ ${border}`;
 		return this.cardRawValue - costValue;
 	}
 }
+@jsonObject({ beforeSerialization: "beforeSerialization", onDeserialized: "onDeserialized" })
 export class Deck implements Drawable {
 	cards: (Card|cardName)[];
+	@jsonArrayMember(String)
+	_cardNames: cardName[];
+	@jsonArrayMember(Card)
+	_cardObjects: Card[];
 	constructor(cards: (Card|cardName)[] = []) {
 		this.cards = cards.map(c => Card.copyCard(c));
+	}
+	beforeSerialization(): void {
+		this._cardNames = [];
+		this._cardObjects = [];
+		this.cards.forEach(c => {
+			if (typeof c == "string") {
+				this._cardNames.push(c);
+			} else if (!c.isModified) {
+				this._cardNames.push(c.name);
+			} else {
+				this._cardObjects.push(c);
+			}
+		})
+	}
+	onDeserialized(): void {
+		this.cards = (<(Card|cardName)[]>this._cardNames).concat(this._cardObjects);
 	}
 	draw(): Card {
 		if (this.cards.length > 0) {
@@ -1060,9 +1087,9 @@ export class Deck implements Drawable {
 	}
 }
 export class SideDeck implements Drawable {
-	card: Card|cardName;
+	card: Card;
 	count: number;
-	constructor(card: Card|cardName, count: number=20) {
+	constructor(card: Card, count: number=20) {
 		this.card = card;
 		this.count = count;
 	}
@@ -1595,7 +1622,7 @@ export abstract class Battle {
 export class SoloBattle extends Battle {
 	player: PlayerBattler;
 	bot: AutoBattler;
-	constructor(player: Player, difficulty: number, options: BattleOptions={}) {
+	constructor(player: Player, difficulty: number, options: BattleOptions) {
 		super(options);
 		this.player = player.battlerInstance(this, 0);
 		this.bot = new AutoBattler(this, difficulty, options.candles > 1);
@@ -1628,7 +1655,7 @@ export class SoloBattle extends Battle {
 }
 export class DuelBattle extends Battle {
 	players: PlayerBattler[]=[];
-	constructor(player1: Player, player2: Player, options: BattleOptions={}) {
+	constructor(player1: Player, player2: Player, options: BattleOptions) {
 		super(options);
 		this.players = [player1.battlerInstance(this, 0), player2.battlerInstance(this, 1)];
 		this.log.push(`Started duel battle!`);
@@ -1951,10 +1978,15 @@ export class AutoBattler implements Battler {
 	}
 }
 
+@jsonObject
 export class Player {
+	@jsonMember
 	deck: Deck;
+	@jsonMember
 	sidedeck: Card;
+	@jsonMember
 	totem: Totem;
+	@jsonMember
 	boonBones: number = 0;
 	constructor(sidedeck?: cardName, deck?: (cardName|Card)[]) {
 		//this.deck = new Deck(randomSelectionFrom(default_deck, 20 + Math.floor(Math.random() * 30)));

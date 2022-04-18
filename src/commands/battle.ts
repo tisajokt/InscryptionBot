@@ -5,20 +5,43 @@ import { Display } from "../Display";
 import { User } from "../User";
 import { generateRandomID, numberEmoji, pickRandom, sleep, toProperCase, toProperFormat } from "../util";
 import game_config from "../../data/game/config.json";
+import { jsonMember, jsonObject } from "typedjson";
 
 type battleMode = "demo"|"solo"|"duel";
 type battleAction = "confirm"|"draw"|"bell"|"play"|"activate"|"inspect"|"resign"|"blood";
-export type BattleOptions = {
-	candles?: number,
-	fieldSize?: number,
-	goal?: number,
-	scale?: number,
-	terrain?: cardName|"none"|"random",
-	sidedeck?: cardName|"random",
-	deckSize?: number|"random",
+@jsonObject
+export class BattleOptions {
+	@jsonMember
+	candles?: number
+	@jsonMember
+	fieldSize?: number
+	@jsonMember
+	goal?: number
+	@jsonMember
+	scale?: number
+	@jsonMember
+	terrain?: cardName|"none"|"random"
+	@jsonMember
+	sidedeck?: cardName|"random"
+	@jsonMember
+	deckSize?: number|"random"
+	@jsonMember
 	startKit?: cardName|"none"
+
+	withDefaults(): BattleOptions {
+		const out = new BattleOptions();
+		const _apply = (prop: string) => {
+			if (this[prop] !== undefined) out[prop] = this[prop];
+			else out[prop] = battleDefaults[prop];
+		}
+		//for (let i of ["candles", "fieldSize", "goal", "scale", "terrain", "sidedeck", "deckSize", "startKit"]) {
+		for (let i in this) {
+			_apply(i);
+		}
+		return out;
+	}
 };
-const battleDefaults: BattleOptions = {
+const battleDefaults = {
 	candles: game_config.candlesDefault,
 	fieldSize: 4,
 	goal: game_config.goalDefault,
@@ -64,11 +87,11 @@ class BattleInteraction {
 	makeButton(action: battleAction, label?: string, args?: string[]): MessageButton {
 		return new MessageButton().setCustomId(`battle.${this.id}.${action}${args?`.${args.join(".")}`:""}`).setLabel(label === undefined ? toProperCase(action) : label).setStyle("SECONDARY");
 	}
-	_rawOptions: BattleOptions;
-	get rawOptions(): BattleOptions {
+	_rawOptions;
+	get rawOptions() {
 		if (this._rawOptions) return this._rawOptions;
 		const opt = this.interaction.options;
-		this._rawOptions = {
+		const _rawOptions = {
 			sidedeck: opt.getString("sidedeck"),
 			candles: opt.getInteger("candles"),
 			fieldSize: opt.getInteger("field_size"),
@@ -77,21 +100,24 @@ class BattleInteraction {
 			startKit: opt.getString("start_kit"),
 			terrain: opt.getString("terrain")
 		};
-		if (!this._rawOptions.sidedeck) delete this._rawOptions.sidedeck;
-		if (!this._rawOptions.candles) delete this._rawOptions.candles;
-		if (!this._rawOptions.fieldSize) delete this._rawOptions.fieldSize;
-		if (!this._rawOptions.goal) delete this._rawOptions.goal;
-		if (this._rawOptions.scale === undefined) delete this._rawOptions.scale;
-		if (!this._rawOptions.startKit) delete this._rawOptions.startKit;
-		if (!this._rawOptions.terrain) delete this._rawOptions.terrain;
-		return Object.freeze(this._rawOptions);
+		if (!_rawOptions.sidedeck) delete _rawOptions.sidedeck;
+		if (!_rawOptions.candles) delete _rawOptions.candles;
+		if (!_rawOptions.fieldSize) delete _rawOptions.fieldSize;
+		if (!_rawOptions.goal) delete _rawOptions.goal;
+		if (_rawOptions.scale === undefined) delete _rawOptions.scale;
+		if (!_rawOptions.startKit) delete _rawOptions.startKit;
+		if (!_rawOptions.terrain) delete _rawOptions.terrain;
+		return this._rawOptions = _rawOptions;
 	}
 	_options: BattleOptions;
 	get options(): BattleOptions {
 		if (this._options) return this._options;
 		const user = User.get(this.userID);
 		Object.assign(user.battleOptions, this.rawOptions);
-		const result = Object.assign(Object.create(battleDefaults), user.battleOptions);
+		if (Object.keys(this.rawOptions).length) {
+			User.saveUsersData();
+		}
+		const result = user.battleOptions.withDefaults();
 		if (result.sidedeck == "random") result.sidedeck = pickRandom(sidedecks);
 		if (result.terrain == "random") result.terrain = pickRandom(terrains);
 		else if (result.terrain == "none") result.terrain = "";

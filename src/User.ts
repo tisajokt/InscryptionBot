@@ -10,12 +10,15 @@ const usersDataFilePath = resolve(__dirname, "../data/user/users.json");
 export class User {
 	@jsonMember
 	id: string;
+	@jsonMember
 	battleOptions: BattleOptions;
+	@jsonMember
 	_soloPlayer: Player;
+	@jsonMember
 	_duelPlayer: Player;
 	constructor(id: string) {
 		this.id = id;
-		this.battleOptions = {};
+		this.battleOptions = new BattleOptions();
 	}
 	get soloPlayer(): Player {
 		this._soloPlayer = this._soloPlayer || new Player();
@@ -33,23 +36,35 @@ export class User {
 	}
 	static get(id: string): User {
 		if (this.usersMap.has(id)) {
-			console.log(`User ${id} found in index`)
+			console.log(`User ${id} found in index`);
 			return this.usersMap.get(id);
 		}
 		var user = this.usersList.find(u => u.id == id);
 		if (!user) {
 			user = new User(id);
 			this.usersList.push(user);
-			console.log(`User ${id} created`)
+			User.saveUsersData();
+			console.log(`User ${id} created`);
 		} else {
-			console.log(`User ${id} found from savedata`)
+			console.log(`User ${id} found from savedata`);
 		}
 		this.usersMap.set(id, user);
 		return user;
 	}
+	static savePromise: Promise<void>;
 	static async saveUsersData(): Promise<void> {
-		const data = userSerializer.stringifyAsArray(this.usersList);
-		await writeFile(usersDataFilePath, data, null);
+		if (User.savePromise) {
+			await User.savePromise;
+		}
+		const data = userSerializer.stringifyAsArray(User.usersList);
+		User.savePromise = new Promise((resolve, reject) => {
+			writeFile(usersDataFilePath, data, (err) => {
+				delete User.savePromise;
+				if (err) reject(err);
+				else resolve();
+			});
+		});
+		return User.savePromise;
 	}
 }
 const userSerializer = new TypedJSON(User);
