@@ -1886,7 +1886,7 @@ export class AutoBattler implements Battler {
 			this.playSmartBackfield();
 		}
 		
-		this.smartRate = difficulty / 4;
+		this.smartRate = (difficulty - 1) / 4;
 		this.targetPower = difficulty;
 		this.playAgain = (difficulty - 1) * 0.1;
 	}
@@ -1932,7 +1932,7 @@ export class AutoBattler implements Battler {
 	getRandomSmartSlot(): number {
 		var open: number[] = [];
 		for (let i = 0; i < this.battle.fieldSize; i++) {
-			if (!this.backfield[i] && !this.battle.field[i]) open.push(i);
+			if (!this.backfield[i] && !this.battle.field[1][i]) open.push(i);
 		}
 		return open.length ? pickRandom(open) : -1;
 	}

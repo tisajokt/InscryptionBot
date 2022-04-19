@@ -1,4 +1,4 @@
-import { ChatInputApplicationCommandData, Client, BaseCommandInteraction, MessageComponentInteraction, ButtonInteraction, MessageApplicationCommandData, CommandInteraction, TextBasedChannel, MessageButton, MessageSelectMenu, MessageSelectOptionData } from "discord.js";
+import { ChatInputApplicationCommandData, Client, BaseCommandInteraction, MessageComponentInteraction, ButtonInteraction, MessageApplicationCommandData, CommandInteraction, TextBasedChannel, MessageButton, MessageSelectMenu } from "discord.js";
 import { generateRandomID } from "./util";
 
 export interface SlashCommand extends ChatInputApplicationCommandData {
