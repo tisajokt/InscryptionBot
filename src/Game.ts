@@ -2035,7 +2035,7 @@ export class Player {
 		const additions: cardName[] = randomSelectionFrom(default_deck.filter(c => {
 			const model = getModel(c);
 			return !_themeFilter(c) && !model.mox && !model.is_mox && model.playerValue >= 3;
-		}), 5);
+		}), 5).filter(c => c);
 		const size = 30 + Math.floor(Math.random() * 15);
 		const selection: cardName[] = randomSelectionFrom(themed, 100).sort(_playerValueSort).slice(0, size - additions.length).concat(additions);
 		return new Deck(selection);

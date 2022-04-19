@@ -22,7 +22,7 @@ export class AppUser {
 	static usersList = [];
 	static usersMap: Map<string, AppUser> = new Map();
 	static initUsersData(): void {
-		const data = String(readFileSync(usersDataFilePath));
+		const data = String(readFileSync(usersDataFilePath)) || "[]";
 		this.usersList = userSerializer.parseAsArray(data);
 	}
 	static get(id: string): AppUser {
