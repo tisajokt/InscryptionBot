@@ -7,8 +7,8 @@ import { EmbedField, Embed } from "src/Display";
 import { jsonArrayMember, jsonMember, jsonObject, jsonSetMember } from "typedjson";
 import { BattleOptions } from "./commands/battle";
 
-export const default_deck: cardName[] = [];
-export const default_auto: cardName[] = [];
+export const playerDeckCards: cardName[] = [];
+export const botDeckCards: cardName[] = [];
 
 for (let p = 0; p < sigil_data.__powers.length; p++) {
 	for (let i = 0; i < sigil_data.__powers[p].length; i++) {
@@ -24,9 +24,14 @@ export const MAX_ENERGY: number = game_config.maxEnergy;
 export const ITEM_LIMIT: number = game_config.itemLimit;
 export const FECUNDITY_NERF: boolean = game_config.fecundityNerf;
 export const VANILLA_CABIN_ONLY: boolean = game_config.vanillaCabinOnly;
+export const NO_MOX: boolean = game_config.noMox;
+export const ENABLED_MODS: string[] = game_config.enabledMods;
 
 export const slow_mode = false;
 export const AI_SPEED: number = slow_mode ? 500 : 0;
+export const cardPools = new Map<string, cardName[]>();
+cardPools["allPlayerCards"] = playerDeckCards;
+cardPools["allBotCards"] = botDeckCards;
 
 export type CardModel = {
 	name?: string,
@@ -42,6 +47,7 @@ export type CardModel = {
 	no_sacrifice?: boolean,
 	no_bones?: boolean,
 	is_conduit?: boolean,
+	is_terrain?: boolean,
 	power_calc?: string,
 	wide?: boolean,
 	playerValue?: number,
@@ -56,7 +62,7 @@ export type cardTribe = "canine"|"insect"|"reptile"|"avian"|"hooved"|"squirrel"|
 export type cardCost = "free"|"blood"|"bones"|"energy"|"mox";
 export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"bones"|"battery"|"armor"|"pliers"|"hourglass"|"fan"|"wiseclock"|"skinning_knife"|"lens"|"hammer";
 export type moxColor = "blue"|"green"|"orange"|"any";
-export type sigil = "immutable"|"skellify"|"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering"|"moon_strike";
+export type sigil = "immutable"|"skellify"|"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering"|"moon_strike"|"animate_blood";
 export type playerIndex = 0|1;
 export type bossType = "prospector"|"angler"|"trader"|"moon";
 export type selectSource = "magpie"|"skinning_knife"|"sniper"|"hammer";
@@ -451,6 +457,9 @@ ${border}`;
 			if (this.sigils.has("spawn_ant")) {
 				await this.battle.addToHand(this.createWithExtraSigils("worker_ant", "spawn_ant"), this.owner);
 			}
+			if (this.sigils.has("animate_blood")) {
+				await this.battle.addToHand(this.createWithExtraSigils("bloodstone", "animate_blood"), this.owner);
+			}
 			if (this.sigils.has("fecundity")) {
 				const clone = new Card(this);
 				if (FECUNDITY_NERF) {
@@ -594,7 +603,7 @@ ${border}`;
 		}
 		while (deaths--) {
 			if (this.sigils.has("gift_bearer")) {
-				await this.battle.addToHand(new Card(pickRandom(default_deck)), this.owner);
+				await this.battle.addToHand(new Card(pickRandom(playerDeckCards)), this.owner);
 			}
 			if (this.activeSigil("steel_trap")) {
 				const otherCard = this.battle.field[other][i];
@@ -925,7 +934,7 @@ ${border}`;
 		return !!getModel(this.name).no_bones;
 	}
 	get noSacrifice(): boolean {
-		return !!getModel(this.name).no_sacrifice;
+		return !!getModel(this.name).no_sacrifice && !(this.battle && this.battle.getCardsWithSigil(this.owner, "animate_blood").length);
 	}
 	get isConduit(): boolean {
 		return !!getModel(this.name).is_conduit;
@@ -1924,7 +1933,7 @@ export class AutoBattler implements Battler {
 		this.difficulty = difficulty;
 		this.backfield = Array(battle.fieldSize).fill(null);
 		if (!cardPool.length) {
-			const selection = default_auto.filter(c => {
+			const selection = botDeckCards.filter(c => {
 				const model = getModel(c);
 				return model.nonplayerValue >= 2 + difficulty;
 			});
@@ -2080,8 +2089,8 @@ export class Player {
 				default: return true;
 			}
 		};
-		const themed: cardName[] = default_deck.filter(_themeFilter);
-		const additions: cardName[] = randomSelectionFrom(default_deck.filter(c => {
+		const themed: cardName[] = playerDeckCards.filter(_themeFilter);
+		const additions: cardName[] = randomSelectionFrom(playerDeckCards.filter(c => {
 			const model = getModel(c);
 			return !_themeFilter(c) && !model.mox && !model.is_mox && model.playerValue >= 3;
 		}), 5).filter(c => c);
@@ -2116,8 +2125,12 @@ for (const name in card_models) {
 	model.nonplayerValue = (new Card(name)).cardNonplayerValue;
 	model.abbrev = model.abbrev || abbreviate(name, 6);
 	
-	if (model.modded || VANILLA_CABIN_ONLY && !model.vanilla_cabin) continue;
-	default_auto.push(name);
+	if (model.is_terrain || NO_MOX && (model.is_mox || model.cost == "mox")) continue;
+	if (model.modded && !ENABLED_MODS.includes(model.modded.toString()) || VANILLA_CABIN_ONLY && !model.vanilla_cabin) continue;
+	botDeckCards.push(name);
 	if (model.event == "none") continue;
-	default_deck.push(name);//*/
+	playerDeckCards.push(name);//*/
+}
+for (const mod of ENABLED_MODS) {
+	cardPools[mod] = botDeckCards.filter(m => getModel(m).modded == mod);
 }

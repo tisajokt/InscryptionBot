@@ -298,6 +298,7 @@
 		"sigils": ["sealed_away"],
 		"sealed_away": "opossum",
 		"no_sacrifice": true,
+		"is_terrain": true,
 		"vanilla_cabin": true
 	},
 	"caged_wolf": {
@@ -336,6 +337,7 @@
 		"stats": [0,5,0],
 		"sigils": ["stone"],
 		"no_sacrifice": true,
+		"is_terrain": true,
 		"event": "none",
 		"vanilla_cabin": true
 	},
@@ -343,11 +345,13 @@
 		"stats": [0,1,0],
 		"sigils": ["detonator"],
 		"no_sacrifice": true,
+		"is_terrain": true,
 		"event": "none"
 	},
 	"stump": {
 		"stats": [0,3,0],
 		"no_sacrifice": true,
+		"is_terrain": true,
 		"event": "none",
 		"vanilla_cabin": true
 	},
@@ -421,6 +425,7 @@
 		"stats": [0,3,0],
 		"sigils": ["mighty_leap"],
 		"no_sacrifice": true,
+		"is_terrain": true,
 		"event": "none",
 		"vanilla_cabin": true
 	},
@@ -1340,16 +1345,25 @@
 		"stats": [0,3,0],
 		"is_mox": true,
 		"no_sacrifice": true,
-		"modded": "MoxExpansion",
+		"modded": "MoxExpansionWIP",
 		"#comment": "once any two mox colors are on the field, this gem adopts the remaining color and gains gem animator"
 	},
-	"blood_mage": {
-		"stats": [0,2,0],
-		"cost": "mox",
+	"bloodstone": {
+		"stats": [0,3,2],
+		"cost": "blood",
 		"sigils": ["many_lives"],
+		"no_sacrifice": true,
+		"event": "none",
+		"modded": "MoxExpansion"
+	},
+	"blood_mage": {
+		"stats": [0,1,0],
+		"cost": "mox",
+		"sigils": ["animate_blood"],
 		"power_calc": "sacrifices",
 		"mox": ["orange"],
-		"modded": "MoxExpansion"
+		"modded": "MoxExpansion",
+		"#comment": "while on the field, you may sacrifice cards which aren't normally sacrificeable"
 	},
 	"leshy": {
 		"stats": [2,6,4],
@@ -1392,10 +1406,12 @@
 		"#comment": "(as seen in grimora's rulebook) gains health from dealing damage"
 	},
 	"spirit": {
-		"stats": [0,1,3],
+		"stats": [0,1,4],
 		"cost": "bones",
 		"sigils": ["haunter"],
 		"power_calc": "sigils",
+		"no_bones": true,
+		"rare": true,
 		"modded": "GrimoraRulebook",
 		"#comment": "(similar to as seen in grimora's rulebook) when sacrificed for something, transfers its sigils; upon death, a card with this sigil returns to the hand as a spirit"
 	},

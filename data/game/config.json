@@ -3,7 +3,9 @@
 	"fecundityNerf": true,
 	"itemLimit": 3,
 	"vanillaCabinOnly": false,
+	"noMox": true,
 	"candlesDefault": 2,
 	"goalDefault": 5,
-	"scaleDefault": -1
+	"scaleDefault": -1,
+	"enabledMods": ["MoxExpansion", "GrimoraRulebook", "Zak"]
 }
