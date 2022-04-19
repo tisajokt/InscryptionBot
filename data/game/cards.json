@@ -1347,7 +1347,8 @@
 		"stats": [0,2,0],
 		"cost": "mox",
 		"sigils": ["many_lives"],
-		"mox": ["any"],
+		"power_calc": "sacrifices",
+		"mox": ["orange"],
 		"modded": "MoxExpansion"
 	},
 	"leshy": {
@@ -1402,20 +1403,13 @@
 		"modded": "GrimoraRulebook",
 		"event": "none"
 	},
-	"bloated_corpse": {
-		"stats": [0,3,2],
-		"cost": "bones",
-		"sigils": ["exploding_guts"],
-		"no_sacrifice": true,
-		"modded": "GrimoraRulebook",
-		"#comment": "(as seen in grimora's rulebook) fills the field with guts upon death"
-	},
 	"rotting_mound": {
 		"stats": [0,3,5],
 		"cost": "bones",
 		"sigils": ["exploding_guts", "withering", "repulsive"],
 		"no_sacrifice": true,
-		"modded": "GrimoraRulebook"
+		"modded": "GrimoraRulebook",
+		"#comment": "(as seen in grimora's rulebook) fills the field with guts upon death"
 	},
 	"custom": {
 		"modded": true,
@@ -1432,13 +1426,14 @@
 		"sigils": ["double_strike", "trifurcated", "hovering", "undying", "death_touch", "armored"],
 		"modded": "debug"
 	},
-	"moon": {
+	"the_moon": {
 		"stats": [1,40,0],
-		"sigils": ["moon_strike", "stone", "mighty_leap", "immutable"],
+		"sigils": ["moon_strike", "mighty_leap", "stone", "immutable"],
 		"modded": "special",
 		"wide": true,
 		"event": "none",
-		"vanilla_cabin": true
+		"vanilla_cabin": true,
+		"inspect": "So much value..."
 	},
 	"starvation": {
 		"stats": [1,1,0],
@@ -1446,6 +1441,26 @@
 		"modded": "special",
 		"event": "none",
 		"vanilla_cabin": true
+	},
+	"mirror_moon": {
+		"stats": [1,30,0],
+		"sigils": ["moon_strike", "mighty_leap", "stone", "immutable"],
+		"power_calc": "mirror",
+		"wide": true,
+		"event": "none",
+		"modded": "Bosses"
+	},
+	"the_limoncello": {
+		"stats": [2,80,0],
+		"sigils": ["moon_strike", "mighty_leap", "stone", "immutable"],
+		"wide": true,
+		"modded": "special"
+	},
+	"piranha": {
+		"stats": [2,2,2],
+		"cost": "blood",
+		"sigils": ["waterborne", "piercing"],
+		"modded": true
 	},
 
 

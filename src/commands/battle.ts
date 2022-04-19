@@ -1,6 +1,6 @@
 import { Client, MessageActionRow, MessageButton, ButtonInteraction, CommandInteraction, InteractionReplyOptions, MessageSelectMenu, SelectMenuInteraction, MessageComponentInteraction, DiscordAPIError, TextBasedChannel } from "discord.js";
 import { PersistentCommandInteraction, SlashCommand } from "../Command";
-import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, Item, sidedecks } from "../Game";
+import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, Item, sidedecks, selectSource, modelSummary } from "../Game";
 import { Display } from "../Display";
 import { AppUser } from "../User";
 import { generateRandomID, numberEmoji, pickRandom, sleep, toProperCase, toProperFormat } from "../util";
@@ -8,7 +8,7 @@ import game_config from "../../data/game/config.json";
 import { jsonMember, jsonObject } from "typedjson";
 
 type battleMode = "demo"|"solo"|"duel";
-type battleAction = "confirm"|"draw"|"bell"|"play"|"activate"|"inspect"|"resign"|"blood";
+type battleAction = "confirm"|"draw"|"bell"|"play"|"activate"|"inspect"|"resign"|"blood"|"select";
 @jsonObject
 export class BattleOptions {
 	@jsonMember
@@ -117,6 +117,70 @@ class BattleInteraction extends PersistentCommandInteraction {
 		else if (result.terrain == "none") result.terrain = "";
 		return this._options = result;
 	}
+	select: (value: number)=>void;
+	selectingPlayer: playerIndex;
+	async uponSelect(source: selectSource, player: playerIndex, defaultVal?: number): Promise<number> {
+		var title: string;
+		var description: string;
+		const actions = new MessageActionRow();
+		const other = player ? 0 : 1;
+		switch (source) {
+			case "magpie":
+				title = "🔍 Magpie's Eye";
+				description = "Choose a card to draw from your deck";
+				actions.addComponents(this.makeSelectMenu("select", this.battle.getPlayer(player).deck.cards.map((card, i) => {
+					return {
+						label: typeof card == "string" ? modelSummary(card) : card.fullSummary(-1),
+						value: `${i}`
+					};
+				}).slice(0, 25)));
+				break;
+			case "sniper":
+				title = "🎯 Sniper";
+				description = "Choose where to strike";
+				this.makeFieldButtons("select", [], this.battle.field[other], () => false, actions);
+				break;
+			case "hammer":
+				title = "🔨 Hammer";
+				description = "Choose a card of yours to hammer";
+				this.makeFieldButtons("select", [], this.battle.field[player], (c) => !c, actions);
+				break;
+			case "skinning_knife":
+				title = "🔪 Skinning Knife";
+				description = "Choose a card on the field to skin";
+				const fieldOptions = this.battle.field[0].filter(c => c).map((card, i) => {
+					return {
+						label: card.fullSummary(i),
+						description: `From player 1's field, column ${i+1}`,
+						value: `${i}`
+					};
+				}).concat(this.battle.field[1].filter(c => c).map((card, i) => {
+					return {
+						label: card.fullSummary(i),
+						description: `From player 2's field, column ${i+1}`,
+						value: `${i+this.battle.fieldSize}`
+					};
+				}));
+				actions.addComponents(this.makeSelectMenu("select", fieldOptions));
+				break;
+			default:
+				return defaultVal;
+		}
+		await this.interaction.followUp({
+			embeds: [{
+				title: title,
+				description: description
+			}],
+			components: [actions]
+		});
+		this.selectingPlayer = player;
+		return await new Promise((resolve) => {
+			this.select = (value: number) => {
+				delete this.select;
+				resolve(value);
+			}
+		});
+	}
 	async init(): Promise<Battle> {
 		if (this.battle) return this.battle;
 		const options = this.options;
@@ -134,6 +198,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 				this.battle = new DuelBattle(player/*User.get(this.playerIDs[0]).duelPlayer*/, player2/*User.get(this.playerIDs[1]).duelPlayer*/, options);
 				break;
 		}
+		this.battle.uponSelect = this.uponSelect.bind(this);
 		if (options.startKit != "none") {
 			for (let k=0; k<2; k++) {
 				if (!this.battle.isHuman(<playerIndex>k)) continue;
@@ -216,6 +281,11 @@ class BattleInteraction extends PersistentCommandInteraction {
 			case "resign":
 				await this.resign(interaction, args);
 				break;
+			case "select":
+				this.select && this.select(parseInt(args[0]));
+				await interaction.deleteReply();
+				await this.reply();
+				break;
 		}
 		return true;
 	}
@@ -230,11 +300,16 @@ class BattleInteraction extends PersistentCommandInteraction {
 			case "activate":
 				await this.activateSelect(interaction, args);
 				break;
+			case "select":
+				this.select && this.select(parseInt(args[0]));
+				await interaction.deleteReply();
+				await this.reply();
+				break;
 		}
 		return true;
 	}
-	makeFieldButtons(action: battleAction, args: string[], field: Card[], disable: (c: Card) => boolean): MessageActionRow {
-		const actions = new MessageActionRow();
+	makeFieldButtons(action: battleAction, args: string[], field: Card[], disable: (c: Card) => boolean, row?: MessageActionRow): MessageActionRow {
+		const actions = row || new MessageActionRow();
 		for (let i = 0; i < field.length; i++) {
 			actions.addComponents(
 				this.makeButton(action, args.concat([`${i}`]))
@@ -590,6 +665,8 @@ class BattleInteraction extends PersistentCommandInteraction {
 			case "blood":
 			case "activate":
 				return userID == this.playerIDs[this.battle.actor];
+			case "select":
+				return this.select && userID == this.playerIDs[this.selectingPlayer];
 			case "inspect":
 				return true;
 			case "resign":

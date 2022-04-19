@@ -54,11 +54,12 @@ export type CardModel = {
 export type cardName = string;
 export type cardTribe = "canine"|"insect"|"reptile"|"avian"|"hooved"|"squirrel"|"all";
 export type cardCost = "free"|"blood"|"bones"|"energy"|"mox";
-export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"bones"|"battery"|"armor"|"pliers"|"hourglass"|"fan"|"wiseclock"|"skinning_knife"|"lens";
+export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"bones"|"battery"|"armor"|"pliers"|"hourglass"|"fan"|"wiseclock"|"skinning_knife"|"lens"|"hammer";
 export type moxColor = "blue"|"green"|"orange"|"any";
 export type sigil = "immutable"|"skellify"|"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering"|"moon_strike";
 export type playerIndex = 0|1;
 export type bossType = "prospector"|"angler"|"trader"|"moon";
+export type selectSource = "magpie"|"skinning_knife"|"sniper"|"hammer";
 
 @jsonObject
 export class Totem {
@@ -74,7 +75,7 @@ export function getModel(card: cardName): CardModel {
 }
 export function modelSummary(card: cardName): string {
 	const model = getModel(card);
-	return `${toProperFormat(card)} [${model.power_calc ? "*" : singleCharStat(model.stats[0])}/${model.stats[1]}] ${Card.costEmojiDisplay(model.cost, model.stats[2], model.mox)}`;
+	return `${toProperFormat(card)} [${model.power_calc ? "*" : singleCharStat(model.stats[0])}/${model.stats[1]}] ${Card.costEmojiDisplay(model.cost, model.stats[2], model.mox) || "free"}`;
 }
 
 export interface Drawable {
@@ -516,6 +517,9 @@ ${border}`;
 				}
 			}
 		}
+		if (this.sigils.has("hoarder")) {
+			await Item.magpieLens(this.battle, this.player);
+		}
 		await this.onMovement(i);
 	}
 	async onHit(attacker: Card): Promise<void> {
@@ -808,20 +812,19 @@ ${border}`;
 		}
 	}
 	getPower(i: number): number {
-		if (!this.battle) {
-			console.log(this.fullDisplay.join("\n"));
-		}
-
 		const other = (this.owner ? 0 : 1);
+		const arr = this.isWide ? [...Array(this.battle.fieldSize).keys()] : [i];
 		var power: number = this.stats[0];
 		switch (this.powerCalc) {
 			case "ant":
 				power = this.battle.field[this.owner].filter(c => c?.powerCalc == "ant").length;
 				break;
 			case "mirror":
-				const otherCard = this.battle.field[other][i];
-				if (otherCard && otherCard.getModelProp("power_calc") != "mirror") {
-					power = otherCard.getPower(i);
+				for (let j of arr) {
+					const otherCard = this.battle.field[other][j];
+					if (otherCard && otherCard.getModelProp("power_calc") != "mirror") {
+						power = Math.max(power, otherCard.getPower(j));
+					}
 				}
 				break;
 			case "bell":
@@ -847,10 +850,14 @@ ${border}`;
 				break;
 		}
 		if (this.powerCalc) power += getModel(this.name).stats[0]; // in all vanilla cases, this does nothing
-		if (this.battle.field[this.owner][i-1]?.sigils.has("leader")) power++;
-		if (this.battle.field[this.owner][i+1]?.sigils.has("leader")) power++;
-		if (this.battle.field[other][i]?.sigils.has("annoying")) power++;
-		if (this.battle.field[other][i]?.sigils.has("stinky") && !this.sigils.has("stone")) power--;
+		if (!this.isWide) {
+			if (this.battle.field[this.owner][i-1]?.sigils.has("leader")) power++;
+			if (this.battle.field[this.owner][i+1]?.sigils.has("leader")) power++;
+		}
+		for (let j of arr) {
+			if (this.battle.field[other][j]?.sigils.has("annoying")) power++;
+			if (this.battle.field[other][j]?.sigils.has("stinky") && !this.sigils.has("stone")) power--;
+		}
 		if (this.sigils.has("gemified") && this.battle.hasMoxColor(this.owner, "orange")) power++;
 		if (this.getModelProp("is_mox")) power += this.battle.getCardsWithSigil(this.owner, "gem_animator").length;
 		const circuit = this.battle.getCircuit(this.owner, i);
@@ -1097,9 +1104,10 @@ export class Deck implements Drawable {
 	onDeserialized(): void {
 		this.cards = (<(Card|cardName)[]>this._cardNames).concat(this._cardObjects);
 	}
-	draw(): Card {
+	draw(i: number=null): Card {
 		if (this.cards.length > 0) {
-			return Card.castCardName((this.cards.splice(Math.floor(Math.random() * this.cards.length), 1))[0]);
+			if (i === null || i < 0 || i >= this.cards.length) i = Math.floor(Math.random() * this.cards.length);
+			return Card.castCardName((this.cards.splice(i, 1))[0]);
 		} else {
 			return null;
 		}
@@ -1142,7 +1150,12 @@ export class Item {
 		this.type = type;
 	}
 	isUsable(battle: Battle, player: playerIndex): boolean {
-		return true;
+		switch (this.type) {
+			case "hammer":
+				return battle.field[player].some(c => c);
+			default:
+				return true;
+		}
 	}
 	static async skinningKnife(card: Card, i: number): Promise<void> {
 		if (card && card.stats[1] > 0) {
@@ -1168,7 +1181,9 @@ export class Item {
 		traitor2?.newOwner(1);
 	}
 	static async magpieLens(battle: Battle, player: PlayerBattler): Promise<void> {
-		await player.addToHand(player.deck.draw());
+		if (!player.deck.cards.length) return;
+		const select = await battle.waitForSelection("magpie", player.index, Math.floor(Math.random() * player.deck.cards.length));
+		await player.addToHand(player.deck.draw(select));
 	}
 	get description(): string {
 		switch (this.type) {
@@ -1192,9 +1207,11 @@ export class Item {
 			case "wiseclock":
 				return "Rotate cards clockwise on the field";
 			case "skinning_knife":
-				return "(NOT IMPLEMENTED) Destroy target card, yielding a pelt";
+				return "Destroy target card, yielding a pelt";
 			case "lens":
-				return "(NOT IMPLEMENTED) Choose a card to draw from your deck";
+				return "Choose a card to draw from your deck";
+			case "hammer":
+				return "Hammer one of your cards";
 		}
 	}
 	async use(battle: Battle, player: playerIndex): Promise<boolean> {
@@ -1228,7 +1245,11 @@ export class Item {
 				await Item.wiseclock(battle);
 				break;
 			case "skinning_knife":
-				//await Item.skinningKnife(battle);
+				const select = await battle.waitForSelection("skinning_knife", player, 0);
+				await Item.skinningKnife(battle.field[Math.floor(select/battle.fieldSize)%2][select%battle.fieldSize], select%battle.fieldSize);
+				break;
+			case "hammer":
+				await battle.getPlayer(player).useHammer(await battle.waitForSelection("hammer", player, 0));
 				break;
 			case "lens":
 				await Item.magpieLens(battle, battle.getPlayer(player));
@@ -1277,6 +1298,13 @@ export abstract class Battle {
 		this.log = [];
 		return log;
 	}
+	uponSelect: (source: selectSource, player: playerIndex, defaultVal: number)=>Promise<number>;
+	async waitForSelection(source: selectSource, player: playerIndex, defaultVal: number): Promise<number> {
+		return await new Promise(async(resolve) => {
+			var result = this.uponSelect ? await this.uponSelect(source, player, defaultVal) : defaultVal;
+			resolve(result);
+		});
+	}
 	async damage(amount: number, player: playerIndex=this.actor): Promise<boolean> {
 		this.scale += amount * (player ? -1 : 1);
 		if (Math.abs(this.scale) >= this.goal) {
@@ -1306,8 +1334,12 @@ export abstract class Battle {
 	}
 	async attackCard(attacker: Card, target: Card, power: number, owner: playerIndex, j: number): Promise<number> {
 		var damage = 0;
+		const prevHealth = target.stats[1];
 		if (await target.takeDamage(j, attacker.sigils.has("death_touch") && !target.sigils.has("stone") ? Infinity : power)) {
 			await target.onHit(attacker);
+			if (attacker.sigils.has("blood_guzzler")) {
+				attacker.stats[1] += Math.max(0, prevHealth - Math.max(0, target.stats[1]));
+			}
 			if (target.stats[1] <= 0) {
 				if (attacker.sigils.has("piercing")) {
 					damage = Math.max(0, -target.stats[1]);
@@ -1322,7 +1354,9 @@ export abstract class Battle {
 	async attackField(i: number, j: number, player: playerIndex=this.actor): Promise<number> {
 		const card = this.field[player][i];
 		if (!card) return 0;
-		if (card.sigils.has("sniper")) j = card.target;
+		if (card.sigils.has("sniper")) {
+			j = await this.waitForSelection("sniper", player, card.target);
+		}
 
 		if (!(j >= 0 && j < this.fieldSize)) return 0;
 		var damage = 0;
@@ -1402,13 +1436,13 @@ export abstract class Battle {
 			if (card.getPower(i) > 0) {
 				let subdamage = 0;
 				if (card.sigils.has("moon_strike")) {
-					if (this.field[other].some(c => c)) {
+					if (this.field[other].some(c => c && !c.sigils.has("repulsive"))) {
 						for (let j = 0; j < this.fieldSize; j++) {
 							if (!this.field[other][j]) continue;
 							damage += await this.attackField(i, j);
 						}
 					} else {
-						damage += await this.attackField(i, 0);
+						damage += card.getPower(0);
 					}
 					continue;
 				}
@@ -1886,7 +1920,7 @@ export class AutoBattler implements Battler {
 	cardsLeft: number=15;
 	constructor(battle: SoloBattle, difficulty: number, isBoss: boolean=false, cardPool: cardName[]=[]) {
 		this.battle = battle;
-		if (isBoss) this.bossEffect = "moon"//pickRandom(["prospector", "angler", "trader"]);
+		if (isBoss) this.bossEffect = pickRandom(["prospector", "angler", "trader"]);
 		this.difficulty = difficulty;
 		this.backfield = Array(battle.fieldSize).fill(null);
 		if (!cardPool.length) {
@@ -1998,7 +2032,7 @@ export class AutoBattler implements Battler {
 				break;
 			case "moon":
 				this.battle.field[1].fill(null);
-				await this.battle.playCard(new Card("moon"), Math.floor(Math.random() * this.battle.fieldSize), 1);
+				await this.battle.playCard(new Card("the_moon"), Math.floor(Math.random() * this.battle.fieldSize), 1);
 				this.cardsLeft = 0;
 				break;
 			default:
@@ -2067,6 +2101,7 @@ export class Player {
 			}
 		})
 		player.drawFrom(player.deck, true, 2);
+		player.items.push(new Item("lens"));
 		player.drawn = true;
 		player.bones += this.boonBones || (this.sidedeck.noSacrifice ? 1 : 0);
 		return player;
