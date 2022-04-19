@@ -353,7 +353,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 		this.battle.field[0].forEach(_toOption(0));
 		this.battle.field[1].forEach(_toOption(1));
 		return new MessageActionRow().addComponents(
-			this.makeSelectMenu("inspect", options).setPlaceholder("Pick a card").addOptions(options)
+			this.makeSelectMenu("inspect", options).setPlaceholder("Pick a card")
 		);
 	}
 	getHandOptions(userID: string): MessageActionRow {

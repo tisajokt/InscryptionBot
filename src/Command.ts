@@ -33,7 +33,7 @@ export abstract class PersistentCommandInteraction {
 		})
 	}
 	makeButton(action: string, args: string[]=[]): MessageButton {
-		return new MessageButton().setCustomId(`${this.cmd()}.${this.id}.${action}${args.length ? "" : `.${args.join(".")}`}`).setStyle("SECONDARY");
+		return new MessageButton().setCustomId(`${this.cmd()}.${this.id}.${action}${args.length ? `.${args.join(".")}` : ""}`).setStyle("SECONDARY");
 	}
 	makeSelectMenu(action: string, options): MessageSelectMenu {
 		return new MessageSelectMenu().setCustomId(`${this.cmd()}.${this.id}.${action}`).setOptions(options);
