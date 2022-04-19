@@ -45,17 +45,27 @@ export class Display {
 		const player0Info = ``;
 		return `\`\`\`${header}\n${player1Info}\n${player0Info}\`\`\``;
 	}
+	static displayField(field: Card[]): string {
+		if (field.some(c => c?.isWide)) {
+			const card = field[0];
+			const name = padTrim(`${" ".repeat(miniMonoSize+1)}${toProperFormat(card.name)}`, miniMonoSize * field.length - 1);
+			const info = padTrim(`${" ".repeat(miniMonoSize+1)}${card.getPower(0)}${card.noSacrifice ? ":" : "/"}${card.stats[1]} ${"*".repeat([...card.sigils].length)}`, miniMonoSize * field.length - 1);
+			return `${name}\n${info}`;
+		} else {
+			const names = field.map(c => c ? padTrim(c.abbrev, miniMonoSize) : emptyMiniMono).join("|");
+			const info = field.map((c,i) => c ? this.cardStatsMiniMono(c, i) : emptyMiniMono).join("|");
+			return `${names}\n${info}`;
+		}
+	}
 	static displayBattleMiniMono(battle: Battle): string {
-		const header = battle.candleDisplay + (battle.getBot()?.bossEffect ? `\nNext boss effect: ${toProperFormat(battle.getBot().bossEffect)}` : "");
+		const header = (battle.getBot()?.bossEffect && battle.players[1].candles > 1 ? `Next boss effect: ${toProperFormat(battle.getBot().bossEffect)}\n` : "") + battle.candleDisplay;
 		const player1Info = battle.isHuman(1) ? this.displayPlayer(battle.getPlayer(1)) : this.displayBackfield(<AutoBattler>battle.players[1], "mini-mono");
 		const separator = Array(battle.fieldSize).fill(lineMiniMono).join("+");
 		const turnSeparator = Array(battle.fieldSize).fill(myTurnMiniMono).join("#");
-		const player1Names = battle.field[1].map(c => c ? padTrim(c.abbrev, miniMonoSize) : emptyMiniMono).join("|");
-		const player1Stats = battle.field[1].map((c,i) => c ? this.cardStatsMiniMono(c, i) : emptyMiniMono).join("|");
-		const player0Names = battle.field[0].map(c => c ? padTrim(c.abbrev, miniMonoSize) : emptyMiniMono).join("|");
-		const player0Stats = battle.field[0].map((c,i) => c ? this.cardStatsMiniMono(c, i) : emptyMiniMono).join("|");
+		const player1Field = this.displayField(battle.field[1]);
+		const player0Field = this.displayField(battle.field[0]);
 		const player0Info = this.displayPlayer(battle.getPlayer(0));
-		return `\`\`\`${header}\n${player1Info}\n${battle.actor ? turnSeparator : separator}\n${player1Names}\n${player1Stats}\n${separator}\n${player0Names}\n${player0Stats}\n${battle.actor ? separator : turnSeparator}\n${player0Info}\`\`\``;
+		return `\`\`\`${header}\n${player1Info}\n${battle.actor ? turnSeparator : separator}\n${player1Field}\n${separator}\n${player0Field}\n${battle.actor ? separator : turnSeparator}\n${player0Info}\`\`\``;
 	}
 	static displayBattle(battle: Battle, displayMode: displayMode=defaultDisplayMode, actions?: MessageActionRow[]): Reply {
 		switch (displayMode) {

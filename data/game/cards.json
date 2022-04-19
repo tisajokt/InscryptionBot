@@ -1410,6 +1410,13 @@
 		"modded": "GrimoraRulebook",
 		"#comment": "(as seen in grimora's rulebook) fills the field with guts upon death"
 	},
+	"rotting_mound": {
+		"stats": [0,3,5],
+		"cost": "bones",
+		"sigils": ["exploding_guts", "withering", "repulsive"],
+		"no_sacrifice": true,
+		"modded": "GrimoraRulebook"
+	},
 	"custom": {
 		"modded": true,
 		"event": "custom",
@@ -1427,7 +1434,7 @@
 	},
 	"moon": {
 		"stats": [1,40,0],
-		"sigils": ["moon_strike", "stone", "mighty_leap", "burrower"],
+		"sigils": ["moon_strike", "stone", "mighty_leap", "immutable"],
 		"modded": "special",
 		"wide": true,
 		"event": "none",

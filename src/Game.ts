@@ -43,6 +43,7 @@ export type CardModel = {
 	no_bones?: boolean,
 	is_conduit?: boolean,
 	power_calc?: string,
+	wide?: boolean,
 	playerValue?: number,
 	nonplayerValue?: number,
 	vanilla_cabin?: boolean,
@@ -55,7 +56,7 @@ export type cardTribe = "canine"|"insect"|"reptile"|"avian"|"hooved"|"squirrel"|
 export type cardCost = "free"|"blood"|"bones"|"energy"|"mox";
 export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"bones"|"battery"|"armor"|"pliers"|"hourglass"|"fan"|"wiseclock"|"skinning_knife"|"lens";
 export type moxColor = "blue"|"green"|"orange"|"any";
-export type sigil = "skellify"|"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering"|"moon_strike";
+export type sigil = "immutable"|"skellify"|"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering"|"moon_strike";
 export type playerIndex = 0|1;
 export type bossType = "prospector"|"angler"|"trader"|"moon";
 
@@ -242,6 +243,12 @@ ${border}`;
 		this.owner = owner;
 		this.humanOwner = this.battle.isHuman(owner);
 	}
+	addSigil(sigil: sigil): void {
+		if (!this.sigils.has("immutable")) this.sigils.add(sigil);
+	}
+	removeSigil(sigil: sigil): void {
+		if (!this.sigils.has("immutable")) this.sigils.delete(sigil);
+	}
 	activeSigil(sigil: sigil): boolean {
 		return this.sigils.has(sigil) && this.checkSigilLoop();
 	}
@@ -318,8 +325,8 @@ ${border}`;
 				this.stats[0]++;
 				break;
 			case "skellify":
-				this.sigils.delete("skellify");
-				this.sigils.add("brittle");
+				this.removeSigil("skellify");
+				this.addSigil("brittle");
 				this.stats[0]++;
 				delete this._ability;
 				break;
@@ -357,8 +364,8 @@ ${border}`;
 				this.cooldown = 0;
 				break;
 			case "hovering":
-				if (this.sigils.has("flying")) this.sigils.delete("flying");
-				else this.sigils.add("flying");
+				if (this.sigils.has("flying")) this.removeSigil("flying");
+				else this.addSigil("flying");
 				this.cooldown = 0;
 				break;
 			case "handy":
@@ -367,7 +374,7 @@ ${border}`;
 				this.player.drawFrom(this.player.deck, true, discards.length);
 				this.player.deck.cards = this.player.deck.cards.concat(discards.filter(c => c.name != this.player.sidedeck.card.name));
 				delete this._ability;
-				this.sigils.delete("handy");
+				this.removeSigil("handy");
 				break;
 		}
 		this.cooldown++;
@@ -382,7 +389,7 @@ ${border}`;
 	async takeDamage(i: number, damage: number): Promise<boolean> {
 		if (!this.stats[1]) return false;
 		if (this.sigils.has("armored")) {
-			this.sigils.delete("armored");
+			this.removeSigil("armored");
 			return false;
 		} else {
 			this.stats[1] -= (damage == Infinity ? this.stats[1] : damage);
@@ -399,14 +406,14 @@ ${border}`;
 		if (this.sigils.has("amorphous")) {
 			const possibleSigils: sigil[] = ["rabbit_hole", "fecundity", "battery", "item_bearer", "dam_builder", "bellist", "beehive", "spikey", "swapper", "corpse_eater", "undying", "steel_trap", "four_bones", "scavenger", "blood_lust", "fledgling", "armored", "death_touch", "stone", "piercing", "leader", "annoying", "stinky", "mighty_leap", "waterborne", "flying", "brittle", "sentry", "trifurcated", "bifurcated", "double_strike", "looter", "many_lives", "worthy_sacrifice", "gem_animator", "gemified", "random_mox", "digger", "morsel", "repulsive", "cuckoo", "guardian", "sealed_away", "sprinter", "scholar", "gemnastics", "stimulate", "enlarge", "energy_gun", "disentomb", "powered_buff", "powered_trifurcated", "gem_guardian", "sniper", "transformer", "burrower", "vessel_printer", "bonehorn", "skeleton_crew", "rampager", "detonator", "bomb_spewer", "power_dice", "gem_detonator", "brittle_latch", "bomb_latch", "shield_latch", "hefty", "jumper", "loose_tail", "hovering", "energy_conduit", "magic_armor", "handy", "double_death", "gift_bearer", "withering", "skellify"];
 			do {
-				this.sigils.add(pickRandom(possibleSigils));
+				this.addSigil(pickRandom(possibleSigils));
 			} while (Math.random() < 0.1);
-			this.sigils.delete("amorphous");
+			this.removeSigil("amorphous");
 		}
 		if (this.sigils.has("random_mox")) {
 			const possibleSigils: sigil[] = ["blue_mox", "orange_mox", "green_mox"];
-			this.sigils.add(pickRandom(possibleSigils));
-			this.sigils.delete("random_mox");
+			this.addSigil(pickRandom(possibleSigils));
+			this.removeSigil("random_mox");
 		}
 		this.hydraCheck();
 		if (this.name == "mox_crystal") {
@@ -446,7 +453,7 @@ ${border}`;
 			if (this.sigils.has("fecundity")) {
 				const clone = new Card(this);
 				if (FECUNDITY_NERF) {
-					clone.sigils.delete("fecundity");
+					clone.removeSigil("fecundity");
 				}
 				await this.battle.addToHand(clone, this.owner);
 			}
@@ -473,8 +480,8 @@ ${border}`;
 		}
 		const other = (this.owner ? 0 : 1);
 		if (this.sigils.has("magic_armor")) {
-			if (!this.battle.field[other][i]) this.sigils.add("armored");
-			this.sigils.delete("magic_armor");
+			if (!this.battle.field[other][i]) this.addSigil("armored");
+			this.removeSigil("magic_armor");
 		}
 		if (this.activeSigil("dam_builder")) {
 			await this.battle.playCard(this.createWithExtraSigils("dam", "dam_builder"), i-1, this.owner);
@@ -493,7 +500,7 @@ ${border}`;
 			for (let j = 0; j < this.battle.fieldSize; j++) {
 				const card = this.battle.field[this.owner][j];
 				if (card && card.getModelProp("is_mox")) {
-					card.sigils.add("armored");
+					card.addSigil("armored");
 				}
 			}
 		}
@@ -536,7 +543,7 @@ ${border}`;
 				const daus = this.battle.field[this.owner][i];
 				if (daus && daus.name == chime_trigger && daus.checkSigilLoop()) {
 					if (attacker.sigils.has("armored")) {
-						attacker.sigils.delete("armored");
+						attacker.removeSigil("armored");
 					} else if (daus.sigils.has("death_touch") && !attacker.sigils.has("stone")) {
 						attacker.stats[1] = 0;
 					} else {
@@ -549,6 +556,7 @@ ${border}`;
 	async onDeath(i: number): Promise<void> {
 		this.battle.log.push(`Player ${this.owner+1}'s ${this.name} dies!`);
 		this.battle.field[this.owner][i] = null;
+		if (this.isWide) this.battle.field[this.owner].fill(null);
 		this.stats[1] = Math.min(this.stats[1], 0);
 		const player = this.player;
 		const other = (this.owner == 0) ? 1 : 0;
@@ -603,7 +611,7 @@ ${border}`;
 			if (this.activeSigil("detonator") || this.getModelProp("is_mox") &&
 			this.battle.getCardsWithSigil(this.owner, "gem_detonator").length + this.battle.getCardsWithSigil(other, "gem_detonator").length > 0) {
 				// shouldn't be necessary to delete the sigil, but just in case, to avoid infinite loop
-				this.sigils.delete("detonator");
+				this.removeSigil("detonator");
 				if (this.battle.field[other][i]) await this.battle.field[other][i].takeDamage(i, Infinity);
 				if (i-1 >= 0 && this.battle.field[this.owner][i-1]) await this.battle.field[this.owner][i-1].takeDamage(i-1, Infinity);
 				if (i+1 < this.battle.fieldSize && this.battle.field[this.owner][i+1]) await this.battle.field[this.owner][i+1].takeDamage(i+1, Infinity);
@@ -630,9 +638,9 @@ ${border}`;
 		}
 		if (this.sigils.has("haunter")) {
 			for (const sigil of this.sigils) {
-				card.sigils.add(sigil);
+				card.addSigil(sigil);
 			}
-			this.sigils.delete("haunter");
+			this.removeSigil("haunter");
 		}
 		if (!this.sigils.has("many_lives")) {
 			await this.onDeath(i);
@@ -641,10 +649,10 @@ ${border}`;
 			this.awakened = !this.awakened;
 			if (this.awakened) {
 				this.stats[0] += 2;
-				this.sigils.add("flying");
+				this.addSigil("flying");
 			} else {
 				this.stats[0] = Math.max(0, this.stats[0] - 2);
-				this.sigils.delete("flying");
+				this.removeSigil("flying");
 			}
 		}
 		if (this.getModelProp("9lives")) {
@@ -652,7 +660,7 @@ ${border}`;
 			if (this.sacrifices == 9) {
 				this.name = this.getModelProp("9lives");
 				this.stats = [...getModel(this.name).stats];
-				this.sigils.delete("many_lives");
+				this.removeSigil("many_lives");
 			}
 		}
 	}
@@ -666,12 +674,12 @@ ${border}`;
 			const tentacles = ["bell_tentacle", "hand_tentacle", "mirror_tentacle"];
 			this.name = pickRandom(tentacles);
 			this.stats = [...getModel(this.name).stats];
-			this.sigils.delete("waterborne");
+			this.removeSigil("waterborne");
 		}
 		if (this.sigils.has("fledgling")) {
 			const base_model = getModel(this.name);
 			const grows_into = base_model.grows_into;
-			this.sigils.delete("fledgling");
+			this.removeSigil("fledgling");
 			if (grows_into) {
 				this.transformInto(grows_into);
 			} else {
@@ -689,10 +697,10 @@ ${border}`;
 			this.awakened = !this.awakened;
 			if (this.awakened) {
 				this.stats[0] += this.getModelProp("transformer_attack") || 0;
-				if (this.getModelProp("transformer_sigil")) this.sigils.add(this.getModelProp("transformer_sigil"));
+				if (this.getModelProp("transformer_sigil")) this.addSigil(this.getModelProp("transformer_sigil"));
 			} else {
 				this.stats[0] -= this.getModelProp("transformer_attack") || 0;
-				if (this.getModelProp("transformer_sigil")) this.sigils.delete(this.getModelProp("transformer_sigil"));
+				if (this.getModelProp("transformer_sigil")) this.removeSigil(this.getModelProp("transformer_sigil"));
 			}
 		}
 		if (this.humanOwner && this.sigils.has("digger")) {
@@ -709,10 +717,10 @@ ${border}`;
 		this.stats[1] += (new_model.stats[1] - old_model.stats[1]);
 		this.stats[2] = new_model.stats[2];
 		for (const sigil of old_model.sigils) {
-			this.sigils.delete(sigil);
+			this.removeSigil(sigil);
 		}
 		for (const sigil of new_model.sigils) {
-			this.sigils.add(sigil);
+			this.addSigil(sigil);
 		}
 	}
 	hydraCheck(): void {
@@ -742,20 +750,20 @@ ${border}`;
 	createWithExtraSigils(cardName: cardName, sigil: sigil=null): Card {
 		const card = new Card(cardName);
 		this.copyExtraSigils(card);
-		if (sigil) card.sigils.delete(sigil);
+		if (sigil) card.removeSigil(sigil);
 		return card;
 	}
 	copyExtraSigils(target: Card): void {
 		for (const sigil of this.sigils) {
 			if (!getModel(this.name).sigils.includes(sigil)) {
-				target.sigils.add(sigil);
+				target.addSigil(sigil);
 			}
 		}
 	}
 	latchEffect(field: Card[], sigil: sigil): boolean {
 		const options = field.filter(c => c && !c.sigils.has(sigil));
 		if (options.length) {
-			pickRandom(options).sigils.add(sigil);
+			pickRandom(options).addSigil(sigil);
 			return true;
 		}
 		return false;
@@ -914,6 +922,9 @@ ${border}`;
 	}
 	get isConduit(): boolean {
 		return !!getModel(this.name).is_conduit;
+	}
+	get isWide(): boolean {
+		return getModel(this.name).wide;
 	}
 	get mox(): moxColor[] {
 		return getModel(this.name).mox;
@@ -1202,7 +1213,7 @@ export class Item {
 				battle.getPlayer(player).energy = battle.getPlayer(player).capacity;
 				break;
 			case "armor":
-				battle.field[player].forEach(c => c?.sigils.add("armored"));
+				battle.field[player].forEach(c => c?.addSigil("armored"));
 				break;
 			case "pliers":
 				await battle.damage(player ? -1 : 1);
@@ -1339,7 +1350,7 @@ export abstract class Battle {
 					let d = (j+1 < this.fieldSize && !this.field[other][j+1]) ? 1 : -1;
 					if (j+d > 0 && !this.field[other][j+d]) {
 						await otherCard.move(j, j+d);
-						otherCard.sigils.delete("loose_tail");
+						otherCard.removeSigil("loose_tail");
 						await this.playCard(otherCard.createWithExtraSigils(otherCard.tail, "loose_tail"), j, other);
 						otherCard = this.field[other][j];
 					}
@@ -1363,9 +1374,10 @@ export abstract class Battle {
 	}
 	async playCard(card: Card, i: number, player: playerIndex=this.actor): Promise<boolean> {
 		await card.onDraw(this, player);
-		if (i < 0 || i >= this.fieldSize || this.field[player][i]) return false;
+		if (i < 0 || i >= this.fieldSize || this.field[player][i] || card.isWide && this.field[player].some(c => c)) return false;
 		this.log.push(`Player ${player+1} plays ${card.name}!`);
 		this.field[player][i] = card;
+		if (card.isWide) this.field[player].fill(card);
 		await card.onPlay(i);
 		return true;
 	}
@@ -1381,7 +1393,7 @@ export abstract class Battle {
 		var damage = 0;
 		for (let i = 0; i < this.fieldSize; i++) {
 			const card = this.field[actor][i];
-			if (!card) continue;
+			if (!card || i > 0 && card.isWide) continue;
 			card.resetSigilLoop();
 			if (card.sigils.has("gem_dependent") && this.countMox(actor) <= 0) {
 				await card.onDeath(i);
@@ -1788,7 +1800,7 @@ export class PlayerBattler implements Battler {
 	async addToHand(card: Card): Promise<void> {
 		if (!card) return;
 		if (this.totem && (card.tribe == this.totem.tribe || card.tribe == "all")) {
-			card.sigils.add(this.totem.sigil);
+			card.addSigil(this.totem.sigil);
 		}
 		await card.onDraw(this.battle, this.index);
 		this.hand.push(card);
@@ -1874,7 +1886,7 @@ export class AutoBattler implements Battler {
 	cardsLeft: number=15;
 	constructor(battle: SoloBattle, difficulty: number, isBoss: boolean=false, cardPool: cardName[]=[]) {
 		this.battle = battle;
-		if (isBoss) this.bossEffect = pickRandom(["prospector", "angler", "trader"]);
+		if (isBoss) this.bossEffect = "moon"//pickRandom(["prospector", "angler", "trader"]);
 		this.difficulty = difficulty;
 		this.backfield = Array(battle.fieldSize).fill(null);
 		if (!cardPool.length) {
@@ -1971,14 +1983,14 @@ export class AutoBattler implements Battler {
 				for (let i = 0; i < this.battle.fieldSize; i++) {
 					if (!this.battle.field[0][i] || this.battle.field[1][i]) continue;
 					const card = new Card("bait_bucket");
-					if (this.difficulty >= 4) card.sigils.add("mighty_leap");
+					if (this.difficulty >= 4) card.addSigil("mighty_leap");
 					await this.battle.playCard(card, i, 1);
 				}
 				break;
 			case "trader":
 				for (let i = 0; i < this.battle.fieldSize; i++) {
 					const card = new Card(pickRandom(this.cardPool));
-					card.sigils.add("amorphous");
+					card.addSigil("amorphous");
 					await this.playBackfield(card, i);
 				}
 				await this.battle.player.addToHand(new Card("wolf_pelt"));
