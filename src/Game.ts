@@ -125,64 +125,17 @@ export class Card {
 			this.name = model.name;
 		}
 		if (!model) {
-			console.log(`ERROR! ${this.name} model not found`);
+			console.error(`ERROR! ${this.name} model not found`);
 		}
 		// stats: [power, health, cost]
 		this.stats = [...model.stats];
 		this.sigils = new Set([...model.sigils]);
-	}
-	toString(): string {
-		return JSON.stringify({
-			name: this.name,
-			stats: this.stats,
-			sigils: [...this.sigils]
-		});
 	}
 	static castCardName(card: Card|cardName): Card {
 		return (typeof card == "string") ? new Card(card) : card;
 	}
 	static copyCard(card: Card|cardName): Card|cardName {
 		return (typeof card == "string") ? card : new Card(card);
-	}
-	static openSlot: string[] =
-`          
-          
-    ..    
-    ..    
-          
-          `.split("\n");
-	getDisplay(i: number): string[] {
-		const size = 8;
-		const name = this.name.replace("_", " ");
-		const name1 = padTrim(name.length <= size ? name : name.split(" ")[0], size);
-		const name2 = padTrim(name.length <= size ? "" : name.split(" ")[1] || "", size);
-		const sigils = [...this.sigils].map(s => (s == this.ability ? "@" : (getModel(this.name).sigils.includes(s) ? "*" : "+")));
-		//const sigil = padTrim((this.ability ? "@" : "").padEnd([...this.sigils].length, "*"), size, this.isConduit ? "~-" : " ");
-		const sigil = padTrim(sigils.join(""), size, this.isConduit ? "~―" : " ");
-		//const sigil = padTrim([...this.sigils].map(s => sigilSymbols[s] || "*").join(""), size);
-		const cost = this.costDisplay.padEnd(size, " ");
-		const stats = this.costDisplay/*`${this.cardRawValue}`.padEnd(4, " ")*/ + (`${this.getPower(i)}/${this.stats[1]}`).padStart(4, " ");
-		const final = cost.substring(0, size-stats.length) + stats;
-		const border = this.getModelProp("rare") ? "#========#" : "+――――――――+";
-		var display;
-		if (this.noSacrifice) {
-			display =
-`+~~~~~~~~+
-:${name1}:
-:${name2}:
-:${sigil}:
-:${final}:
-+~~~~~~~~+`;
-		} else {
-			display =
-`${border}
-|${name1}|
-|${name2}|
-|${sigil}|
-|${final}|
-${border}`;
-		}
-		return display.split("\n");
 	}
 	get nameSummary(): string {
 		return toProperFormat(this.name) + (this.hasModifiedSigils ? "*" : "");
@@ -211,26 +164,6 @@ ${border}`;
 	get inspectText(): string {
 		return card_models[this.name].inspect;
 	}
-	get fullDisplay(): string[] {
-		var display = ["", this.name.replace("_", " "), this.stats[2] ? `${this.stats[2]} ${this.cost}` : "free", this.getModelProp("tribe") || "no tribe"];
-		for (const sigil of this.sigils) {
-			display.push(sigil.replace("_", " "));
-		}
-		display.push(`${this.stats[0]}/${this.stats[1]}`);
-		var size = this.name.length;
-		for (let i = 2; i < display.length; i++) {
-			size = Math.max(size, display[i].length);
-		}
-		const sides = this.noSacrifice ? ":" : "|";
-		const top = this.noSacrifice ? "~" : (this.getModelProp("rare") ? "=" : "―");
-		const corners = this.getModelProp("rare") ? "#" : "+";
-		for (let i = 1; i < display.length; i++) {
-			display[i] = `${sides}${display[i].padEnd(size, " ")}${sides}`
-		}
-		display[0] = `${corners}${"".padEnd(size, top)}${corners}`;
-		display.push(display[0]);
-		return display;
-	}
 	get ability(): sigil {
 		return [...this.sigils].find(s => sigil_data[s].active);
 	}
@@ -241,20 +174,21 @@ ${border}`;
 		this.owner = owner;
 		this.humanOwner = this.battle.isHuman(owner);
 	}
-	addSigil(sigil: sigil): void {
-		if (!this.sigils.has("immutable")) this.sigils.add(sigil);
+	addSigil(sigil: sigil): boolean {
+		if (!this.sigils.has("immutable")) {
+			this.sigils.add(sigil);
+			return true;
+		} else {
+			return false;
+		}
 	}
-	removeSigil(sigil: sigil): void {
-		if (!this.sigils.has("immutable")) this.sigils.delete(sigil);
-	}
-	activeSigil(sigil: sigil): boolean {
-		return this.sigils.has(sigil) && this.checkSigilLoop();
-	}
-	checkSigilLoop(): boolean {
-		return (this.sigilActivations = (this.sigilActivations || 0) + 1) < 10;
-	}
-	resetSigilLoop(): void {
-		delete this.sigilActivations;
+	removeSigil(sigil: sigil): boolean {
+		if (!this.sigils.has("immutable")) {
+			this.sigils.delete(sigil);
+			return true;
+		} else {
+			return false;
+		}
 	}
 	get abilityDescription(): string {
 		return this.ability && toProperCase(sigil_data[this.ability].desc.match(/activate: (.+)$/)[1]);
@@ -379,18 +313,16 @@ ${border}`;
 			this.addSigil(pickRandom(possibleSigils));
 			this.removeSigil("random_mox");
 		}
-		this.hydraCheck();
 		if (this.name == "mox_crystal") {
 			const possibleMox: cardName[] = ["emerald_mox", "ruby_mox", "sapphire_mox"];
 			this.transformInto(pickRandom(possibleMox));
 		}
-		//console.log(this.fullDisplay.join("\n"));
 	}
 	async onMovement(i: number): Promise<void> {
 		const other = (this.owner ? 0 : 1);
 		const otherCard = this.battle.field[other][i];
 		if (otherCard) {
-			if (otherCard.activeSigil("sentry")) {
+			if (otherCard.sigils.has("sentry")) {
 				this.battle.attackCard(otherCard, this, 1, this.owner, i);
 				if (this.stats[1] <= 0) {
 					await this.onDeath(i);
@@ -399,7 +331,7 @@ ${border}`;
 		} else {
 			for (let j = 0; j < this.battle.fieldSize; j++) {
 				const card = this.battle.field[other][j];
-				if (card?.activeSigil("guardian")) {
+				if (card?.sigils.has("guardian")) {
 					this.battle.field[other][i] = card;
 					this.battle.field[other][j] = null;
 				}
@@ -407,6 +339,9 @@ ${border}`;
 		}
 	}
 	async onPlay(i: number): Promise<void> {
+		for (let j = 0; j < this.battle.fieldSize; j++) {
+			this.battle[this.owner][j].hydraCheck();
+		}
 		if (this.humanOwner) {
 			if (this.sigils.has("rabbit_hole")) {
 				await this.battle.addToHand(this.createWithExtraSigils("rabbit", "rabbit_hole"), this.owner);
@@ -450,15 +385,15 @@ ${border}`;
 			if (!this.battle.field[other][i]) this.addSigil("armored");
 			this.removeSigil("magic_armor");
 		}
-		if (this.activeSigil("dam_builder")) {
+		if (this.sigils.has("dam_builder")) {
 			await this.battle.playCard(this.createWithExtraSigils("dam", "dam_builder"), i-1, this.owner);
 			await this.battle.playCard(this.createWithExtraSigils("dam", "dam_builder"), i+1, this.owner);
 		}
-		if (this.activeSigil("bellist")) {
+		if (this.sigils.has("bellist")) {
 			await this.battle.playCard(new Card("chime"), i-1, this.owner);
 			await this.battle.playCard(new Card("chime"), i+1, this.owner);
 		}
-		if (this.activeSigil("cuckoo")) {
+		if (this.sigils.has("cuckoo")) {
 			await this.battle.playCard(new Card("broken_egg"), i, other);
 		}
 		this.baseHP = this.stats[1];
@@ -474,7 +409,7 @@ ${border}`;
 		if (this.sigils.has("sniper")) {
 			this.target = this.battle.isHuman(this.owner) ? i : Math.floor(Math.random() * this.battle.fieldSize);
 		}
-		if (this.activeSigil("bomb_spewer")) {
+		if (this.sigils.has("bomb_spewer")) {
 			for (let k of [this.owner, 1-this.owner]) {
 				for (let j = 0; j < this.battle.fieldSize; j++) {
 					if (!this.battle.field[k][j]) {
@@ -489,16 +424,15 @@ ${border}`;
 		await this.onMovement(i);
 	}
 	async onHit(attacker: Card): Promise<void> {
-		this.battle.log.push(`Player ${this.owner ? 2 : 1}'s ${this.name} dies!`);
 		if (this.humanOwner) {
-			if (this.activeSigil("beehive")) {
+			if (this.sigils.has("beehive")) {
 				await this.battle.addToHand(this.createWithExtraSigils("bee", "beehive"), this.owner);
 			}
-			if (this.activeSigil("vessel_printer")) {
+			if (this.sigils.has("vessel_printer")) {
 				await this.battle.addToHand(this.createWithExtraSigils("empty_vessel", "vessel_printer"), this.owner);
 			}
 		}
-		if (this.activeSigil("spikey")) {
+		if (this.sigils.has("spikey")) {
 			attacker.stats[1]--;
 			if (this.sigils.has("death_touch") && !attacker.sigils.has("stone")) {
 				attacker.stats[1] = 0;
@@ -511,7 +445,7 @@ ${border}`;
 		if (chime_trigger) {
 			for (let i = 0; i < this.battle.fieldSize; i++) {
 				const daus = this.battle.field[this.owner][i];
-				if (daus && daus.name == chime_trigger && daus.checkSigilLoop()) {
+				if (daus && daus.name == chime_trigger) {
 					if (attacker.sigils.has("armored")) {
 						attacker.removeSigil("armored");
 					} else if (daus.sigils.has("death_touch") && !attacker.sigils.has("stone")) {
@@ -524,19 +458,18 @@ ${border}`;
 		}
 	}
 	async onDeath(i: number): Promise<void> {
-		this.battle.log.push(`Player ${this.owner+1}'s ${this.name} dies!`);
 		this.battle.field[this.owner][i] = null;
 		if (this.isWide) this.battle.field[this.owner].fill(null);
 		this.stats[1] = Math.min(this.stats[1], 0);
 		const player = this.player;
 		const other = (this.owner == 0) ? 1 : 0;
 		let deaths = 1 + this.battle.getCardsWithSigil(this.owner, "double_death").length;
-		if (this.activeSigil("sealed_away") && !this.hammered) {
+		if (this.sigils.has("sealed_away") && !this.hammered) {
 			deaths = 1;
 			await this.battle.playCard(this.createWithExtraSigils(this.getModelProp("sealed_away") || "opossum", "sealed_away"), i, this.owner);
 		} else if (this.battle.isHuman(this.owner)) {
 			for (let j = 0; j < player.hand.length; j++) {
-				if (player.hand[j].activeSigil("corpse_eater")) {
+				if (player.hand[j].sigils.has("corpse_eater")) {
 					deaths = 1;
 					const card = player.hand.splice(j,1)[0];
 					await this.battle.playCard(card, i);
@@ -562,7 +495,7 @@ ${border}`;
 			if (this.sigils.has("gift_bearer")) {
 				await this.battle.addToHand(new Card(pickRandom(playerDeckCards)), this.owner);
 			}
-			if (this.activeSigil("steel_trap")) {
+			if (this.sigils.has("steel_trap")) {
 				const otherCard = this.battle.field[other][i];
 				Item.skinningKnife(otherCard, i);
 			}
@@ -578,7 +511,7 @@ ${border}`;
 			this.tryLatch("brittle_latch", "brittle", other);
 			this.tryLatch("bomb_latch", "detonator", other);
 			this.tryLatch("shield_latch", "armored", this.owner);
-			if (this.activeSigil("detonator") || this.isMox &&
+			if (this.sigils.has("detonator") || this.isMox &&
 			this.battle.getCardsWithSigil(this.owner, "gem_detonator").length + this.battle.getCardsWithSigil(other, "gem_detonator").length > 0) {
 				// shouldn't be necessary to delete the sigil, but just in case, to avoid infinite loop
 				this.removeSigil("detonator");
@@ -950,31 +883,7 @@ ${border}`;
 		}
 	}
 	get costEmoji(): string {
-		switch (this.cost) {
-			case "blood":
-				return "🩸";
-			case "bones":
-				return "🦴";
-			case "mox":
-				return "💎";
-			case "energy":
-				return "🔋";
-		}
-		return "";
-	}
-	get costDisplay(): string {
-		switch (this.cost) {
-			case "blood":
-				return `${"".padEnd(this.stats[2], "&")}`.padEnd(4, " ");
-			case "bones":
-				return `${this.stats[2]}//`.padEnd(4, " ");
-			case "energy":
-				return `[${this.stats[2]}]`.padEnd(4, " ");
-			case "mox":
-				return `m${this.mox.map(m => m[0].toUpperCase()).join("")}`.padEnd(4, " ");
-			case "free":
-				return "".padEnd(4, " ");
-		}
+		return costEmoji[this.cost] || "";
 	}
 	static costEmojiDisplay(cost: cardCost, amount: number, mox: moxColor[]): string {
 		switch (cost) {
@@ -1237,7 +1146,6 @@ export abstract class Battle {
 	candles: number[];
 	fieldSize: number;
 	field: Card[][];
-	log: string[];
 	ended: boolean = false;
 	players: Battler[];
 	starvation: number;
@@ -1249,7 +1157,6 @@ export abstract class Battle {
 		this.candles = [candles, candles];
 		this.fieldSize = fieldSize;
 		this.field = [Array(this.fieldSize).fill(null), Array(this.fieldSize).fill(null)];
-		this.log = [];
 		this.terrain = terrain;
 	}
 	async placeTerrain(terrain: cardName): Promise<void> {
@@ -1263,11 +1170,6 @@ export abstract class Battle {
 	}
 	get actor(): playerIndex {
 		return <playerIndex>(this.turn % 2);
-	}
-	flushLog(): string {
-		const log = this.log.join("\n");
-		this.log = [];
-		return log;
 	}
 	uponSelect: (source: selectSource, player: playerIndex, defaultVal: number)=>Promise<number>;
 	async waitForSelection(source: selectSource, player: playerIndex, defaultVal: number): Promise<number> {
@@ -1295,7 +1197,6 @@ export abstract class Battle {
 	}
 	async setupTurn(): Promise<void> {
 		const actor = this.actor;
-		this.log.push(`Player ${actor+1} starts their turn.`);
 		for (var i = 0; i < this.fieldSize; i++) {
 			const card = this.field[actor][i];
 			if (!card) continue;
@@ -1372,15 +1273,11 @@ export abstract class Battle {
 		if (card.sigils.has("brittle") || card.stats[1] <= 0) {
 			await card.onDeath(i);
 		}
-		if (damage) {
-			this.log.push(`${card.name} deals ${damage} damage!`);
-		}
 		return damage;
 	}
 	async playCard(card: Card, i: number, player: playerIndex=this.actor): Promise<boolean> {
 		await card.onDraw(this, player);
 		if (i < 0 || i >= this.fieldSize || this.field[player][i] || card.isWide && this.field[player].some(c => c)) return false;
-		this.log.push(`Player ${player+1} plays ${card.name}!`);
 		this.field[player][i] = card;
 		if (card.isWide) this.field[player].fill(card);
 		await card.onPlay(i);
@@ -1399,7 +1296,6 @@ export abstract class Battle {
 		for (let i = 0; i < this.fieldSize; i++) {
 			const card = this.field[actor][i];
 			if (!card || i > 0 && card.isWide) continue;
-			card.resetSigilLoop();
 			if (card.sigils.has("gem_dependent") && this.countMox(actor) <= 0) {
 				await card.onDeath(i);
 				continue;
@@ -1539,16 +1435,11 @@ export abstract class Battle {
 		return false;
 	}
 	getCardsWithSigil(player: playerIndex, sigil: sigil): Card[] {
-		var arr = [];
-		for (let i = 0; i < this.fieldSize; i++) {
-			if (this.field[player][i]?.sigils.has(sigil)) {
-				arr.push(this.field[player][i]);
-			}
-		}
-		return arr;
+		return this.field[player].filter(card => card && card.sigils.has(sigil));
 	}
 	countBlood(player: playerIndex, maxRawValue: number=Infinity): number {
-		const sacrifices = this.field[player].filter(c => c && c.blood).sort((a,b) => a.sacrificePriority - b.sacrificePriority);
+		return this.field[player].reduce((v,card) => (v + card?.blood || 0), 0);
+		/*const sacrifices = this.field[player].filter(c => c && c.blood).sort((a,b) => a.sacrificePriority - b.sacrificePriority);
 		var blood = 0;
 		var valueTotal = 0;
 		for (const card of sacrifices) {
@@ -1556,7 +1447,7 @@ export abstract class Battle {
 			if (valueTotal >= maxRawValue) continue;
 			blood += card.blood || 0;
 		}
-		return blood;
+		return blood;*/
 	}
 	countMox(player: playerIndex): number {
 		var count = 0;
@@ -1604,52 +1495,13 @@ export abstract class Battle {
 			case "deck":
 				return player.deck.cards.length > 0;
 			case "sidedeck":
-				return true;
+				return player.sidedeck.count > 0;
 			case "hammer":
 				return this.field[this.actor].some(c => c);
 		}
 	}
 	get candleDisplay(): string {
 		return `${"i".repeat(this.candles[0])}(${("").padStart(Math.min(this.goal, Math.max(0, -this.scale)), "*").padStart(this.goal, " ")}/${("").padEnd(Math.min(this.goal, Math.max(0, this.scale)), "*").padEnd(this.goal, " ")})${"i".repeat(this.candles[1])}${Math.abs(this.scale)>this.goal?` +${Math.abs(this.scale)-this.goal}`:""}`;
-	}
-	get display(): string {
-		var display = `${this.candleDisplay}\n${this.players[1].display}\n`;
-		for (let p = 1; p >= 0; p--) {
-			let arr: string[][] = [];
-			for (let i = 0; i < this.fieldSize; i++) {
-				arr.push((this.field[p][i] ? this.field[p][i].getDisplay(i) : Card.openSlot));
-			}
-			let arr2 = Array(Card.openSlot.length).fill("");
-			for (let j = 0; j < arr2.length; j++) {
-				for (let k = 0; k < arr.length; k++) {
-					arr2[j] += arr[k][j];
-				}
-			}
-			display += arr2.join("\n") + "\n";
-		}
-		display += this.players[0].display;
-		return display;
-	}
-	get embedDisplay(): Embed {
-		var fields: Embed[] = [];
-		return {
-			title: "Battle",
-			description: "",
-			fields: []
-		}
-	}
-	async awaitCompletion(displayCallback=console.log): Promise<playerIndex> {
-		// Returns: winner's player index
-		if (this.terrain) await this.placeTerrain(this.terrain);
-		await displayCallback(this.display);
-		while (!this.ended) {
-			await this.setupTurn();
-			while (await this.players[this.actor].performAction());
-			await this.executeTurn();
-			await displayCallback(this.display);
-		}
-		await displayCallback(this.display);
-		return this.candles[0] ? 0 : 1;
 	}
 	abstract onCandleOut(player: playerIndex): Promise<void>;
 	abstract getPlayer(player: playerIndex): PlayerBattler;
@@ -1667,7 +1519,6 @@ export class SoloBattle extends Battle {
 		this.bot = new AutoBattler(this, difficulty, options.candles > 1);
 		this.players = [this.player, this.bot];
 		this.candles[0] = 1;
-		this.log.push(`Started AI battle!`);
 	}
 	async onCandleOut(player: playerIndex): Promise<void> {
 		if (player == 1) {
@@ -1697,7 +1548,6 @@ export class DuelBattle extends Battle {
 	constructor(player1: Player, player2: Player, options: BattleOptions) {
 		super(options);
 		this.players = [player1.battlerInstance(this, 0), player2.battlerInstance(this, 1)];
-		this.log.push(`Started duel battle!`);
 	}
 	async onCandleOut(player: playerIndex): Promise<void> {
 		await this.players[player].addToHand(new Card("greater_smoke"));
