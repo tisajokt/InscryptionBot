@@ -1047,9 +1047,13 @@ ${border}`;
 				costValue = this.stats[2];
 				break;
 			case "mox":
+				if (!this.mox) {
+					console.error(`Error: ${this.name} has mox cost, but .mox property isn't defined!`);
+					break;
+				}
 				for (let mox of this.mox) {
 					if (mox == "any") costValue += 1;
-					else costValue += 2;
+					else costValue += 3;
 				}
 				break;
 		}
@@ -1982,7 +1986,7 @@ export class AutoBattler implements Battler {
 				break;
 			case "moon":
 				this.battle.field[1].fill(null);
-				this.battle.playCard(new Card("moon"), Math.floor(Math.random() * this.battle.fieldSize));
+				await this.battle.playCard(new Card("moon"), Math.floor(Math.random() * this.battle.fieldSize), 1);
 				this.cardsLeft = 0;
 				break;
 			default:
@@ -2031,7 +2035,6 @@ export class Player {
 			}
 		};
 		const themed: cardName[] = default_deck.filter(_themeFilter);
-		console.log(themed);
 		const additions: cardName[] = randomSelectionFrom(default_deck.filter(c => {
 			const model = getModel(c);
 			return !_themeFilter(c) && !model.mox && !model.is_mox && model.playerValue >= 3;

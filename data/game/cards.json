@@ -29,6 +29,7 @@
 		"stats": [0,2,1],
 		"cost": "energy",
 		"sigils": ["random_mox"],
+		"is_mox": true,
 		"is_conduit": true,
 		"no_sacrifice": true,
 		"no_bones": true,
@@ -768,13 +769,28 @@
 		"no_sacrifice": true,
 		"event": "none"
 	},
+	"crystal_bud": {
+		"stats": [0,1,0],
+		"sigils": ["fledgling", "magic_armor", "random_mox"],
+		"grows_into": "crystal_growth",
+		"is_mox": true,
+		"rare": true
+	},
+	"crystal_growth": {
+		"stats": [0,3,0],
+		"sigils": ["fledgling"],
+		"grows_into": "magnus_mox",
+		"is_mox": true,
+		"rare": true,
+		"event": "none"
+	},
 	"magnus_mox": {
 		"stats": [0,9,0],
-		"cost": "mox",
 		"sigils": ["blue_mox", "orange_mox", "green_mox", "magic_armor"],
-		"mox": ["blue", "orange", "green"],
+		"is_mox": true,
 		"rare": true,
-		"#comment": "now requires all mox to be played"
+		"event": "none",
+		"#comment": "is obtainable via crystal bud"
 	},
 	"draugr": {
 		"stats": [0,1,0],
@@ -1315,24 +1331,10 @@
 		"stats": [0,1,0],
 		"sigils": ["random_mox", "skellify"],
 		"tribe": "squirrel",
+		"is_mox": true,
 		"is_conduit": true,
 		"modded": "Omnisquirrels",
 		"#comment": "combines the functionality of gem vessels, squirrels, & skeletons"
-	},
-	"crystal_bud": {
-		"stats": [0,1,0],
-		"sigils": ["fledgling", "random_mox"],
-		"grows_into": "crystal_growth",
-		"rare": true,
-		"modded": "MoxExpansion"
-	},
-	"crystal_growth": {
-		"stats": [0,1,0],
-		"sigils": ["fledgling"],
-		"grows_into": "magnus_mox",
-		"rare": true,
-		"modded": "MoxExpansion",
-		"event": "none"
 	},
 	"dormant_mox": {
 		"stats": [0,3,0],
