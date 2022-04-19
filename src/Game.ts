@@ -55,7 +55,8 @@ export type CardModel = {
 	vanilla_cabin?: boolean,
 	modded?: boolean|string,
 	inspect?: string,
-	event?: string
+	event?: string,
+	themes?: Set<string>
 };
 export type cardName = string;
 export type cardTribe = "canine"|"insect"|"reptile"|"avian"|"hooved"|"squirrel"|"all";
@@ -107,7 +108,6 @@ export class Card {
 
 	/* Assigned under certain circumstances */
 	cooldown?: number;
-	_ability?: sigil;
 	target?: number;
 	sprintToLeft?: boolean;
 	awakened?: boolean;
@@ -232,16 +232,7 @@ ${border}`;
 		return display;
 	}
 	get ability(): sigil {
-		if (!this._ability) {
-			const abilities: sigil[] = ["scholar", "stimulate", "skellify", "enlarge", "energy_gun", "disentomb", "sniper", "bonehorn", "power_dice", "hovering", "energy_conduit", "handy"];
-			for (const ability of abilities) {
-				if (this.sigils.has(ability)) {
-					this._ability = ability;
-					break;
-				}
-			}
-		}
-		return this._ability;
+		return [...this.sigils].find(s => sigil_data[s].active);
 	}
 	get player(): PlayerBattler {
 		return this.battle.getPlayer(this.owner);
@@ -266,34 +257,7 @@ ${border}`;
 		delete this.sigilActivations;
 	}
 	get abilityDescription(): string {
-		switch (this.ability) {
-			/*case "bonehorn":
-				return "Converts all energy, at 2x🦴 bones per 1x🔋 energy";
-			case "power_dice":
-				return "Reroll power (1-6) for 1x🔋 energy";
-			case "energy_gun":
-				return "Deal 1 damage to opposing card for 1x🔋 energy";
-			case "stimulate":
-				return "Gain +1 power for 2x🔋 energy";
-			case "disentomb":
-				return "Draw a skeleton for 1x🦴 bones";
-			case "enlarge":
-				return "Gain +1/+1 for 2x🦴 bones";
-			case "scholar":
-				return "Sacrifice self and draw 3 cards";
-			case "energy_conduit":
-				return "Refill energy when part of circuit";
-			case "handy":
-				return "Reroll hand, lose this sigil";
-			case "skellify":
-				return "Gain +1 power and brittle sigil, lose this sigil";
-			case "hovering":
-				return "Toggle flying sigil for free";*/
-			case "sniper":
-				return `Retarget (currently column ${(this.target||0)+1})`;
-			default:
-				return toProperCase(sigil_data[this.ability].desc.match(/activate: (.+)$/)[1]);
-		}
+		return this.ability && toProperCase(sigil_data[this.ability].desc.match(/activate: (.+)$/)[1]);
 	}
 	canActivate(i: number): boolean {
 		if (this.cooldown >= 3) return false;
@@ -316,7 +280,6 @@ ${border}`;
 				return this.battle.hasCircuit(this.owner) && this.player.energy < this.player.capacity;
 			case "handy":
 				return this.player.hand.length > 0;
-			case "sniper":
 			case "hovering":
 			case "skellify":
 				return true;
@@ -335,7 +298,6 @@ ${border}`;
 				this.removeSigil("skellify");
 				this.addSigil("brittle");
 				this.stats[0]++;
-				delete this._ability;
 				break;
 			case "scholar":
 				await this.onDeath(i);
@@ -366,10 +328,6 @@ ${border}`;
 			case "energy_conduit":
 				this.player.energy = this.player.capacity;
 				break;
-			case "sniper":
-				this.target = (this.target + 1) % this.battle.fieldSize;
-				this.cooldown = 0;
-				break;
 			case "hovering":
 				if (this.sigils.has("flying")) this.removeSigil("flying");
 				else this.addSigil("flying");
@@ -380,7 +338,6 @@ ${border}`;
 				this.player.hand = [];
 				this.player.drawFrom(this.player.deck, true, discards.length);
 				this.player.deck.cards = this.player.deck.cards.concat(discards.filter(c => c.name != this.player.sidedeck.card.name));
-				delete this._ability;
 				this.removeSigil("handy");
 				break;
 		}
@@ -472,7 +429,7 @@ ${border}`;
 				this.player.energy = Math.min(this.player.capacity, this.player.energy + 1);
 			}
 			if (this.sigils.has("item_bearer") && this.player.items.length < ITEM_LIMIT) {
-				const possibleItems: itemType[] = ["squirrel", "black_goat", "boulder", "frozen_opossum", "bones", "battery", "armor", "pliers", "hourglass", "fan"];
+				const possibleItems: itemType[] = ["squirrel", "black_goat", "boulder", "frozen_opossum", "bones", "battery", "armor", "pliers", "hourglass", "fan", "lens", "hammer", "skinning_knife"];
 				this.player.items.push(new Item(pickRandom(possibleItems)));
 			}
 			if (this.sigils.has("gemnastics")) {
@@ -509,7 +466,7 @@ ${border}`;
 		if (this.sigils.has("gem_guardian")) {
 			for (let j = 0; j < this.battle.fieldSize; j++) {
 				const card = this.battle.field[this.owner][j];
-				if (card && card.getModelProp("is_mox")) {
+				if (card?.isMox) {
 					card.addSigil("armored");
 				}
 			}
@@ -621,7 +578,7 @@ ${border}`;
 			this.tryLatch("brittle_latch", "brittle", other);
 			this.tryLatch("bomb_latch", "detonator", other);
 			this.tryLatch("shield_latch", "armored", this.owner);
-			if (this.activeSigil("detonator") || this.getModelProp("is_mox") &&
+			if (this.activeSigil("detonator") || this.isMox &&
 			this.battle.getCardsWithSigil(this.owner, "gem_detonator").length + this.battle.getCardsWithSigil(other, "gem_detonator").length > 0) {
 				// shouldn't be necessary to delete the sigil, but just in case, to avoid infinite loop
 				this.removeSigil("detonator");
@@ -747,15 +704,17 @@ ${border}`;
 				squirrel: 0,
 				all: 0
 			}
-			for (let k = 0; k <= 1; k++) {
-				this.battle.field[k].forEach(c => {
-					if (!c) return;
-					if (c.tribe == "all") tribes.all++;
-					else if (c.tribe) tribes[c.tribe] = 1;
-				})
+			const _countTribe = (card: Card) => {
+				if (!card) return;
+				if (card.tribe == "all") tribes.all++;
+				else if (card.tribe) tribes[card.tribe] = 1;
 			}
+			for (let k = 0; k <= 1; k++) {
+				this.battle.field[k].forEach(_countTribe);
+			}
+			this.player.hand.forEach(_countTribe);
 			
-			if (tribes.canine + tribes.insect + tribes.reptile + tribes.avian + tribes.hooved + tribes.all >= 5) {
+			if (tribes.canine + tribes.insect + tribes.reptile + tribes.avian + tribes.hooved + tribes.all >= 3) {
 				this.transformInto("hydra");
 			}
 		}
@@ -868,7 +827,7 @@ ${border}`;
 			if (this.battle.field[other][j]?.sigils.has("stinky") && !this.sigils.has("stone")) power--;
 		}
 		if (this.sigils.has("gemified") && this.battle.hasMoxColor(this.owner, "orange")) power++;
-		if (this.getModelProp("is_mox")) power += this.battle.getCardsWithSigil(this.owner, "gem_animator").length;
+		if (this.isMox) power += this.battle.getCardsWithSigil(this.owner, "gem_animator").length;
 		const circuit = this.battle.getCircuit(this.owner, i);
 		if (circuit) {
 			if (circuit[0].sigils.has("buff_conduit")) power++;
@@ -938,6 +897,9 @@ ${border}`;
 	}
 	get isConduit(): boolean {
 		return !!getModel(this.name).is_conduit;
+	}
+	get isMox(): boolean {
+		return !!getModel(this.name).is_mox;
 	}
 	get isWide(): boolean {
 		return getModel(this.name).wide;
@@ -2075,16 +2037,15 @@ export class Player {
 		const _playerValueSort = (a,b) => {
 			return getModel(b).playerValue - getModel(a).playerValue;
 		};
-		const _themeFilter = (c) => {
+		const _themeFilter = (c: cardName) => {
 			const model = getModel(c);
 			if (!model.mox && !model.cost && sidedeck != "mox_crystal") return true;
+			if (model.cost == "mox" && !["mox_crystal", "omnisquirrel"].includes(sidedeck)) return false;
 			switch (sidedeck) {
-				case "squirrel": return model.cost == "blood" || model.cost == "bones" && model.vanilla_cabin ||
-					model.sigils.includes("many_lives") || model.sigils.includes("worthy_sacrifice");
-				case "empty_vessel": return model.cost == "energy" || model.sigils.includes("battery");
-				case "skeleton": return model.cost == "bones" || model.sigils.includes("four_bones") || model.sigils.includes("scavenger") ||
-					model.power_calc == "bones";
-				case "mox_crystal": return model.cost == "mox" || model.is_mox || model.sigils.includes("gemified");
+				case "squirrel": return model.themes.has("blood") || model.vanilla_cabin;
+				case "empty_vessel": return model.themes.has("energy");
+				case "skeleton": return model.themes.has("bones");
+				case "mox_crystal": return model.themes.has("mox");
 				case "omnisquirrel": return true;
 				default: return true;
 			}
@@ -2104,13 +2065,12 @@ export class Player {
 		// Guaranteed to draw at least one low-cost card
 		player.drawFrom(player.deck, true, 1, (card: Card|cardName): boolean => {
 			if (card instanceof Card) {
-				return card.stats[2] <= 1 && !card.isModified;
+				return card.stats[2] <= 1 && !card.isModified && !card.isMox;
 			} else {
-				return getModel(card).stats[2] <= 1;
+				return getModel(card).stats[2] <= 1 && !getModel(card).is_mox;
 			}
 		})
 		player.drawFrom(player.deck, true, 2);
-		player.items.push(new Item("lens"));
 		player.drawn = true;
 		player.bones += this.boonBones || (this.sidedeck.noSacrifice ? 1 : 0);
 		return player;
@@ -2124,6 +2084,22 @@ for (const name in card_models) {
 	model.playerValue = (new Card(name)).cardPlayerValue;
 	model.nonplayerValue = (new Card(name)).cardNonplayerValue;
 	model.abbrev = model.abbrev || abbreviate(name, 6);
+	model.themes = new Set();
+	if (model.cost) model.themes.add(model.cost);
+	if (model.tribe) model.themes.add("tribal");
+	if (model.is_mox) model.themes.add("mox");
+	for (const sigil of [...model.sigils]) {
+		const theme = sigil_data[sigil].theme;
+		if (theme) model.themes.add(theme);
+	}
+	switch (model.power_calc) {
+		case "sacrifices":
+			model.themes.add("blood");
+			break;
+		case "bones":
+			model.themes.add("bones");
+			break;
+	}
 	
 	if (model.is_terrain || NO_MOX && (model.is_mox || model.cost == "mox")) continue;
 	if (model.modded && !ENABLED_MODS.includes(model.modded.toString()) || VANILLA_CABIN_ONLY && !model.vanilla_cabin) continue;
@@ -2133,4 +2109,7 @@ for (const name in card_models) {
 }
 for (const mod of ENABLED_MODS) {
 	cardPools[mod] = botDeckCards.filter(m => getModel(m).modded == mod);
+}
+for (const theme of ["blood", "bones", "energy", "mox", "tribal", "conduit"]) {
+	cardPools[`${theme}Theme`] = botDeckCards.filter(m => getModel(m).themes.has(theme));
 }

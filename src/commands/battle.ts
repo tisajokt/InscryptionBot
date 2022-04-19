@@ -343,7 +343,8 @@ class BattleInteraction extends PersistentCommandInteraction {
 			const actions = new MessageActionRow().addComponents(
 				this.makeButton("draw", ["deck"]).setDisabled(!this.battle.hasDrawOption("deck")).setEmoji("🃏"),
 				this.makeButton("draw", ["sidedeck"]).setDisabled(!this.battle.hasDrawOption("sidedeck")).setEmoji(this.battle.getPlayer(this.battle.actor).sidedeckIcon),
-				this.makeButton("draw", ["hammer"]).setDisabled(!this.battle.hasDrawOption("hammer")).setEmoji("🔨")
+				this.makeButton("draw", ["hammer"]).setDisabled(!this.battle.hasDrawOption("hammer")).setEmoji("🔨"),
+				this.makeButton("inspect").setEmoji("🔍")
 			);
 			const message = {
 				content: interaction.message.content,
@@ -551,10 +552,13 @@ class BattleInteraction extends PersistentCommandInteraction {
 				const card = this.battle.field[player.index][index];
 				await card.activate(index);
 			}
+			if (player.items.length > 0 || this.battle.field[player.index].some((c,i) => c?.ability && c.canActivate(i))) {
+				return await this.activate(interaction);
+			}
 		}
 		await this.reply(interaction);
 	}
-	async activate(interaction: ButtonInteraction): Promise<void> {
+	async activate(interaction: MessageComponentInteraction): Promise<void> {
 		const options: any = [{
 			label: "Return",
 			value: "none"
@@ -563,7 +567,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 		player.items.forEach((item,i) => {
 			options.push({
 				label: toProperFormat(item.type),
-				description: item.description,
+				description: `${item.description}${item.isUsable(this.battle, player.index) ? "" : " (can't use)"}`,
 				value: `i.${i}`
 			})
 		});
@@ -749,10 +753,11 @@ const universalOptions: any = [
 		choices: [
 			{name: "None", value: "none"},
 			{name: "Black Goat", value: "black_goat"},
-			{name: "Rabbit w/ Undying & Waterborne", value: "rabbit"},
-			{name: "Cat w/ Repulsive", value: "cat"},
 			{name: "Mrs. Bomb", value: "mrs._bomb"},
-			{name: "Omnisquirrel w/ Item Bearer", value: "omni_squirrel"}
+			{name: "Magpie", value: "magpie"},
+			{name: "Omnisquirrel w/ Item Bearer", value: "omni_squirrel"},
+			{name: "Rabbit w/ Undying & Waterborne", value: "rabbit"},
+			{name: "Cat w/ Repulsive", value: "cat"}
 		]
 	}
 ];

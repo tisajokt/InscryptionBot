@@ -1341,17 +1341,10 @@
 		"modded": "Omnisquirrels",
 		"#comment": "combines the functionality of gem vessels, squirrels, & skeletons"
 	},
-	"dormant_mox": {
-		"stats": [0,3,0],
-		"is_mox": true,
-		"no_sacrifice": true,
-		"modded": "MoxExpansionWIP",
-		"#comment": "once any two mox colors are on the field, this gem adopts the remaining color and gains gem animator"
-	},
 	"bloodstone": {
 		"stats": [0,3,2],
 		"cost": "blood",
-		"sigils": ["many_lives"],
+		"sigils": ["worthy_sacrifice"],
 		"no_sacrifice": true,
 		"event": "none",
 		"modded": "MoxExpansion"
@@ -1364,39 +1357,6 @@
 		"mox": ["orange"],
 		"modded": "MoxExpansion",
 		"#comment": "while on the field, you may sacrifice cards which aren't normally sacrificeable"
-	},
-	"leshy": {
-		"stats": [2,6,4],
-		"cost": "blood",
-		"sigils": ["many_lives", "worthy_sacrifice"],
-		"power_calc": "sacrifices",
-		"tribe": "all",
-		"modded": "Scrybes",
-		"event": "scrybe"
-	},
-	"grimora": {
-		"stats": [2,4,8],
-		"cost": "bones",
-		"sigils": ["stinky", "digger", "undying", "four_bones"],
-		"power_calc": "bones",
-		"modded": "Scrybes",
-		"event": "scrybe"
-	},
-	"po3": {
-		"stats": [2,4,6],
-		"cost": "energy",
-		"sigils": ["energy_gun", "buff_conduit", "battery"],
-		"is_conduit": true,
-		"modded": "Scrybes",
-		"event": "scrybe"
-	},
-	"magnificus": {
-		"stats": [0,3,0],
-		"cost": "mox",
-		"mox": ["blue", "orange", "green"],
-		"sigils": ["blue_mox", "orange_mox", "green_mox", "gem_animator", "gemified"],
-		"modded": "Scrybes",
-		"event": "scrybe"
 	},
 	"vampire": {
 		"stats": [2,1,5],

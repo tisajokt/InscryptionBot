@@ -22,7 +22,8 @@
 		"desc": "gains health equal to damage dealt to other cards"
 	},
 	"animate_blood": {
-		"desc": "while on the field, you may sacrifice any card; when played, draw a bloodstone"
+		"desc": "while on the field, you may sacrifice any card; when played, draw a bloodstone",
+		"theme": "blood"
 	},
 	"corpse_eater": {
 		"desc": "when a card you control dies, this card plays itself from your hand to replace it"
@@ -31,7 +32,8 @@
 		"desc": "upon death, releases the card inside"
 	},
 	"double_death": {
-		"desc": "while on the field, cards you control will die an additional time (reactivating death effects & yielding more bones)"
+		"desc": "while on the field, cards you control will die an additional time (reactivating death effects & yielding more bones)",
+		"theme": "bones"
 	},
 	"moon_strike": {
 		"desc": "will strike all of the opponent's cards; if unopposed, will strike the opponent directly"
@@ -43,7 +45,8 @@
 		"desc": "when played, you gain a random item"
 	},
 	"hydra_egg": {
-		"desc": "when played to a field with representatives from each tribe, will transform into a hydra"
+		"desc": "when played to a field with representatives from 3 or more tribes, will transform into a hydra",
+		"theme": "tribal"
 	},
 	"double_strike": {
 		"desc": "will strike the opposing position an additional time"
@@ -56,14 +59,16 @@
 	},
 	"stimulate": {
 		"desc": "activate: gain +1 power for 2x🔋 energy",
-		"active": true
+		"active": true,
+		"theme": "energy"
 	},
 	"looter": {
 		"desc": "when striking the opponent directly, you draw cards equal to the damage dealt"
 	},
 	"enlarge": {
 		"desc": "activate: gain +1 power & health for 2x🦴 bones",
-		"active": true
+		"active": true,
+		"theme": "bones"
 	},
 	"bomb_spewer": {
 		"desc": "when played, fills the field with explode bots"
@@ -85,7 +90,8 @@
 		"desc": "may not be directly attacked by any card"
 	},
 	"many_lives": {
-		"desc": "doesn't perish when sacrificed"
+		"desc": "doesn't perish when sacrificed",
+		"theme": "blood"
 	},
 	"hoarder": {
 		"desc": "(not implemented) when played, choose a card to draw from your deck"
@@ -97,10 +103,12 @@
 		"desc": "when played to an unopposed position, gains the armored sigil"
 	},
 	"gemified": {
-		"desc": "gains +1 power if you control an orange mox; +2 health for green; -1 cost to play for blue"
+		"desc": "gains +1 power if you control an orange mox; +2 health for green; -1 cost to play for blue",
+		"theme": "mox"
 	},
 	"morsel": {
-		"desc": "when sacrificed, this card's stats are added to that of the new card"
+		"desc": "when sacrificed, this card's stats are added to that of the new card",
+		"theme": "blood"
 	},
 	"blood_lust": {
 		"desc": "upon killing a card, gains +1 power"
@@ -112,16 +120,18 @@
 		"desc": "upon death, gives the brittle sigil to a random card (prioritizing opponent's cards)"
 	},
 	"sniper": {
-		"desc": "may strike any position on the field; activate: change its target",
+		"desc": "may target any position on the field when attacking",
 		"active": true
 	},
 	"scholar": {
 		"desc": "if you control a blue mox, you may activate: sacrifice self and draw 3 cards",
-		"active": true
+		"active": true,
+		"theme": "mox"
 	},
 	"disentomb": {
 		"desc": "activate: draw a skeleton for 1x🦴 bone",
-		"active": true
+		"active": true,
+		"theme": "bones"
 	},
 	"sentry": {
 		"desc": "strikes cards that move to oppose this card, dealing 1 damage"
@@ -133,16 +143,20 @@
 		"desc": "when completing a circuit, empty slots spawn a l33pb0t at the end of your turn"
 	},
 	"gemnastics": {
-		"desc": "when played, you draw from your deck as many cards as you have mox on the field"
+		"desc": "when played, you draw from your deck as many cards as you have mox on the field",
+		"theme": "mox"
 	},
 	"ruby_heart": {
-		"desc": "upon death, releases a ruby mox in its place"
+		"desc": "upon death, releases a ruby mox in its place",
+		"theme": "mox"
 	},
 	"gem_animator": {
-		"desc": "while on the field, mox you own gain +1 power"
+		"desc": "while on the field, mox you own gain +1 power",
+		"theme": "mox"
 	},
 	"skeleton_crew": {
-		"desc": "at the end of your turn, moves to an adjacent spot, leaving a skeleton in its wake"
+		"desc": "at the end of your turn, moves to an adjacent spot, leaving a skeleton in its wake",
+		"theme": "bones"
 	},
 	"leader": {
 		"desc": "cards to either side gain +1 power"
@@ -157,32 +171,39 @@
 		"desc": "when played, spawns beaver dams on either side"
 	},
 	"spawn_ant": {
-		"desc": "when played, you draw a worker ant"
+		"desc": "when played, you draw a worker ant",
+		"theme": "blood"
 	},
 	"beehive": {
-		"desc": "when attacked, you draw a bee"
+		"desc": "when attacked, you draw a bee",
+		"theme": "blood"
 	},
 	"rabbit_hole": {
-		"desc": "when played, you draw a rabbit"
+		"desc": "when played, you draw a rabbit",
+		"theme": "blood"
 	},
 	"gift_bearer": {
 		"desc": "upon death, you draw a random card"
 	},
 	"four_bones": {
-		"desc": "yields 4 bones upon death instead of 1"
+		"desc": "yields 4 bones upon death instead of 1",
+		"theme": "bones"
 	},
 	"battery": {
-		"desc": "when played, you gain +1 energy capacity"
+		"desc": "when played, you gain +1 energy capacity",
+		"theme": "energy"
 	},
 	"energy_conduit": {
 		"desc": "when completing a circuit, you may activate: refill energy",
-		"active": true
+		"active": true,
+		"theme": "energy"
 	},
 	"bomb_latch": {
 		"desc": "upon death, gives the detonator sigil to a random card (prioritizing opponent's cards)"
 	},
 	"gem_guardian": {
-		"desc": "when played, all mox you control gain the armored sigil"
+		"desc": "when played, all mox you control gain the armored sigil",
+		"theme": "mox"
 	},
 	"vessel_printer": {
 		"desc": "when attacked, you draw an empty vessel"
@@ -194,7 +215,8 @@
 		"desc": "is immune to the touch of death and stinky sigils"
 	},
 	"scavenger": {
-		"desc": "while on the field, the death of the opponent's cards will yield bones"
+		"desc": "while on the field, the death of the opponent's cards will yield bones",
+		"theme": "bones"
 	},
 	"piercing": {
 		"desc": "when attacking, overkill damage pierces through to the opponent"
@@ -206,28 +228,35 @@
 		"desc": "attackers receive 1 point of retaliation damage"
 	},
 	"worthy_sacrifice": {
-		"desc": "worth 3 blood when sacrificed instead of 1"
+		"desc": "worth 3 blood when sacrificed instead of 1",
+		"theme": "blood"
 	},
 	"stinky": {
 		"desc": "an opposing card loses -1 power"
 	},
 	"digger": {
-		"desc": "at the start of your turn, yields 1 bone"
+		"desc": "at the start of your turn, yields 1 bone",
+		"theme": "bones"
 	},
 	"random_mox": {
-		"desc": "when drawn, replaces this sigil with a random mox"
+		"desc": "when drawn, replaces this sigil with a random mox",
+		"theme": "mox"
 	},
 	"green_mox": {
-		"desc": "provides a green mox"
+		"desc": "provides a green mox",
+		"theme": "mox"
 	},
 	"orange_mox": {
-		"desc": "provides an orange mox"
+		"desc": "provides an orange mox",
+		"theme": "mox"
 	},
 	"blue_mox": {
-		"desc": "provides a blue mox"
+		"desc": "provides a blue mox",
+		"theme": "mox"
 	},
 	"gem_dependent": {
-		"desc": "dies if there are no mox on your side of the field"
+		"desc": "dies if there are no mox on your side of the field",
+		"theme": "mox"
 	},
 	"brittle": {
 		"desc": "dies after attacking"
@@ -281,7 +310,8 @@
 		"desc": "at the start of your turn, will transform to/from another form"
 	},
 	"gem_detonator": {
-		"desc": "while on the field, mox you own will detonate"
+		"desc": "while on the field, mox you own will detonate",
+		"theme": "mox"
 	},
 	"rampager": {
 		"desc": "at the end of your turn, moves to an adjacent spot, shoving cards behind it"
@@ -305,7 +335,8 @@
 	},
 	"bonehorn": {
 		"desc": "activate: converts all energy to 2x🦴 bones per 1x🔋 energy",
-		"active": true
+		"active": true,
+		"theme": "bones"
 	},
 	"power_dice": {
 		"desc": "activate: rerolls power (1-6) for 1x🔋 energy",
