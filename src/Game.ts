@@ -117,6 +117,7 @@ export class Card {
 	moved?: boolean;
 	sigilActivations?: number;
 	hammered?: boolean;
+	sacrificedFor?: number;
 	constructor(model: Card|cardName) {
 		if (typeof model == "string") {
 			this.name = model;
@@ -340,7 +341,7 @@ export class Card {
 	}
 	async onPlay(i: number): Promise<void> {
 		for (let j = 0; j < this.battle.fieldSize; j++) {
-			this.battle[this.owner][j].hydraCheck();
+			this.battle.field[this.owner][j]?.hydraCheck();
 		}
 		if (this.humanOwner) {
 			if (this.sigils.has("rabbit_hole")) {
@@ -468,12 +469,14 @@ export class Card {
 			deaths = 1;
 			await this.battle.playCard(this.createWithExtraSigils(this.getModelProp("sealed_away") || "opossum", "sealed_away"), i, this.owner);
 		} else if (this.battle.isHuman(this.owner)) {
-			for (let j = 0; j < player.hand.length; j++) {
-				if (player.hand[j].sigils.has("corpse_eater")) {
-					deaths = 1;
-					const card = player.hand.splice(j,1)[0];
-					await this.battle.playCard(card, i);
-					break;
+			if (this.sacrificedFor !== i) {
+				for (let j = 0; j < player.hand.length; j++) {
+					if (player.hand[j].sigils.has("corpse_eater")) {
+						deaths = 1;
+						const card = player.hand.splice(j,1)[0];
+						await this.battle.playCard(card, i);
+						break;
+					}
 				}
 			}
 			if (this.sigils.has("haunter")) {
@@ -531,7 +534,7 @@ export class Card {
 			}
 		}*/
 	}
-	async onSacrifice(i: number, card: Card): Promise<void> {
+	async onSacrifice(i: number, card: Card, t: number): Promise<void> {
 		if (!this.blood) return;
 		this.player.blood += this.blood;
 		this.player.sacrifices++;
@@ -546,7 +549,9 @@ export class Card {
 			this.removeSigil("haunter");
 		}
 		if (!this.sigils.has("many_lives")) {
+			this.sacrificedFor = t;
 			await this.onDeath(i);
+			delete this.sacrificedFor;
 		}
 		if (this.name == "child_13") {
 			this.awakened = !this.awakened;
@@ -1438,7 +1443,7 @@ export abstract class Battle {
 		return this.field[player].filter(card => card && card.sigils.has(sigil));
 	}
 	countBlood(player: playerIndex, maxRawValue: number=Infinity): number {
-		return this.field[player].reduce((v,card) => (v + card?.blood || 0), 0);
+		return this.field[player].reduce((v,card) => (v + (card?.blood || 0)), 0);
 		/*const sacrifices = this.field[player].filter(c => c && c.blood).sort((a,b) => a.sacrificePriority - b.sacrificePriority);
 		var blood = 0;
 		var valueTotal = 0;
@@ -1668,8 +1673,8 @@ export class PlayerBattler implements Battler {
 			case "blood":
 				if (this.blood < cost) {
 					const sacrifices = this.battle.field[this.index].filter(c => c && c.blood).sort((a,b) => a.sacrificePriority - b.sacrificePriority);
-					for (let i = 0; i < sacrifices.length; i++) {
-						await sacrifices[i].onSacrifice(this.battle.field[this.index].indexOf(sacrifices[i]), card);
+					for (let j = 0; j < sacrifices.length; i++) {
+						await sacrifices[j].onSacrifice(this.battle.field[this.index].indexOf(sacrifices[j]), card, i);
 						if (this.blood >= cost) break;
 					}
 				}

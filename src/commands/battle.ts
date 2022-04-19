@@ -463,7 +463,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 		sacrifices.map(k => field[k]?.blood || 0).forEach(n => {blood += n});
 		if (player.blood + blood >= card.getCost()) {
 			sacrifices.forEach(k => {
-				field[k]?.onSacrifice(k, card);
+				field[k]?.onSacrifice(k, card, target);
 			});
 			await this.play(interaction, args);
 			return;
