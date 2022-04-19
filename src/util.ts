@@ -55,5 +55,9 @@ export const costEmoji = {
 	blood: "🩸",
 	bones: "🦴",
 	mox: "💎",
-	energy: "🔋"
+	energy: "🔋",
+	blue_mox: "🔵",
+	green_mox: "🟩",
+	orange_mox: "🔶",
+	any_mox: "❔"
 };

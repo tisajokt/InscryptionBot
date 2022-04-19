@@ -73,7 +73,7 @@ export function getModel(card: cardName): CardModel {
 }
 export function modelSummary(card: cardName): string {
 	const model = getModel(card);
-	return `${toProperFormat(card)} [${model.power_calc ? "*" : singleCharStat(model.stats[0])}/${model.stats[1]}] ${Card.costEmojiDisplay(model.cost, model.stats[2])}`;
+	return `${toProperFormat(card)} [${model.power_calc ? "*" : singleCharStat(model.stats[0])}/${model.stats[1]}] ${Card.costEmojiDisplay(model.cost, model.stats[2], model.mox)}`;
 }
 
 export interface Drawable {
@@ -180,7 +180,7 @@ ${border}`;
 		return toProperFormat(this.name) + (this.hasModifiedSigils ? "*" : "");
 	}
 	fullSummary(i: number): string {
-		return `${this.nameSummary} [${this.powerCalc ? "*" : singleCharStat(i > -1 ? this.getPower(i) : this.stats[0])}/${this.stats[1]}] ${Card.costEmojiDisplay(this.cost, this.stats[2])}`;
+		return `${this.nameSummary} [${this.powerCalc ? "*" : singleCharStat(i > -1 ? this.getPower(i) : this.stats[0])}/${this.stats[1]}] ${Card.costEmojiDisplay(this.cost, this.stats[2], this.mox)}`;
 	}
 	getEmbedDisplay(i: number, inline: boolean=false): EmbedField {
 		const stats = `Stats: \`${i >= 0 ? this.getPower(i) : (this.powerCalc ? "*" : this.stats[0])}/${this.stats[1]}\``;
@@ -987,14 +987,14 @@ ${border}`;
 				return "".padEnd(4, " ");
 		}
 	}
-	static costEmojiDisplay(cost: cardCost, amount: number): string {
+	static costEmojiDisplay(cost: cardCost, amount: number, mox: moxColor[]): string {
 		switch (cost) {
 			case "blood":
 			case "bones":
 			case "energy":
 				return `${amount}x${costEmoji[cost]}`;
 			case "mox":
-				return `${costEmoji.mox.repeat(amount)}`;
+				return mox.map(c => costEmoji[`${c}_mox`]).join("");
 			case "free":
 				return "free";
 		}
@@ -1006,7 +1006,7 @@ ${border}`;
 			case "energy":
 				return `Costs: ${this.getCost()}x${this.costEmoji}${this.cost}`;
 			case "mox":
-				return `Requires: ${this.mox.join(", ")} ${this.costEmoji}mox`;
+				return `Requires: ${this.mox.map(m => costEmoji[`${m}_mox`]).join("")} mox`;
 			case "free":
 				return "Free to play";
 		}
@@ -1048,8 +1048,8 @@ ${border}`;
 				break;
 			case "mox":
 				for (let mox of this.mox) {
-					if (mox == "any") costValue += 3;
-					else costValue += 5;
+					if (mox == "any") costValue += 1;
+					else costValue += 2;
 				}
 				break;
 		}
@@ -2018,23 +2018,24 @@ export class Player {
 		};
 		const _themeFilter = (c) => {
 			const model = getModel(c);
-			if (!model.mox && !model.cost) return true;
+			if (!model.mox && !model.cost && sidedeck != "mox_crystal") return true;
 			switch (sidedeck) {
 				case "squirrel": return model.cost == "blood" || model.cost == "bones" && model.vanilla_cabin ||
 					model.sigils.includes("many_lives") || model.sigils.includes("worthy_sacrifice");
 				case "empty_vessel": return model.cost == "energy" || model.sigils.includes("battery");
 				case "skeleton": return model.cost == "bones" || model.sigils.includes("four_bones") || model.sigils.includes("scavenger") ||
 					model.power_calc == "bones";
-				case "mox_crystal": return !!model.mox || model.sigils.includes("gemified");
+				case "mox_crystal": return model.cost == "mox" || model.is_mox || model.sigils.includes("gemified");
 				case "omnisquirrel": return true;
 				default: return true;
 			}
 		};
 		const themed: cardName[] = default_deck.filter(_themeFilter);
+		console.log(themed);
 		const additions: cardName[] = randomSelectionFrom(default_deck.filter(c => {
 			const model = getModel(c);
-			return !_themeFilter(c) && !model.mox && !model.is_mox && Math.random() < Math.min(0.5, (model.playerValue - 5) * 0.05);
-		}).concat(["geck"]), 5);
+			return !_themeFilter(c) && !model.mox && !model.is_mox && model.playerValue >= 3;
+		}), 5);
 		const size = 30 + Math.floor(Math.random() * 15);
 		const selection: cardName[] = randomSelectionFrom(themed, 100).sort(_playerValueSort).slice(0, size - additions.length).concat(additions);
 		return new Deck(selection);
@@ -2065,7 +2066,6 @@ for (const name in card_models) {
 	model.nonplayerValue = (new Card(name)).cardNonplayerValue;
 	model.abbrev = model.abbrev || abbreviate(name, 6);
 	
-	if (model.mox || model.is_mox) continue;
 	if (model.modded || VANILLA_CABIN_ONLY && !model.vanilla_cabin) continue;
 	default_auto.push(name);
 	if (model.event == "none") continue;
