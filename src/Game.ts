@@ -2,19 +2,18 @@
 import sigil_data from "../data/game/sigils.json";
 import card_models from "../data/game/cards.json";
 import game_config from "../data/game/config.json";
-import { padTrim, pickRandom, sleep, randomSelectionFrom, toProperCase, abbreviate, toProperFormat } from "./util";
+import { padTrim, pickRandom, sleep, randomSelectionFrom, toProperCase, abbreviate, toProperFormat, singleCharStat, costEmoji } from "./util";
 import { EmbedField, Embed } from "src/Display";
 import { jsonArrayMember, jsonMember, jsonObject, jsonSetMember } from "typedjson";
 import { BattleOptions } from "./commands/battle";
 
-const default_deck: cardName[] = [];
-const default_auto: cardName[] = [];
+export const default_deck: cardName[] = [];
+export const default_auto: cardName[] = [];
 
 for (let p = 0; p < sigil_data.__powers.length; p++) {
 	for (let i = 0; i < sigil_data.__powers[p].length; i++) {
-		sigil_data[sigil_data.__powers[p][i]] = {
-			power: p-3
-		}
+		const sigil = sigil_data.__powers[p][i];
+		sigil_data[sigil].power = p-3;
 	}
 }
 
@@ -68,9 +67,13 @@ export class Totem {
 	sigil: sigil
 };
 
-function getModel(card: cardName): CardModel {
+export function getModel(card: cardName): CardModel {
 	if (!card_models[card]) console.error(`${card} model not found`);
 	return card_models[card];
+}
+export function modelSummary(card: cardName): string {
+	const model = getModel(card);
+	return `${toProperFormat(card)} [${model.power_calc ? "*" : singleCharStat(model.stats[0])}/${model.stats[1]}] ${Card.costEmojiDisplay(model.cost, model.stats[2])}`;
 }
 
 export interface Drawable {
@@ -176,6 +179,9 @@ ${border}`;
 	get nameSummary(): string {
 		return toProperFormat(this.name) + (this.hasModifiedSigils ? "*" : "");
 	}
+	fullSummary(i: number): string {
+		return `${this.nameSummary} [${this.powerCalc ? "*" : singleCharStat(i > -1 ? this.getPower(i) : this.stats[0])}/${this.stats[1]}] ${Card.costEmojiDisplay(this.cost, this.stats[2])}`;
+	}
 	getEmbedDisplay(i: number, inline: boolean=false): EmbedField {
 		const stats = `Stats: \`${i >= 0 ? this.getPower(i) : (this.powerCalc ? "*" : this.stats[0])}/${this.stats[1]}\``;
 		var arr = [stats, this.costEmbedDisplay];
@@ -186,7 +192,7 @@ ${border}`;
 		if (this.isConduit) arr.push("Acts as a conduit");
 		if (this.inspectText) arr.push(this.inspectText);
 		this.sigils.forEach(s => {
-			arr.push(`_${s.split("_").join(" ")}_`)
+			arr.push(`_${s.split("_").join(" ")}_ ― ${sigil_data[s].desc}`);
 		});
 		return {
 			name: `${this.rare ? "✨ " : ""}${this.nameSummary}`,
@@ -247,7 +253,7 @@ ${border}`;
 	}
 	get abilityDescription(): string {
 		switch (this.ability) {
-			case "bonehorn":
+			/*case "bonehorn":
 				return "Converts all energy, at 2x🦴 bones per 1x🔋 energy";
 			case "power_dice":
 				return "Reroll power (1-6) for 1x🔋 energy";
@@ -267,12 +273,12 @@ ${border}`;
 				return "Reroll hand, lose this sigil";
 			case "skellify":
 				return "Gain +1 power and brittle sigil, lose this sigil";
+			case "hovering":
+				return "Toggle flying sigil for free";*/
 			case "sniper":
 				return `Retarget (currently column ${(this.target||0)+1})`;
-			case "hovering":
-				return "Toggle flying sigil for free";
 			default:
-				return "";
+				return toProperCase(sigil_data[this.ability].desc.match(/activate: (.+)$/)[1]);
 		}
 	}
 	canActivate(i: number): boolean {
@@ -981,6 +987,18 @@ ${border}`;
 				return "".padEnd(4, " ");
 		}
 	}
+	static costEmojiDisplay(cost: cardCost, amount: number): string {
+		switch (cost) {
+			case "blood":
+			case "bones":
+			case "energy":
+				return `${amount}x${costEmoji[cost]}`;
+			case "mox":
+				return `${costEmoji.mox.repeat(amount)}`;
+			case "free":
+				return "free";
+		}
+	}
 	get costEmbedDisplay(): string {
 		switch (this.cost) {
 			case "blood":
@@ -1229,7 +1247,7 @@ export abstract class Battle {
 	}
 	async placeTerrain(terrain: cardName): Promise<void> {
 		if (this.isSolo() && this.candles[1] >= 3) {
-			await this.playCard(new Card("moon"), Math.floor(Math.random() * this.fieldSize), 1);
+			if (terrain == "moleman") await this.playCard(new Card("moleman"), Math.floor(Math.random() * this.fieldSize), 1);
 			return;
 		}
 		if (!terrain) return;

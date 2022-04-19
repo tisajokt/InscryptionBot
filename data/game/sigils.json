@@ -11,5 +11,302 @@
 		["trifurcated", "item_bearer", "steel_trap", "power_dice"],
 		["moon_strike"]
 	],
-	"__player_sigils": ["hovering", "four_bones", "undying", "worthy_sacrifice", "digger", "battery", "energy_conduit", "vessel_printer", "scavenger", "piercing", "haunter", "rabbit_hole", "beehive", "fecundity", "corpse_eater", "spawn_ant", "gemnastics", "disentomb", "scholar", "morsel", "hoarder", "many_lives", "handy", "enlarge", "energy_gun", "looter", "stimulate", "bonehorn", "item_bearer", "power_dice", "random_mox"]
+	"__player_sigils": ["hovering", "four_bones", "undying", "worthy_sacrifice", "digger", "battery", "energy_conduit", "vessel_printer", "scavenger", "piercing", "haunter", "rabbit_hole", "beehive", "fecundity", "corpse_eater", "spawn_ant", "gemnastics", "disentomb", "scholar", "morsel", "hoarder", "many_lives", "handy", "enlarge", "energy_gun", "looter", "stimulate", "bonehorn", "item_bearer", "power_dice", "random_mox"],
+	"haunter": {
+		"desc": "when sacrificed, the new card gains this card's sigils; upon death, returns to your hand as a spirit"
+	},
+	"blood_guzzler": {
+		"desc": "gains health equal to damage dealt to other cards"
+	},
+	"corpse_eater": {
+		"desc": "when a card you control dies, this card plays itself from your hand to replace it"
+	},
+	"sealed_away": {
+		"desc": "upon death, releases the card inside"
+	},
+	"double_death": {
+		"desc": "while on the field, cards you control will die an additional time (reactivating death effects & yielding more bones)"
+	},
+	"moon_strike": {
+		"desc": "will strike all of the opponent's cards; if unopposed, will strike the opponent directly"
+	},
+	"steel_trap": {
+		"desc": "upon death, the opposing card dies and its owner draws a pelt bearing its sigils"
+	},
+	"item_bearer": {
+		"desc": "when played, you gain a random item"
+	},
+	"hydra_egg": {
+		"desc": "when played to a field with representatives from each tribe, will transform into a hydra"
+	},
+	"double_strike": {
+		"desc": "will strike the opposing position an additional time"
+	},
+	"cuckoo": {
+		"desc": "when played to an unopposed position, a broken egg is played opposite it"
+	},
+	"armored": {
+		"desc": "will lose this sigil instead of taking damage"
+	},
+	"stimulate": {
+		"desc": "activate: gain +1 power for 2x🔋 energy",
+		"active": true
+	},
+	"looter": {
+		"desc": "when striking the opponent directly, you draw cards equal to the damage dealt"
+	},
+	"enlarge": {
+		"desc": "activate: gain +1 power & health for 2x🦴 bones",
+		"active": true
+	},
+	"bomb_spewer": {
+		"desc": "when played, fills the field with explode bots"
+	},
+	"handy": {
+		"desc": "activate: reroll hand and lose this sigil",
+		"active": true
+	},
+	"bellist": {
+		"desc": "when played, spawns chimes to either side"
+	},
+	"trifurcated": {
+		"desc": "will strike to the left and right in addition to the front"
+	},
+	"bifurcated": {
+		"desc": "will strike to the left and right instead of the front"
+	},
+	"repulsive": {
+		"desc": "may not be directly attacked by any card"
+	},
+	"many_lives": {
+		"desc": "doesn't perish when sacrificed"
+	},
+	"hoarder": {
+		"desc": "(not implemented) when played, choose a card to draw from your deck"
+	},
+	"death_touch": {
+		"desc": "any card this card strikes will perish"
+	},
+	"magic_armor": {
+		"desc": "when played to an unopposed position, gains the armored sigil"
+	},
+	"gemified": {
+		"desc": "gains +1 power if you control an orange mox; +2 health for green; -1 cost to play for blue"
+	},
+	"morsel": {
+		"desc": "when sacrificed, this card's stats are added to that of the new card"
+	},
+	"blood_lust": {
+		"desc": "upon killing a card, gains +1 power"
+	},
+	"powered_trifurcated": {
+		"desc": "strikes all 3 positions in front of it when part of a circuit"
+	},
+	"brittle_latch": {
+		"desc": "upon death, gives the brittle sigil to a random card (prioritizing opponent's cards)"
+	},
+	"sniper": {
+		"desc": "may strike any position on the field; activate: change its target",
+		"active": true
+	},
+	"scholar": {
+		"desc": "if you control a blue mox, you may activate: sacrifice self and draw 3 cards",
+		"active": true
+	},
+	"disentomb": {
+		"desc": "activate: draw a skeleton for 1x🦴 bone",
+		"active": true
+	},
+	"sentry": {
+		"desc": "strikes cards that move to oppose this card, dealing 1 damage"
+	},
+	"buff_conduit": {
+		"desc": "when completing a circuit, cards within the circuit gain +1 power"
+	},
+	"factory_conduit": {
+		"desc": "when completing a circuit, empty slots spawn a l33pb0t at the end of your turn"
+	},
+	"gemnastics": {
+		"desc": "when played, you draw from your deck as many cards as you have mox on the field"
+	},
+	"ruby_heart": {
+		"desc": "upon death, releases a ruby mox in its place"
+	},
+	"gem_animator": {
+		"desc": "while on the field, mox you own gain +1 power"
+	},
+	"skeleton_crew": {
+		"desc": "at the end of your turn, moves to an adjacent spot, leaving a skeleton in its wake"
+	},
+	"leader": {
+		"desc": "cards to either side gain +1 power"
+	},
+	"amorphous": {
+		"desc": "when drawn, replaces this sigil with a random other sigil"
+	},
+	"fecundity": {
+		"desc": "when played, you draw a copy"
+	},
+	"dam_builder": {
+		"desc": "when played, spawns beaver dams on either side"
+	},
+	"spawn_ant": {
+		"desc": "when played, you draw a worker ant"
+	},
+	"beehive": {
+		"desc": "when attacked, you draw a bee"
+	},
+	"rabbit_hole": {
+		"desc": "when played, you draw a rabbit"
+	},
+	"gift_bearer": {
+		"desc": "upon death, you draw a random card"
+	},
+	"four_bones": {
+		"desc": "yields 4 bones upon death instead of 1"
+	},
+	"battery": {
+		"desc": "when played, you gain +1 energy capacity"
+	},
+	"energy_conduit": {
+		"desc": "when completing a circuit, you may activate: refill energy",
+		"active": true
+	},
+	"bomb_latch": {
+		"desc": "upon death, gives the detonator sigil to a random card (prioritizing opponent's cards)"
+	},
+	"gem_guardian": {
+		"desc": "when played, all mox you control gain the armored sigil"
+	},
+	"vessel_printer": {
+		"desc": "when attacked, you draw an empty vessel"
+	},
+	"powered_buff": {
+		"desc": "gains +2 power when within a circuit"
+	},
+	"stone": {
+		"desc": "is immune to the touch of death and stinky sigils"
+	},
+	"scavenger": {
+		"desc": "while on the field, the death of the opponent's cards will yield bones"
+	},
+	"piercing": {
+		"desc": "when attacking, overkill damage pierces through to the opponent"
+	},
+	"undying": {
+		"desc": "upon death, returns to your hand"
+	},
+	"spikey": {
+		"desc": "attackers receive 1 point of retaliation damage"
+	},
+	"worthy_sacrifice": {
+		"desc": "worth 3 blood when sacrificed instead of 1"
+	},
+	"stinky": {
+		"desc": "an opposing card loses -1 power"
+	},
+	"digger": {
+		"desc": "at the start of your turn, yields 1 bone"
+	},
+	"random_mox": {
+		"desc": "when drawn, replaces this sigil with a random mox"
+	},
+	"green_mox": {
+		"desc": "provides a green mox"
+	},
+	"orange_mox": {
+		"desc": "provides an orange mox"
+	},
+	"blue_mox": {
+		"desc": "provides a blue mox"
+	},
+	"gem_dependent": {
+		"desc": "dies if there are no mox on your side of the field"
+	},
+	"brittle": {
+		"desc": "dies after attacking"
+	},
+	"withering": {
+		"desc": "loses 1 health at the start of your turn"
+	},
+	"annoying": {
+		"desc": "an opposing card gains +1 power"
+	},
+	"flying": {
+		"desc": "strikes the opponent directly, over opposing cards"
+	},
+	"mighty_leap": {
+		"desc": "blocks cards with the flying sigil"
+	},
+	"detonator": {
+		"desc": "upon death, kills all adjacent cards"
+	},
+	"swapper": {
+		"desc": "upon taking damage, swaps its power and health"
+	},
+	"clinger": {
+		"desc": "(not implemented)"
+	},
+	"sprinter": {
+		"desc": "at the end of your turn, moves to an adjacent spot"
+	},
+	"burrower": {
+		"desc": "will move to block an attack on an empty spot"
+	},
+	"waterborne": {
+		"desc": "submerges during the opponent's turn"
+	},
+	"hefty": {
+		"desc": "at the end of your turn, moves to an adjacent spot, pushing any cards in its path"
+	},
+	"jumper": {
+		"desc": "at the end of your turn, moves in a direction, jumping over any cards in its path"
+	},
+	"guardian": {
+		"desc": "will move to oppose any card that gets played"
+	},
+	"null_conduit": {
+		"desc": "may complete a circuit (no other effect)"
+	},
+	"shield_latch": {
+		"desc": "upon death, gives the armored sigil to a random card (prioritizing your cards)"
+	},
+	"transformer": {
+		"desc": "at the start of your turn, will transform to/from another form"
+	},
+	"gem_detonator": {
+		"desc": "while on the field, mox you own will detonate"
+	},
+	"rampager": {
+		"desc": "at the end of your turn, moves to an adjacent spot, shoving cards behind it"
+	},
+	"hovering": {
+		"desc": "activate: toggle flying sigil (for free)",
+		"active": true
+	},
+	"exploding_guts": {
+		"desc": "upon death, fills the field with guts"
+	},
+	"fledgling": {
+		"desc": "at the start of your next turn, will grow more powerful"
+	},
+	"loose_tail": {
+		"desc": "will move to dodge a strike, losing this sigil and leaving behind a tail"
+	},
+	"skellify": {
+		"desc": "activate: gains +1 power and brittle sigil, loses this sigil",
+		"active": true
+	},
+	"bonehorn": {
+		"desc": "activate: converts all energy to 2x🦴 bones per 1x🔋 energy",
+		"active": true
+	},
+	"power_dice": {
+		"desc": "activate: rerolls power (1-6) for 1x🔋 energy",
+		"active": true
+	},
+	"energy_gun": {
+		"desc": "activate: deals 1 damage to opposing card for 1x🔋 energy",
+		"active": true
+	}
 }

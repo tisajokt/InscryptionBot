@@ -2,7 +2,7 @@
 import "reflect-metadata";
 import app_config from "../app_config.json";
 
-import { User } from "./User";
+import { AppUser } from "./User";
 import onReady from "./listeners/ready";
 import onInteractionCreate from "./listeners/interactionCreate";
 
@@ -14,4 +14,4 @@ onReady(client);
 onInteractionCreate(client);
 client.login(app_config.botToken);
 
-setInterval(User.saveUsersData, 60000);
+setInterval(AppUser.saveUsersData, 60000);

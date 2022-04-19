@@ -1,7 +1,7 @@
-import { Client, Interaction, BaseCommandInteraction, ButtonInteraction, SelectMenuInteraction } from "discord.js";
+import { Client, Interaction, BaseCommandInteraction, ButtonInteraction, SelectMenuInteraction, CommandInteraction } from "discord.js";
 import { SlashCommands } from "../Commands";
 
-async function handleCommand(client: Client, interaction: BaseCommandInteraction): Promise<void> {
+async function handleCommand(client: Client, interaction: CommandInteraction): Promise<void> {
 	console.log(`Received a "${interaction.commandName}" command`);
 	const command = SlashCommands.find(c => c.name === interaction.commandName);
 	if (!command) {
@@ -33,7 +33,7 @@ async function handleSelectMenu(client: Client, interaction: SelectMenuInteracti
 
 export default (client: Client): void => {
 	client.on("interactionCreate", async(interaction: Interaction) => {
-		if (interaction.isCommand() || interaction.isContextMenu()) {
+		if (interaction.isCommand()) {
 			await handleCommand(client, interaction);
 		} else if (interaction.isButton()) {
 			await handleButton(client, interaction);

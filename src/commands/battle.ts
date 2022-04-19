@@ -2,7 +2,7 @@ import { Client, MessageActionRow, MessageButton, ButtonInteraction, CommandInte
 import { PersistentCommandInteraction, SlashCommand } from "../Command";
 import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, Item, sidedecks } from "../Game";
 import { Display } from "../Display";
-import { User } from "../User";
+import { AppUser } from "../User";
 import { generateRandomID, numberEmoji, pickRandom, sleep, toProperCase, toProperFormat } from "../util";
 import game_config from "../../data/game/config.json";
 import { jsonMember, jsonObject } from "typedjson";
@@ -68,6 +68,9 @@ class BattleInteraction extends PersistentCommandInteraction {
 	storeID(): void {
 		BattleInteraction.list[this.id] = this;
 	}
+	cmd(): string {
+		return "battle";
+	}
 	static async create(interaction: CommandInteraction): Promise<BattleInteraction> {
 		const battleInteraction = new BattleInteraction(interaction);
 		if (battleInteraction.mode == "duel") {
@@ -77,12 +80,6 @@ class BattleInteraction extends PersistentCommandInteraction {
 			await battleInteraction.reply();
 		}
 		return battleInteraction;
-	}
-	makeSelectMenu(args: string): MessageSelectMenu {
-		return new MessageSelectMenu().setCustomId(`battle.${this.id}.${args}`);
-	}
-	makeButton(action: battleAction, label?: string, args?: string[]): MessageButton {
-		return new MessageButton().setCustomId(`battle.${this.id}.${action}${args?`.${args.join(".")}`:""}`).setLabel(label === undefined ? toProperCase(action) : label).setStyle("SECONDARY");
 	}
 	_rawOptions;
 	get rawOptions() {
@@ -109,10 +106,10 @@ class BattleInteraction extends PersistentCommandInteraction {
 	_options: BattleOptions;
 	get options(): BattleOptions {
 		if (this._options) return this._options;
-		const user = User.get(this.userID);
+		const user = AppUser.get(this.userID);
 		Object.assign(user.battleOptions, this.rawOptions);
 		if (Object.keys(this.rawOptions).length) {
-			User.saveUsersData();
+			AppUser.saveUsersData();
 		}
 		const result = user.battleOptions.withDefaults();
 		if (result.sidedeck == "random") result.sidedeck = pickRandom(sidedecks);
@@ -159,9 +156,9 @@ class BattleInteraction extends PersistentCommandInteraction {
 	async confirmation(): Promise<void> {
 		if (this.mode != "duel") return;
 		const actions = new MessageActionRow().addComponents(
-			this.makeButton("confirm", "", ["accept", "0"]).setEmoji(numberEmoji[1]),
-			this.makeButton("confirm", "", ["accept", "1"]).setEmoji(numberEmoji[2]),
-			this.makeButton("confirm", "Decline", ["decline"]).setStyle("DANGER")
+			this.makeButton("confirm", ["accept", "0"]).setEmoji(numberEmoji[1]),
+			this.makeButton("confirm", ["accept", "1"]).setEmoji(numberEmoji[2]),
+			this.makeButton("confirm", ["decline"]).setLabel("Decline").setStyle("DANGER")
 		)
 		await this.interaction.editReply({
 			embeds: [{
@@ -193,7 +190,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 	static get(id: string): BattleInteraction {
 		return this.list[id];
 	}
-	async receiveAction(interaction: ButtonInteraction, action: battleAction, args: string[]=[]): Promise<boolean> {
+	async receiveButton(interaction: ButtonInteraction, action: battleAction, args: string[]=[]): Promise<boolean> {
 		switch (action) {
 			case "confirm":
 				await this.confirmChoice(interaction, args);
@@ -240,7 +237,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 		const actions = new MessageActionRow();
 		for (let i = 0; i < field.length; i++) {
 			actions.addComponents(
-				this.makeButton(action, "", args.concat([`${i}`]))
+				this.makeButton(action, args.concat([`${i}`]))
 					.setDisabled(disable(field[i])).setEmoji(numberEmoji[i+1])
 			)
 		}
@@ -269,9 +266,9 @@ class BattleInteraction extends PersistentCommandInteraction {
 		const choice = args[0];
 		if (!choice) {
 			const actions = new MessageActionRow().addComponents(
-				this.makeButton("draw", "", ["deck"]).setDisabled(!this.battle.hasDrawOption("deck")).setEmoji("🃏"),
-				this.makeButton("draw", "", ["sidedeck"]).setDisabled(!this.battle.hasDrawOption("sidedeck")).setEmoji(this.battle.getPlayer(this.battle.actor).sidedeckIcon),
-				this.makeButton("draw", "", ["hammer"]).setDisabled(!this.battle.hasDrawOption("hammer")).setEmoji("🔨")
+				this.makeButton("draw", ["deck"]).setDisabled(!this.battle.hasDrawOption("deck")).setEmoji("🃏"),
+				this.makeButton("draw", ["sidedeck"]).setDisabled(!this.battle.hasDrawOption("sidedeck")).setEmoji(this.battle.getPlayer(this.battle.actor).sidedeckIcon),
+				this.makeButton("draw", ["hammer"]).setDisabled(!this.battle.hasDrawOption("hammer")).setEmoji("🔨")
 			);
 			const message = {
 				content: interaction.message.content,
@@ -289,7 +286,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 				if (num) {
 					const card = player.hand[player.hand.length-1];
 					const actions = new MessageActionRow().addComponents(
-						this.makeButton("play", "Play", [(player.hand.length-1).toString()])
+						this.makeButton("play", [(player.hand.length-1).toString()]).setLabel("Play")
 							.setDisabled(!card.isPlayable())
 					);
 					await interaction.followUp({
@@ -345,7 +342,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 		const _toOption = (field: number) => (card: Card, index: number) => {
 			if (!card) return;
 			options.push({
-				label: card.nameSummary,
+				label: card.fullSummary(field >= 0 ? index : -1),
 				description: field >= 0 ? `From player ${field+1}'s field, column ${index+1}` :
 					(field == -1 ? `From your hand, card #${index+1}` : `From opponent's backfield, column ${index+1}`),
 				value: `${field}.${index}`
@@ -356,20 +353,20 @@ class BattleInteraction extends PersistentCommandInteraction {
 		this.battle.field[0].forEach(_toOption(0));
 		this.battle.field[1].forEach(_toOption(1));
 		return new MessageActionRow().addComponents(
-			this.makeSelectMenu("inspect").setPlaceholder("Pick a card").addOptions(options)
+			this.makeSelectMenu("inspect", options).setPlaceholder("Pick a card").addOptions(options)
 		);
 	}
 	getHandOptions(userID: string): MessageActionRow {
 		const options = this.getPlayer(userID).hand.sort((a,b) => ((a.isPlayable()?0:1) - (b.isPlayable()?0:1)))
 			.map((card,i) => {
 				return {
-					label: card.nameSummary,
+					label: `${card.nameSummary} [${card.stats[0]}/${card.stats[1]}]`,
 					description: `${card.costEmbedDisplay}${card.isPlayable() ? "" : " (can't play)"}`,
 					value: `${i}`
 				}
 			});
 		return options.length ? new MessageActionRow().addComponents(
-			this.makeSelectMenu("play").setPlaceholder("Pick a card").addOptions(options)
+			this.makeSelectMenu("play", options).setPlaceholder("Pick a card")
 		) : null;
 	}
 	async chooseBlood(interaction: ButtonInteraction, args: string[]): Promise<void> {
@@ -400,7 +397,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			const card = field[i];
 			const pendingSacrifice = sacrifices.includes(i);
 			actions.addComponents(
-				this.makeButton("blood", "", [args[0], args[1], pendingSacrifice ? sacrifices.filter(v => v != i).join("-") : sacrifices.concat([i]).join("-")])
+				this.makeButton("blood", [args[0], args[1], pendingSacrifice ? sacrifices.filter(v => v != i).join("-") : sacrifices.concat([i]).join("-")])
 					.setDisabled(!card || card.noSacrifice || i == target)
 					.setEmoji(pendingSacrifice ? "🩸" : numberEmoji[i+1])
 			)
@@ -504,7 +501,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			})
 		});
 		const actions = new MessageActionRow().addComponents(
-			this.makeSelectMenu("activate").setPlaceholder("Select ability to activate").addOptions(options)
+			this.makeSelectMenu("activate", options).setPlaceholder("Select ability to activate")
 		);
 		await interaction.editReply({
 			content: interaction.message.content,
@@ -547,7 +544,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			await this.reply();
 		} else {
 			const actions = new MessageActionRow().addComponents(
-				this.makeButton("resign", "Resign", ["yes"]).setStyle("DANGER").setEmoji("🏳️")
+				this.makeButton("resign", ["yes"]).setStyle("DANGER").setEmoji("🏳️").setLabel("Resign")
 			)
 			await interaction.followUp({
 				embeds: [{
@@ -564,11 +561,11 @@ class BattleInteraction extends PersistentCommandInteraction {
 		const bell = this.battle.mayRingBell || this.mode == "demo";
 		const hasActive = actor.items.length || this.battle.field[actor.index].filter(c => c?.ability).length;
 		const actions = new MessageActionRow().addComponents(
-			this.makeButton(bell ? "bell" : "draw","").setStyle("PRIMARY").setDisabled(disabled).setEmoji(bell ? "🔔" : "🃏"),
-			this.makeButton("play","").setDisabled(!bell || !actor.hand.length).setEmoji("🖐️"),
-			this.makeButton("activate","").setDisabled(!hasActive).setEmoji("⚡"),
-			this.makeButton("inspect","").setEmoji("🔍"),
-			this.makeButton("resign","").setStyle("DANGER").setEmoji("🏳️")
+			this.makeButton(bell ? "bell" : "draw").setStyle("PRIMARY").setDisabled(disabled).setEmoji(bell ? "🔔" : "🃏"),
+			this.makeButton("play").setDisabled(!bell || !actor.hand.length).setEmoji("🖐️"),
+			this.makeButton("activate").setDisabled(!hasActive).setEmoji("⚡"),
+			this.makeButton("inspect").setEmoji("🔍"),
+			this.makeButton("resign").setStyle("DANGER").setEmoji("🏳️")
 		);
 		return Display.displayBattle(this.battle, "mini-mono", this.battle.ended ? [] : [actions]);
 	}
@@ -752,7 +749,6 @@ export const battle: SlashCommand = {
 		}
 	],
 	run: async(client: Client, interaction: CommandInteraction) => {
-		// const user = User.get(interaction.user.id);
 		const cmd = interaction.options.getSubcommand();
 		if (cmd == "continue") {
 			const battle = BattleInteraction.get(interaction.options.getString("id"));
@@ -769,10 +765,14 @@ export const battle: SlashCommand = {
 	button: async(client: Client, interaction: ButtonInteraction, args: string[]) => {
 		const battleInteraction = BattleInteraction.get(args[0]);
 		const action = <battleAction>args[1];
+		if (action == "resign" && !battleInteraction) {
+			//await interaction.message.
+			return;
+		}
 		if (!battleInteraction?.isAllowedAction(interaction.user.id, action)) return;
 		await interaction.deferUpdate();
 		try {
-			await battleInteraction.receiveAction(interaction, action, args.slice(2));
+			await battleInteraction.receiveButton(interaction, action, args.slice(2));
 		} catch (e) {
 			if (e instanceof DiscordAPIError) {
 				console.error(e);

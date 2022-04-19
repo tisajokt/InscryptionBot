@@ -1,7 +1,7 @@
 
 import { MessageActionRow } from 'discord.js';
 import { AutoBattler, Battle, Card, MAX_ENERGY, moxColor, PlayerBattler } from './Game';
-import { padTrim, toProperFormat } from './util';
+import { padTrim, singleCharStat, toProperFormat } from './util';
 
 const defaultDisplayMode: displayMode = "mini-mono";
 
@@ -17,9 +17,6 @@ const myTurnMiniMono = "".padEnd(miniMonoSize, "═");
 const emptyMiniMono = "".padEnd(miniMonoSize, " ");
 
 export class Display {
-	static singleCharStat(stat: number): string {
-		return stat < 10 ? `${stat}` : "!";
-	}
 	static displayPlayer(player: PlayerBattler): string {
 		const cards = `[P${player.index+1}] ${player.hand.length.toString().padStart(2, " ")}/${player.deck.cards.length.toString().padEnd(2, " ")}`;
 		const mox = `m(${["blue", "green", "orange"].map(c => player.battle.hasMoxColor(player.index, <moxColor>c) ? c[0].toUpperCase() : " ").join("")})`;
@@ -40,7 +37,7 @@ export class Display {
 		const numSigils = [...card.sigils].length;
 		const conduit = (card.isConduit ? "~" : " ");
 		const sigilIcon = numSigils ? (card.hasModifiedSigils ? (card.ability ? `@${numSigils}` : `+${numSigils}`) : (card.ability ? " @" : " *")) : "  ";
-		return (padTrim(`${this.singleCharStat(card.getPower(i))}${card.noSacrifice ? ":" : "/"}${this.singleCharStat(card.stats[1])}`, miniMonoSize-2) + sigilIcon).replaceAll(" ", conduit);
+		return (padTrim(`${singleCharStat(card.getPower(i))}${card.noSacrifice ? ":" : "/"}${singleCharStat(card.stats[1])}`, miniMonoSize-2) + sigilIcon).replaceAll(" ", conduit);
 	}
 	static displayBattleFullMono(battle: Battle): string {
 		const header = ``;
@@ -49,7 +46,7 @@ export class Display {
 		return `\`\`\`${header}\n${player1Info}\n${player0Info}\`\`\``;
 	}
 	static displayBattleMiniMono(battle: Battle): string {
-		const header = battle.candleDisplay + (battle.getBot()?.bossEffect ? `\nBoss effect: ${toProperFormat(battle.getBot().bossEffect)}` : "");
+		const header = battle.candleDisplay + (battle.getBot()?.bossEffect ? `\nNext boss effect: ${toProperFormat(battle.getBot().bossEffect)}` : "");
 		const player1Info = battle.isHuman(1) ? this.displayPlayer(battle.getPlayer(1)) : this.displayBackfield(<AutoBattler>battle.players[1], "mini-mono");
 		const separator = Array(battle.fieldSize).fill(lineMiniMono).join("+");
 		const turnSeparator = Array(battle.fieldSize).fill(myTurnMiniMono).join("#");

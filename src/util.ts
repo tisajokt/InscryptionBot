@@ -20,6 +20,9 @@ export function toProperCase(str: string): string {
 export function toProperFormat(str: string): string {
 	return str.split(/[ _]/).map(s => toProperCase(s)).join(" ");
 }
+export function singleCharStat(stat: number): string {
+	return stat < 10 ? `${stat}` : "!";
+}
 export function abbreviate(str: string, len: number): string {
 	str = str.split(/[ _]/).map(s => toProperCase(s)).join(" ");
 	if (str.length <= len) return str;
@@ -48,3 +51,9 @@ export function generateRandomID(len: number): string {
 	return id;
 }
 export const numberEmoji = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
+export const costEmoji = {
+	blood: "🩸",
+	bones: "🦴",
+	mox: "💎",
+	energy: "🔋"
+};
