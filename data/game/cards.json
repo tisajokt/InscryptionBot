@@ -1388,6 +1388,21 @@
 		"modded": "MoxExpansion",
 		"#comment": "while on the field, you may sacrifice cards which aren't normally sacrificeable"
 	},
+	"combat_mage": {
+		"stats": [1,1,0],
+		"cost": "mox",
+		"sigils": ["stun_latch", "blood_lust"],
+		"mox": ["green"],
+		"modded": "MoxExpansion"
+	},
+	"arcane_artist": {
+		"stats": [0,1,0],
+		"cost": "mox",
+		"sigils": ["painter"],
+		"mox": ["blue"],
+		"power_calc": "sigils",
+		"modded": "MoxExpansion"
+	},
 	"vampire": {
 		"stats": [2,1,5],
 		"cost": "bones",
