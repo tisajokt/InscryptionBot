@@ -745,6 +745,11 @@
 		"fish_gifts": true,
 		"#comment": "added fisher sigil, buffed power to 2, nerfed health to 2"
 	},
+	"lonely_wizbot": {
+		"stats": [2,1,2],
+		"cost": "energy",
+		"sigils": ["clinger"]
+	},
 	"good_fish": {
 		"stats": [2,2,6],
 		"cost": "energy",
@@ -1214,8 +1219,7 @@
 	"skelemagus": {
 		"stats": [4,1,2],
 		"cost": "bones",
-		"sigils": ["brittle", "gem_dependent"],
-		"mox": ["any"]
+		"sigils": ["brittle", "gem_dependent"]
 	},
 	"revenant": {
 		"stats": [3,1,3],
@@ -1483,10 +1487,15 @@
 		"sigils": ["waterborne", "piercing"],
 		"modded": true
 	},
+	"glitched_card": {
+		"glitch": true,
+		"event": "none",
+		"modded": "special"
+	},
 
 
 
-	"z+t": {
+	"z_+_t": {
 		"stats": [3,2,1],
 		"cost": "blood",
 		"sigils": ["many_lives"],
