@@ -11,7 +11,7 @@
 		["trifurcated", "item_bearer", "steel_trap", "power_dice", "painter"],
 		["moon_strike"]
 	],
-	"__player_sigils": ["hovering", "four_bones", "undying", "worthy_sacrifice", "digger", "battery", "energy_conduit", "vessel_printer", "scavenger", "piercing", "haunter", "rabbit_hole", "beehive", "fecundity", "corpse_eater", "spawn_ant", "gemnastics", "disentomb", "scholar", "morsel", "hoarder", "many_lives", "handy", "enlarge", "energy_gun", "looter", "stimulate", "bonehorn", "item_bearer", "power_dice", "random_mox", "skellify", "painter", "gift_bearer"],
+	"__player_sigils": ["hovering", "four_bones", "undying", "worthy_sacrifice", "digger", "battery", "energy_conduit", "vessel_printer", "scavenger", "piercing", "haunter", "rabbit_hole", "beehive", "fecundity", "corpse_eater", "spawn_ant", "gemnastics", "disentomb", "scholar", "morsel", "hoarder", "many_lives", "handy", "enlarge", "energy_gun", "looter", "stimulate", "bonehorn", "item_bearer", "power_dice", "random_mox", "skellify", "painter", "gift_bearer", "painter"],
 	"haunter": {
 		"desc": "when sacrificed, the new card gains this card's sigils; upon death, returns to your hand as a spirit"
 	},
@@ -133,8 +133,7 @@
 		"desc": "upon death, choose a card on the field to be given the brittle sigil"
 	},
 	"sniper": {
-		"desc": "may target any position on the field when attacking",
-		"active": true
+		"desc": "may target any position on the field when attacking"
 	},
 	"scholar": {
 		"desc": "if you control a blue mox, you may activate: sacrifice self and draw 3 cards",

@@ -137,6 +137,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 	select: (value: number)=>void;
 	selectingPlayer: playerIndex;
 	async uponSelect(source: selectSource, player: playerIndex, defaultVal?: number, args: string[]=[]): Promise<number> {
+		if (!this.battle.isHuman(player)) return defaultVal;
 		var title: string;
 		var description: string;
 		const actions = new MessageActionRow();
@@ -163,7 +164,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 				this.makeFieldButtons("select", [], this.battle.field[player], (c) => !c, actions);
 				break;
 			case "latch":
-				title = args[0] == "stunned" ? "💫 Stun Latch" : `🪛 ${toProperFormat(args[0])} Latch`;
+				title = `💫 Latch: ${toProperFormat(args[0])}`;
 				description = `Choose a card to receive the _${args[0].replaceAll("_", " ")}_ sigil`;
 				actions.addComponents(this.makeSelectMenu("select", this.getFieldOptions(c => c && !c.sigils.has(<sigil>args[0]))));
 				break;
@@ -591,9 +592,10 @@ class BattleInteraction extends PersistentCommandInteraction {
 		const actions = new MessageActionRow().addComponents(
 			this.makeSelectMenu("activate", options).setPlaceholder("Select ability to activate")
 		);
+		const reply = this.makeReply();
 		await interaction.editReply({
-			content: interaction.message.content,
-			embeds: interaction.message.embeds,
+			content: reply.content,
+			embeds: reply.embeds,
 			components: [actions]
 		});
 	}

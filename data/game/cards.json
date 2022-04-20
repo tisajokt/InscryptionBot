@@ -1399,13 +1399,12 @@
 		"mox": ["green"],
 		"modded": "MoxExpansion"
 	},
-	"arcane_artist": {
+	"arcane_artistan": {
 		"stats": [0,1,0],
 		"cost": "mox",
 		"sigils": ["painter"],
 		"mox": ["blue"],
 		"power_calc": "sigils",
-		"rare": true,
 		"modded": "MoxExpansion"
 	},
 	"vampire": {

@@ -112,7 +112,6 @@ export class Card {
 
 	/* Assigned under certain circumstances */
 	cooldown?: number;
-	target?: number;
 	sprintToLeft?: boolean;
 	awakened?: boolean;
 	sacrifices?: number;
@@ -433,9 +432,6 @@ export class Card {
 				}
 			}
 		}
-		if (this.sigils.has("sniper")) {
-			this.target = this.battle.isHuman(this.owner) ? i : Math.floor(Math.random() * this.battle.fieldSize);
-		}
 		if (this.sigils.has("bomb_spewer")) {
 			for (let k of [this.owner, 1-this.owner]) {
 				for (let j = 0; j < this.battle.fieldSize; j++) {
@@ -546,9 +542,9 @@ export class Card {
 			this.battle.getCardsWithSigil(this.owner, "gem_detonator").length + this.battle.getCardsWithSigil(other, "gem_detonator").length > 0) {
 				// shouldn't be necessary to delete the sigil, but just in case, to avoid infinite loop
 				this.removeSigil("detonator");
-				if (this.battle.field[other][i]) await this.battle.field[other][i].takeDamage(i, Infinity);
-				if (i-1 >= 0 && this.battle.field[this.owner][i-1]) await this.battle.field[this.owner][i-1].takeDamage(i-1, Infinity);
-				if (i+1 < this.battle.fieldSize && this.battle.field[this.owner][i+1]) await this.battle.field[this.owner][i+1].takeDamage(i+1, Infinity);
+				if (this.battle.field[other][i]) await this.battle.field[other][i].takeDamage(i, 10);
+				if (i-1 >= 0 && this.battle.field[this.owner][i-1]) await this.battle.field[this.owner][i-1].takeDamage(i-1, 10);
+				if (i+1 < this.battle.fieldSize && this.battle.field[this.owner][i+1]) await this.battle.field[this.owner][i+1].takeDamage(i+1, 10);
 			}
 		}
 		// Last green mox is destroyed, update health of gemified cards
@@ -1255,7 +1251,7 @@ export abstract class Battle {
 		const card = this.field[player][i];
 		if (!card) return 0;
 		if (card.sigils.has("sniper")) {
-			j = await this.waitForSelection("sniper", player, card.target);
+			j = await this.waitForSelection("sniper", player, Math.floor(Math.random() * this.fieldSize));
 		}
 
 		if (!(j >= 0 && j < this.fieldSize)) return 0;
