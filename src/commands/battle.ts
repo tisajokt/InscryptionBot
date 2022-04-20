@@ -138,11 +138,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 	selectingPlayer: playerIndex;
 	async uponSelect(source: selectSource, player: playerIndex, defaultVal?: number, args: string[]=[]): Promise<number> {
 		if (!this.battle.isHuman(player)) return defaultVal;
-		const reply = this.makeReply();
-		await this.interaction.editReply({
-			content: reply.content,
-			embeds: reply.embeds
-		});
+		await this.refresh();
 		if (this.select) {
 			const oldSelect = this.select;
 			await new Promise<void>(resolve => {
@@ -242,6 +238,8 @@ class BattleInteraction extends PersistentCommandInteraction {
 		await this.battle.setupTurn();
 		return this.battle;
 	}
+	// .confirm.decline
+	// .confirm.accept.[player index]
 	async confirmation(): Promise<void> {
 		if (this.mode != "duel") return;
 		const actions = new MessageActionRow().addComponents(
@@ -342,6 +340,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 		}
 		return actions;
 	}
+	// .draw.hammer.[field position]
 	async chooseHammer(interaction: ButtonInteraction, arg: string): Promise<void> {
 		const choice = parseInt(arg);
 		const idx = this.getPlayerIdx(interaction.user.id);
@@ -360,6 +359,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 		};
 		await interaction.editReply(message);
 	}
+	// .draw?.["deck"|"sidedeck"|"hammer"]
 	async chooseDraw(interaction: ButtonInteraction, args: string[]): Promise<void> {
 		const choice = args[0];
 		if (!choice) {
@@ -468,6 +468,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			this.makeSelectMenu("play", options).setPlaceholder("Pick a card")
 		) : null;
 	}
+	// .blood.[hand index].[field position]?.[i0-i1-...]
 	async chooseBlood(interaction: ButtonInteraction, args: string[]): Promise<void> {
 		if (args.length < 2) return;
 		const player = this.getPlayer(interaction.user.id);
@@ -485,9 +486,9 @@ class BattleInteraction extends PersistentCommandInteraction {
 		var blood = 0;
 		sacrifices.map(k => field[k]?.blood || 0).forEach(n => {blood += n});
 		if (player.blood + blood >= card.getCost()) {
-			sacrifices.forEach(k => {
-				field[k]?.onSacrifice(k, card, target);
-			});
+			for (let k of sacrifices) {
+				await field[k]?.onSacrifice(k, card, target);
+			}
 			await this.play(interaction, args);
 			return;
 		}
@@ -509,6 +510,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			components: [actions]
 		});
 	}
+	// .play?.[hand index]?.[field position]
 	async play(interaction: ButtonInteraction, args: string[]): Promise<void> {
 		if (args.length >= 2) {
 			const index = parseInt(args[0]);
@@ -560,6 +562,9 @@ class BattleInteraction extends PersistentCommandInteraction {
 			components: [actions]
 		});
 	}
+	// .activate
+	// .activate.none
+	// .activate.[item|field].[card index]
 	async activateSelect(interaction: SelectMenuInteraction, args: string[]): Promise<void> {
 		if (!args[0]) return;
 		args = args[0].split(".");
@@ -612,6 +617,8 @@ class BattleInteraction extends PersistentCommandInteraction {
 			components: [actions]
 		});
 	}
+	// .inspect
+	// .inspect.[area].[card index]
 	async inspectCard(interaction: SelectMenuInteraction, args: string[]): Promise<void> {
 		if (!args[0]) return;
 		args = args[0].split(".");
@@ -638,6 +645,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			ephemeral: true
 		});
 	}
+	// .resign?.yes
 	async resign(interaction: ButtonInteraction, args: string[]): Promise<void> {
 		if (this.battle.turn < 2) {
 			this.battle.ended = true;
@@ -670,13 +678,22 @@ class BattleInteraction extends PersistentCommandInteraction {
 			this.makeButton("inspect").setEmoji("🔍"),
 			this.makeButton("resign").setStyle("DANGER").setEmoji("🏳️")
 		);
-		return Display.displayBattle(this.battle, "mini-mono", this.battle.ended ? [] : [actions]);
-	}
-	async reply(interaction: CommandInteraction|MessageComponentInteraction=this.interaction): Promise<void> {
-		const reply = this.makeReply();
+		const reply = Display.displayBattle(this.battle, "mini-mono", this.battle.ended ? [] : [actions]);
 		if (this.mode == "duel") {
 			reply.content = `<@${this.playerIDs[this.battle.actor]}>'s Turn\n${reply.content||""}`;
 		}
+		return reply;
+	}
+	async refresh(): Promise<void> {
+		// Refresh battle view without affecting UI elements
+		const reply = this.makeReply();
+		await this.interaction.editReply({
+			content: reply.content,
+			embeds: reply.embeds
+		});
+	}
+	async reply(interaction: CommandInteraction|MessageComponentInteraction=this.interaction): Promise<void> {
+		const reply = this.makeReply();
 		await interaction.editReply(reply);
 	}
 	isAllowedUser(userID: string): boolean {

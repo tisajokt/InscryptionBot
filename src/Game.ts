@@ -567,16 +567,16 @@ export class Card {
 			card.stats[0] += this.stats[0];
 			card.stats[1] += this.stats[1];
 		}
+		if (!this.sigils.has("many_lives")) {
+			this.sacrificedFor = t;
+			await this.onDeath(i);
+			delete this.sacrificedFor;
+		}
 		if (this.sigils.has("haunter")) {
 			for (const sigil of this.sigils) {
 				card.addSigil(sigil);
 			}
 			this.sigils.clear();
-		}
-		if (!this.sigils.has("many_lives")) {
-			this.sacrificedFor = t;
-			await this.onDeath(i);
-			delete this.sacrificedFor;
 		}
 		if (this.name == "child_13") {
 			this.awakened = !this.awakened;
