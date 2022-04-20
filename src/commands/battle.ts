@@ -1,6 +1,6 @@
 import { Client, MessageActionRow, MessageButton, ButtonInteraction, CommandInteraction, InteractionReplyOptions, MessageSelectMenu, SelectMenuInteraction, MessageComponentInteraction, DiscordAPIError, TextBasedChannel } from "discord.js";
 import { PersistentCommandInteraction, SlashCommand } from "../Command";
-import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, Item, sidedecks, selectSource, modelSummary } from "../Game";
+import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, Item, sidedecks, selectSource, modelSummary, sigil } from "../Game";
 import { Display } from "../Display";
 import { AppUser } from "../User";
 import { generateRandomID, numberEmoji, pickRandom, sleep, toProperCase, toProperFormat } from "../util";
@@ -117,9 +117,26 @@ class BattleInteraction extends PersistentCommandInteraction {
 		else if (result.terrain == "none") result.terrain = "";
 		return this._options = result;
 	}
+	getFieldOptions(filter: (card: Card)=>boolean = (c)=>!!c) {
+		return this.battle.field[0].map((card, i) => {
+			return card ? {
+				card: card,
+				label: card.fullSummary(i),
+				description: `From player 1's field, column ${i+1}`,
+				value: `${card.absoluteIndex(i)}`
+			} : null;
+		}).concat(this.battle.field[1].map((card, i) => {
+			return card ? {
+				card: card,
+				label: card.fullSummary(i),
+				description: `From player 2's field, column ${i+1}`,
+				value: `${card.absoluteIndex(i)}`
+			} : null;
+		})).filter(option => filter(option?.card));
+	}
 	select: (value: number)=>void;
 	selectingPlayer: playerIndex;
-	async uponSelect(source: selectSource, player: playerIndex, defaultVal?: number): Promise<number> {
+	async uponSelect(source: selectSource, player: playerIndex, defaultVal?: number, args: string[]=[]): Promise<number> {
 		var title: string;
 		var description: string;
 		const actions = new MessageActionRow();
@@ -133,7 +150,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 						label: typeof card == "string" ? modelSummary(card) : card.fullSummary(-1),
 						value: `${i}`
 					};
-				}).slice(0, 25)));
+				}).slice(0, 25))); // Discord API limitation
 				break;
 			case "sniper":
 				title = "🎯 Sniper";
@@ -145,23 +162,15 @@ class BattleInteraction extends PersistentCommandInteraction {
 				description = "Choose a card of yours to hammer";
 				this.makeFieldButtons("select", [], this.battle.field[player], (c) => !c, actions);
 				break;
+			case "latch":
+				title = `💫 ${toProperFormat(args[0])} Latch`;
+				description = `Choose a card to receive the ${args[0].replaceAll("_", " ")} sigil`;
+				actions.addComponents(this.makeSelectMenu("select", this.getFieldOptions(c => c && !c.sigils.has(<sigil>args[0]))));
+				break;
 			case "skinning_knife":
 				title = "🔪 Skinning Knife";
 				description = "Choose a card on the field to skin";
-				const fieldOptions = this.battle.field[0].filter(c => c).map((card, i) => {
-					return {
-						label: card.fullSummary(i),
-						description: `From player 1's field, column ${i+1}`,
-						value: `${i}`
-					};
-				}).concat(this.battle.field[1].filter(c => c).map((card, i) => {
-					return {
-						label: card.fullSummary(i),
-						description: `From player 2's field, column ${i+1}`,
-						value: `${i+this.battle.fieldSize}`
-					};
-				}));
-				actions.addComponents(this.makeSelectMenu("select", fieldOptions));
+				actions.addComponents(this.makeSelectMenu("select", this.getFieldOptions()));
 				break;
 			default:
 				return defaultVal;
