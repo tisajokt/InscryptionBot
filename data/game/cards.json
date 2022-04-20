@@ -664,7 +664,8 @@
 		"event": "none"
 	},
 	"bait_bucket": {
-		"stats": [0,1,0],
+		"stats": [0,1,2],
+		"cost": "blood",
 		"sigils": ["sealed_away"],
 		"sealed_away": "great_white",
 		"no_sacrifice": true,

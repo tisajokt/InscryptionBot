@@ -4,7 +4,7 @@ import { SlashCommand } from "../Command";
 export const admin: SlashCommand = {
 	name: "admin",
 	description: "Admin commands",
-	run: async(client: Client, interaction: BaseCommandInteraction) => {
+	run: async(interaction: BaseCommandInteraction) => {
 		await interaction.reply({
 			ephemeral: true,
 			content: `Admin!!`

@@ -8,7 +8,7 @@ async function handleCommand(client: Client, interaction: CommandInteraction): P
 		interaction.followUp({content: "An error has occurred!"});
 		return;
 	}
-	await command.run(client, interaction);
+	await command.run(interaction);
 }
 async function handleButton(client: Client, interaction: ButtonInteraction): Promise<void> {
 	console.log(`Received a "${interaction.customId}" button interaction`);
@@ -17,7 +17,7 @@ async function handleButton(client: Client, interaction: ButtonInteraction): Pro
 		interaction.followUp({content: "An error has occurred!"});
 		return;
 	}
-	await command.button(client, interaction, interaction.customId.split(".").slice(1));
+	await command.button(interaction, interaction.customId.split(".").slice(1));
 }
 async function handleSelectMenu(client: Client, interaction: SelectMenuInteraction): Promise<void> {
 	console.log(`Received a "${interaction.customId}" select menu interaction, value: ${interaction.values[0]}`);
@@ -28,7 +28,7 @@ async function handleSelectMenu(client: Client, interaction: SelectMenuInteracti
 	}
 	const args = interaction.customId.split(".").slice(1);
 	if (interaction.values[0]) args.push(...interaction.values[0].split("."));
-	await command.menu(client, interaction, args);
+	await command.menu(interaction, args);
 }
 
 export default (client: Client): void => {

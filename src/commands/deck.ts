@@ -1,4 +1,4 @@
-import { ButtonInteraction, Client, CommandInteraction, MessageActionRow, MessageButton, MessageComponentInteraction, SelectMenuInteraction } from "discord.js";
+import { ButtonInteraction, CacheType, Client, CommandInteraction, MessageActionRow, MessageButton, MessageComponentInteraction, SelectMenuInteraction } from "discord.js";
 import { PersistentCommandInteraction, SlashCommand } from "src/Command";
 import { AppUser } from "src/User";
 
@@ -45,12 +45,21 @@ class DeckInteraction extends PersistentCommandInteraction {
 			components: []
 		});
 	}
+	isAllowedAction(userID: string, action: string): boolean {
+		return true;
+	}
+	async receiveComponent(i: MessageComponentInteraction<CacheType>, action: string, args: string[]): Promise<void> {
+		
+	}
+	async tokenExpired(): Promise<void> {
+		
+	}
 }
 
 export const deck: SlashCommand = {
 	name: "deck",
 	description: "Manage your card decks for duels & sandbox battles",
-	run: async(client: Client, interaction: CommandInteraction) => {
+	run: async(interaction: CommandInteraction) => {
 		await interaction.deferReply();
 		await (new DeckInteraction(interaction)).reply();
 	}

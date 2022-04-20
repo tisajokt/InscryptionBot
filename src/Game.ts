@@ -1939,7 +1939,7 @@ export class Player {
 		};
 		const _themeFilter = (c: cardName) => {
 			const model = getModel(c);
-			if (!model.mox && !model.cost && sidedeck != "mox_crystal") return true;
+			if (!model.cost && !model.is_mox && sidedeck != "mox_crystal") return true;
 			if (model.cost == "mox" && !["mox_crystal", "omnisquirrel"].includes(sidedeck)) return false;
 			switch (sidedeck) {
 				case "squirrel": return model.themes.has("blood") || model.vanilla_cabin;

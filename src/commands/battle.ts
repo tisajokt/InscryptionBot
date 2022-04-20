@@ -1,13 +1,14 @@
-import { Client, MessageActionRow, MessageButton, ButtonInteraction, CommandInteraction, InteractionReplyOptions, MessageSelectMenu, SelectMenuInteraction, MessageComponentInteraction, DiscordAPIError, TextBasedChannel } from "discord.js";
-import { PersistentCommandInteraction, SlashCommand } from "../Command";
+import { Client, MessageActionRow, ButtonInteraction, CommandInteraction, InteractionReplyOptions, SelectMenuInteraction, MessageComponentInteraction, DiscordAPIError } from "discord.js";
+import { componentAction, PersistentCommandInteraction, SlashCommand } from "../Command";
 import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, Item, sidedecks, selectSource, modelSummary, sigil } from "../Game";
 import { Display } from "../Display";
 import { AppUser } from "../User";
 import { generateRandomID, numberEmoji, pickRandom, sleep, toProperCase, toProperFormat } from "../util";
 import game_config from "../../data/game/config.json";
 import { jsonMember, jsonObject } from "typedjson";
+import { assert } from "console";
 
-type battleMode = "demo"|"solo"|"duel";
+type battleMode = "solo"|"duel";
 type battleAction = "confirm"|"draw"|"bell"|"play"|"activate"|"inspect"|"resign"|"blood"|"select";
 @jsonObject
 export class BattleOptions {
@@ -74,7 +75,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 	static async create(interaction: CommandInteraction): Promise<BattleInteraction> {
 		const battleInteraction = new BattleInteraction(interaction);
 		if (battleInteraction.mode == "duel") {
-			await battleInteraction.confirmation();
+			await battleInteraction.confirm();
 		} else {
 			await battleInteraction.init();
 			await battleInteraction.reply();
@@ -134,15 +135,15 @@ class BattleInteraction extends PersistentCommandInteraction {
 			} : null;
 		})).filter(option => filter(option?.card));
 	}
-	select: (value: number)=>void;
+	selectCallback: (value: number)=>void;
 	selectingPlayer: playerIndex;
 	async uponSelect(source: selectSource, player: playerIndex, defaultVal?: number, args: string[]=[]): Promise<number> {
 		if (!this.battle.isHuman(player)) return defaultVal;
 		await this.refresh();
-		if (this.select) {
-			const oldSelect = this.select;
+		if (this.selectCallback) {
+			const oldSelect = this.selectCallback;
 			await new Promise<void>(resolve => {
-				this.select = (value: number) => {
+				this.selectCallback = (value: number) => {
 					oldSelect(value);
 					resolve();
 				}
@@ -161,7 +162,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 						label: typeof card == "string" ? modelSummary(card) : card.fullSummary(-1),
 						value: `${i}`
 					};
-				}).slice(0, 25))); // Discord API limitation
+				})));
 				break;
 			case "sniper":
 				title = "🎯 Sniper";
@@ -195,8 +196,8 @@ class BattleInteraction extends PersistentCommandInteraction {
 		});
 		this.selectingPlayer = player;
 		return await new Promise((resolve) => {
-			this.select = (value: number) => {
-				delete this.select;
+			this.selectCallback = (value: number) => {
+				delete this.selectCallback;
 				resolve(value);
 			}
 		});
@@ -206,15 +207,11 @@ class BattleInteraction extends PersistentCommandInteraction {
 		const options = this.options;
 		const player = new Player(options.sidedeck);
 		switch (this.mode) {
-			case "demo":
-				this.battle = this.interaction.options.getString("type") == "solo" ? new SoloBattle(player, 2, options) : new DuelBattle(player, player, options);
-				break;
 			case "solo":
 				this.battle = new SoloBattle(player/*User.get(this.userID).soloPlayer*/, this.interaction.options.getInteger("difficulty") || 2, options);
 				break;
 			case "duel":
 				const player2 = new Player(options.sidedeck);
-				console.log("Sidedecks:", player.sidedeck.name, player2.sidedeck.name);
 				this.battle = new DuelBattle(player/*User.get(this.playerIDs[0]).duelPlayer*/, player2/*User.get(this.playerIDs[1]).duelPlayer*/, options);
 				break;
 		}
@@ -238,25 +235,45 @@ class BattleInteraction extends PersistentCommandInteraction {
 		await this.battle.setupTurn();
 		return this.battle;
 	}
-	// .confirm.decline
-	// .confirm.accept.[player index]
-	async confirmation(): Promise<void> {
-		if (this.mode != "duel") return;
-		const actions = new MessageActionRow().addComponents(
-			this.makeButton("confirm", ["accept", "0"]).setEmoji(numberEmoji[1]),
-			this.makeButton("confirm", ["accept", "1"]).setEmoji(numberEmoji[2]),
-			this.makeButton("confirm", ["decline"]).setLabel("Decline").setStyle("DANGER")
-		)
-		await this.interaction.editReply({
-			embeds: [{
-				title: "Battle request",
-				description: `<@${this.userID}> vs. <@${this.playerIDs[1]}>`
-			}],
-			components: [actions]
-		});
+	static get(id: string): BattleInteraction {
+		return this.list[id];
 	}
-	async confirmChoice(interaction: ButtonInteraction, args: string[]): Promise<void> {
-		if (!args.length) return;
+	static componentActions: Map<battleAction, componentAction> = new Map([
+		["confirm", BattleInteraction.prototype.confirm],
+		["draw", BattleInteraction.prototype.draw],
+		["bell", BattleInteraction.prototype.bell],
+		["play", BattleInteraction.prototype.play],
+		["activate", BattleInteraction.prototype.activate],
+		["inspect", BattleInteraction.prototype.inspect],
+		["resign", BattleInteraction.prototype.resign],
+		["blood", BattleInteraction.prototype.blood],
+		["select", BattleInteraction.prototype.select]
+	]);
+	async receiveComponent(interaction: MessageComponentInteraction, action: battleAction, args: string[]=[]): Promise<void> {
+		if (BattleInteraction.componentActions.has(action)) {
+			console.log(`Received ${action} with ${args.length} args:`, args);
+			await BattleInteraction.componentActions.get(action).call(this, interaction, args);
+		}
+	}
+	async confirm(interaction?: MessageComponentInteraction, args: string[]=[]): Promise<void> {
+		// on init of duel battle
+		if (!args[0]) {
+			if (this.mode != "duel") return;
+			const actions = new MessageActionRow().addComponents(
+				this.makeButton("confirm", ["accept", "0"]).setEmoji(numberEmoji[1]),
+				this.makeButton("confirm", ["accept", "1"]).setEmoji(numberEmoji[2]),
+				this.makeButton("confirm", ["decline"]).setLabel("Decline").setStyle("DANGER")
+			)
+			await this.interaction.editReply({
+				embeds: [{
+					title: "Battle request",
+					description: `<@${this.userID}> vs. <@${this.playerIDs[1]}>`
+				}],
+				components: [actions]
+			});
+			return;
+		}
+		// .confirm.decline
 		if (args[0] == "decline") {
 			delete BattleInteraction.list[this.id];
 			await interaction.editReply({
@@ -266,154 +283,95 @@ class BattleInteraction extends PersistentCommandInteraction {
 				}],
 				components: []
 			});
-		} else if (args[0] == "accept" && args[1]) {
+			return;
+		}
+		// .confirm.accept.[player index]
+		if (args[0] == "accept" && args[1]) {
 			if (args[1] == "0") {
 				this.playerIDs = [this.playerIDs[1], this.playerIDs[0]];
 			}
 			await this.init();
 			await this.reply();
-		}
-	}
-	static get(id: string): BattleInteraction {
-		return this.list[id];
-	}
-	async receiveButton(interaction: ButtonInteraction, action: battleAction, args: string[]=[]): Promise<boolean> {
-		switch (action) {
-			case "confirm":
-				await this.confirmChoice(interaction, args);
-				break;
-			case "draw":
-				await this.chooseDraw(interaction, args);
-				break;
-			case "bell":
-				await this.ringBell(interaction);
-				break;
-			case "play":
-				await this.play(interaction, args);
-				break;
-			case "blood":
-				await this.chooseBlood(interaction, args);
-				break;
-			case "activate":
-				await this.activate(interaction);
-				break;
-			case "inspect":
-				await this.inspect(interaction);
-				break;
-			case "resign":
-				await this.resign(interaction, args);
-				break;
-			case "select":
-				this.select && this.select(parseInt(args[0]));
-				await interaction.deleteReply();
-				await this.reply();
-				break;
-		}
-		return true;
-	}
-	async receiveMenu(interaction: SelectMenuInteraction, action: battleAction, args: string[]=[]): Promise<boolean> {
-		switch (action) {
-			case "play":
-				await this.playCard(interaction, args);
-				break;
-			case "inspect":
-				await this.inspectCard(interaction, args);
-				break;
-			case "activate":
-				await this.activateSelect(interaction, args);
-				break;
-			case "select":
-				this.select && this.select(parseInt(args[0]));
-				await interaction.deleteReply();
-				await this.reply();
-				break;
-		}
-		return true;
-	}
-	makeFieldButtons(action: battleAction, args: string[], field: Card[], disable: (c: Card) => boolean, row?: MessageActionRow): MessageActionRow {
-		const actions = row || new MessageActionRow();
-		for (let i = 0; i < field.length; i++) {
-			actions.addComponents(
-				this.makeButton(action, args.concat([`${i}`]))
-					.setDisabled(disable(field[i])).setEmoji(numberEmoji[i+1])
-			)
-		}
-		return actions;
-	}
-	// .draw.hammer.[field position]
-	async chooseHammer(interaction: ButtonInteraction, arg: string): Promise<void> {
-		const choice = parseInt(arg);
-		const idx = this.getPlayerIdx(interaction.user.id);
-		const field = this.battle.field[idx];
-		if (arg && field[choice]) {
-			const player = this.getPlayer(interaction.user.id);
-			await player.useHammer(choice);
-			await this.reply(interaction);
 			return;
 		}
-		const actions = this.makeFieldButtons("draw", ["hammer"], field, (c) => !c);
-		const message = {
-			content: interaction.message.content,
-			embeds: interaction.message.embeds,
-			components: [actions]
-		};
-		await interaction.editReply(message);
 	}
-	// .draw?.["deck"|"sidedeck"|"hammer"]
-	async chooseDraw(interaction: ButtonInteraction, args: string[]): Promise<void> {
-		const choice = args[0];
-		if (!choice) {
-			const actions = new MessageActionRow().addComponents(
-				this.makeButton("draw", ["deck"]).setDisabled(!this.battle.hasDrawOption("deck")).setEmoji("🃏"),
-				this.makeButton("draw", ["sidedeck"]).setDisabled(!this.battle.hasDrawOption("sidedeck")).setEmoji(this.battle.getPlayer(this.battle.actor).sidedeckIcon),
-				this.makeButton("draw", ["hammer"]).setDisabled(!this.battle.hasDrawOption("hammer")).setEmoji("🔨"),
-				this.makeButton("inspect").setEmoji("🔍")
-			);
-			const message = {
-				content: interaction.message.content,
-				embeds: interaction.message.embeds,
-				components: [actions]
-			};
-			await interaction.editReply(message);
-			return;
-		}
-		const player = this.battle.getPlayer(this.battle.actor);
-		if (player.index != this.battle.actor) return;
-		switch (choice) {
-			case "deck":
-				const num = await player.drawFrom(player.deck);
-				if (num) {
-					const card = player.hand[player.hand.length-1];
-					const actions = new MessageActionRow().addComponents(
-						this.makeButton("play", [(player.hand.length-1).toString()]).setLabel("Play")
-							.setDisabled(!card.isPlayable())
-					);
-					await interaction.followUp({
-						embeds: [{
-							title: "🃏 Drew from deck:",
-							fields: [card.getEmbedDisplay(-1)]
-						}],
-						components: card.isPlayable() ? [actions] : [],
-						ephemeral: true
-					})
+	async draw(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
+		switch (args.length) {
+			// .draw
+			case 0:
+				const actions = new MessageActionRow().addComponents(
+					this.makeButton("draw", ["deck"]).setDisabled(!this.battle.hasDrawOption("deck")).setEmoji("🃏"),
+					this.makeButton("draw", ["sidedeck"]).setDisabled(!this.battle.hasDrawOption("sidedeck")).setEmoji(this.battle.getPlayer(this.battle.actor).sidedeckIcon),
+					this.makeButton("draw", ["hammer"]).setDisabled(!this.battle.hasDrawOption("hammer")).setEmoji("🔨"),
+					this.makeButton("inspect").setEmoji("🔍")
+				);
+				const message = {
+					content: interaction.message.content,
+					embeds: interaction.message.embeds,
+					components: [actions]
+				};
+				await interaction.editReply(message);
+				break;
+			// .draw.[deck|sidedeck|hammer]
+			case 1:
+				const choice = args[0];
+				const player = this.battle.getPlayer(this.battle.actor);
+				if (player.index != this.battle.actor) return;
+				switch (choice) {
+					case "deck":
+						const num = await player.drawFrom(player.deck);
+						if (num) {
+							const card = player.hand[player.hand.length-1];
+							const actions = new MessageActionRow().addComponents(
+								this.makeButton("play", [(player.hand.length-1).toString()]).setLabel("Play")
+									.setDisabled(!card.isPlayable())
+							);
+							await interaction.followUp({
+								embeds: [{
+									title: "🃏 Drew from deck:",
+									fields: [card.getEmbedDisplay(-1)]
+								}],
+								components: card.isPlayable() ? [actions] : [],
+								ephemeral: true
+							})
+						}
+						break;
+					case "sidedeck":
+						await player.drawFrom(player.sidedeck);
+						break;
+					case "hammer":
+						const idx = this.getPlayerIdx(interaction.user.id);
+						const field = this.battle.field[idx];
+						const actions = this.makeFieldButtons("draw", ["hammer"], field, (c) => !c);
+						const message = {
+							content: interaction.message.content,
+							embeds: interaction.message.embeds,
+							components: [actions]
+						};
+						await interaction.editReply(message);
+						return;
+				}
+				await this.reply(interaction);
+				break;
+			// .draw.hammer.[field position]
+			case 2:
+				if (args[0] != "hammer") break;
+				const fieldPos = parseInt(args[1]);
+				const idx = this.getPlayerIdx(interaction.user.id);
+				const field = this.battle.field[idx];
+				if (args[1] && field[fieldPos]) {
+					const player = this.getPlayer(interaction.user.id);
+					await player.useHammer(fieldPos);
+					await this.reply(interaction);
 				}
 				break;
-			case "sidedeck":
-				await player.drawFrom(player.sidedeck);
-				break;
-			case "hammer":
-				await this.chooseHammer(interaction, args[1]);
-				return;
 		}
-		await this.reply(interaction);
 	}
-	async ringBell(interaction: ButtonInteraction): Promise<void> {
+	async bell(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
+		// .bell
 		const battle = this.battle;
-		if (this.bellMutex || !battle.mayRingBell && this.mode != "demo") return;
+		if (this.bellMutex || !battle.mayRingBell) return;
 		this.bellMutex = true;
-		if (this.mode == "demo") {
-			while (await battle.players[battle.actor].performAction());
-		}
 		await battle.executeTurn();
 		await battle.setupTurn();
 		await this.reply(interaction);
@@ -428,6 +386,224 @@ class BattleInteraction extends PersistentCommandInteraction {
 		if (this.battle.ended) {
 			delete BattleInteraction[this.id];
 		}
+	}
+	async play(interaction: MessageComponentInteraction, args: string[], edit?: boolean): Promise<void> {
+		const index = parseInt(args[0]);
+		const target = parseInt(args[1]);
+		const player = this.getPlayer(interaction.user.id);
+		const card = player.hand[index];
+		switch (args.length) {
+			// .play
+			case 0:
+				const options = this.getHandOptions(interaction.user.id);
+				const message: any = {
+					embeds: [{
+						title: ":hand_splayed: Play from hand",
+						description: "Select a card from your hand to play"
+					}],
+					components: options ? [options] : []
+				};
+				if (edit) {
+					interaction.editReply(message);
+				} else {
+					message.ephemeral = true;
+					interaction.followUp(message);
+				}
+				break;
+			// .play.[hand index]
+			case 1:
+				if (!card?.isPlayable()) return;
+				const actions = this.makeFieldButtons("play", [`${index}`], this.battle.field[player.index], (c) => {
+					if (c) return card.cost != "blood" || c.noSacrifice || card.getCost() == 0 || c.sigils.has("many_lives");
+					return false;
+				});
+				const cost = card.getCost() ? ` for ${card.getCost()}x${card.costEmoji}` : "";
+				await interaction.editReply({
+					embeds: [{
+						title: ":hand_splayed: Play from hand",
+						description: `Choose where to play the ${card.nameSummary}${cost}`
+					}],
+					components: [actions]
+				});
+				break;
+			// .play.[hand index].[field position]
+			case 2:
+				if (!card?.isPlayable()) return;
+				if (card.cost == "blood" && player.blood < card.getCost()) {
+					await this.blood(interaction, args);
+					return;
+				} else {
+					await player.playFromHand(index, target);
+					player.blood = 0;
+					await this.reply();
+					await this.play(interaction, [], true);
+				}
+				break;
+		}
+	}
+	async activate(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
+		const player = this.getPlayer(interaction.user.id)
+		switch (args.length) {
+			// .activate
+			case 0:
+				const options: any = [{
+					label: "Return",
+					value: "none"
+				}];
+				player.items.forEach((item,i) => {
+					options.push({
+						label: toProperFormat(item.type),
+						description: `${item.description}${item.isUsable(this.battle, player.index) ? "" : " (can't use)"}`,
+						value: `i.${i}`
+					})
+				});
+				this.battle.field[player.index].forEach((card,i) => {
+					if (!card || !card.ability) return;
+					options.push({
+						label: `${card.nameSummary}: ${toProperFormat(card.ability)}`,
+						description: `${card.abilityDescription}${card.canActivate(i) ? "" : " (can't activate)"}`,
+						value: `f.${i}`
+					})
+				});
+				const actions = new MessageActionRow().addComponents(
+					this.makeSelectMenu("activate", options).setPlaceholder("Select ability to activate")
+				);
+				const reply = this.makeReply();
+				await interaction.editReply({
+					content: reply.content,
+					embeds: reply.embeds,
+					components: [actions]
+				});
+				break;
+			// .activate.none
+			case 1:
+				if (args[0] != "none") break;
+				await this.reply();
+				break;
+			// .activate.[item|field].[card index]
+			case 2:
+				const type = args[0];
+				const index = parseInt(args[1]);
+				if (type == "i") {
+					const item = player.items[index];
+					await item?.use(this.battle, player.index);
+					player.items.splice(index, 1);
+				} else if (type == "f") {
+					const card = this.battle.field[player.index][index];
+					await card.activate(index);
+				}
+				if (player.items.length > 0 || this.battle.field[player.index].some((c,i) => c?.ability && c.canActivate(i))) {
+					return await this.activate(interaction, []);
+				}
+				await this.reply();
+				break;
+		}
+	}
+	async inspect(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
+		switch (args.length) {
+			// .inspect
+			case 0:
+				await this.interaction.followUp({
+					embeds: [{
+						title: ":mag: Inspect",
+						description: "Select a card from the field or your hand to view full details on"
+					}],
+					components: [this.getInspectOptions(interaction.user.id)],
+					ephemeral: true
+				});
+				break;
+			// .inspect.[area].[card index]
+			case 2:
+				const field = parseInt(args[0]);
+				const index = parseInt(args[1]);
+				if (![-2,-1,0,1].includes(field)) break;
+				const card = (field >= 0 ? this.battle.field[field] : (field == -1 ? this.getPlayer(interaction.user.id).hand : (<SoloBattle>this.battle).bot.backfield))[index];
+				if (card) {
+					await interaction.editReply({
+						embeds: [{
+							title: ":mag: Inspect",
+							fields: [card.getEmbedDisplay(field >= 0 ? index : -1)]
+						}],
+						components: [this.getInspectOptions(interaction.user.id)]
+					})
+				}
+				break;
+		}
+	}
+	async resign(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
+		if (this.battle.turn < 2) {
+			this.battle.ended = true;
+			await this.interaction.deleteReply();
+			return;
+		}
+		switch (args[0]) {
+			// .resign.yes
+			case "yes":
+				this.battle.ended = true;
+				await this.reply();
+				break;
+			// .resign
+			default:
+				const actions = new MessageActionRow().addComponents(
+					this.makeButton("resign", ["yes"]).setStyle("DANGER").setEmoji("🏳️").setLabel("Resign")
+				);
+				await interaction.followUp({
+					embeds: [{
+						description: "Are you sure you want to resign?"
+					}],
+					components: [actions],
+					ephemeral: true
+				});
+				break;
+		}
+	}
+	async select(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
+		// .select
+		this.select && this.selectCallback(parseInt(args[0]));
+		await interaction.deleteReply();
+		await this.refresh();
+	}
+	async blood(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
+		// .blood.[hand index].[field position]?.[i0-i1-...]
+		if (args.length < 2) return;
+		const player = this.getPlayer(interaction.user.id);
+		const field = this.battle.field[player.index];
+		const card = player.hand[parseInt(args[0])];
+		if (!card || card.cost != "blood") return;
+		const target = parseInt(args[1]);
+		var sacrifices = [];
+		if (!args[2]) {
+			args[2] = field[target] ? `${target}` : "";
+		}
+		if (args[2]) {
+			sacrifices = args[2].split("-").map(n => parseInt(n));
+		}
+		var blood = 0;
+		sacrifices.map(k => field[k]?.blood || 0).forEach(n => {blood += n});
+		if (player.blood + blood >= card.getCost()) {
+			for (let k of sacrifices) {
+				await field[k]?.onSacrifice(k, card, target);
+			}
+			await this.play(interaction, [args[0], args[1]]);
+			return;
+		}
+		const actions = new MessageActionRow();
+		for (let i = 0; i < field.length; i++) {
+			const card = field[i];
+			const pendingSacrifice = sacrifices.includes(i);
+			actions.addComponents(
+				this.makeButton("blood", [args[0], args[1], pendingSacrifice ? sacrifices.filter(v => v != i).join("-") : sacrifices.concat([i]).join("-")])
+					.setDisabled(!card || card.noSacrifice || i == target)
+					.setEmoji(pendingSacrifice ? "🩸" : numberEmoji[i+1])
+			)
+		}
+		await interaction.editReply({
+			embeds: [{
+				title: `🩸 Sacrifice`,
+				description: `Choose sacrifices to yield ${card.getCost()} blood`
+			}],
+			components: [actions]
+		});
 	}
 	getPlayerIdx(userID: string): playerIndex {
 		const idx = this.playerIDs.indexOf(userID);
@@ -468,208 +644,20 @@ class BattleInteraction extends PersistentCommandInteraction {
 			this.makeSelectMenu("play", options).setPlaceholder("Pick a card")
 		) : null;
 	}
-	// .blood.[hand index].[field position]?.[i0-i1-...]
-	async chooseBlood(interaction: ButtonInteraction, args: string[]): Promise<void> {
-		if (args.length < 2) return;
-		const player = this.getPlayer(interaction.user.id);
-		const field = this.battle.field[player.index];
-		const card = player.hand[parseInt(args[0])];
-		if (!card || card.cost != "blood") return;
-		const target = parseInt(args[1]);
-		var sacrifices = [];
-		if (!args[2]) {
-			args[2] = field[target] ? `${target}` : "";
-		}
-		if (args[2]) {
-			sacrifices = args[2].split("-").map(n => parseInt(n));
-		}
-		var blood = 0;
-		sacrifices.map(k => field[k]?.blood || 0).forEach(n => {blood += n});
-		if (player.blood + blood >= card.getCost()) {
-			for (let k of sacrifices) {
-				await field[k]?.onSacrifice(k, card, target);
-			}
-			await this.play(interaction, args);
-			return;
-		}
-		const actions = new MessageActionRow();
+	makeFieldButtons(action: battleAction, args: string[], field: Card[], disable: (c: Card) => boolean, row?: MessageActionRow): MessageActionRow {
+		const actions = row || new MessageActionRow();
 		for (let i = 0; i < field.length; i++) {
-			const card = field[i];
-			const pendingSacrifice = sacrifices.includes(i);
 			actions.addComponents(
-				this.makeButton("blood", [args[0], args[1], pendingSacrifice ? sacrifices.filter(v => v != i).join("-") : sacrifices.concat([i]).join("-")])
-					.setDisabled(!card || card.noSacrifice || i == target)
-					.setEmoji(pendingSacrifice ? "🩸" : numberEmoji[i+1])
+				this.makeButton(action, args.concat([`${i}`]))
+					.setDisabled(disable(field[i])).setEmoji(numberEmoji[i+1])
 			)
 		}
-		await interaction.editReply({
-			embeds: [{
-				title: `🩸 Sacrifice`,
-				description: `Choose sacrifices to yield ${card.getCost()} blood`
-			}],
-			components: [actions]
-		});
-	}
-	// .play?.[hand index]?.[field position]
-	async play(interaction: ButtonInteraction, args: string[]): Promise<void> {
-		if (args.length >= 2) {
-			const index = parseInt(args[0]);
-			const target = parseInt(args[1]);
-			const player = this.getPlayer(interaction.user.id);
-			const card = player.hand[index];
-			if (!card?.isPlayable()) return;
-			if (card.cost == "blood" && player.blood < card.getCost()) {
-				await this.chooseBlood(interaction, args);
-				return;
-			} else {
-				await player.playFromHand(index, target);
-				player.blood = 0;
-				await this.reply();
-			}
-		}
-		else if (args[0] && args.length == 1) return await this.playCard(interaction, args);
-		const options = this.getHandOptions(interaction.user.id);
-		const message: any = {
-			embeds: [{
-				title: ":hand_splayed: Play from hand",
-				description: "Select a card from your hand to play"
-			}],
-			components: options ? [options] : []
-		};
-		if (args[0]) {
-			interaction.editReply(message);
-		} else {
-			message.ephemeral = true;
-			interaction.followUp(message);
-		}
-	}
-	async playCard(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
-		if (!args[0]) return;
-		const index = parseInt(args[0]);
-		const player = this.getPlayer(interaction.user.id);
-		const card = player.hand[index];
-		if (!card?.isPlayable()) return;
-		const actions = this.makeFieldButtons("play", [`${index}`], this.battle.field[player.index], (c) => {
-			if (c) return card.cost != "blood" || c.noSacrifice || card.getCost() == 0 || c.sigils.has("many_lives");
-			return false;
-		});
-		const cost = card.getCost() ? ` for ${card.getCost()}x${card.costEmoji}` : "";
-		await interaction.editReply({
-			embeds: [{
-				title: ":hand_splayed: Play from hand",
-				description: `Choose where to play the ${card.nameSummary}${cost}`
-			}],
-			components: [actions]
-		});
-	}
-	// .activate
-	// .activate.none
-	// .activate.[item|field].[card index]
-	async activateSelect(interaction: SelectMenuInteraction, args: string[]): Promise<void> {
-		if (!args[0]) return;
-		args = args[0].split(".");
-		if (args.length == 2) {
-			const type = args[0];
-			const index = parseInt(args[1]);
-			const player = this.getPlayer(interaction.user.id)
-			if (type == "i") {
-				const item = player.items[index];
-				await item?.use(this.battle, player.index);
-				player.items.splice(index, 1);
-			} else if (type == "f") {
-				const card = this.battle.field[player.index][index];
-				await card.activate(index);
-			}
-			if (player.items.length > 0 || this.battle.field[player.index].some((c,i) => c?.ability && c.canActivate(i))) {
-				return await this.activate(interaction);
-			}
-		}
-		await this.reply(interaction);
-	}
-	async activate(interaction: MessageComponentInteraction): Promise<void> {
-		const options: any = [{
-			label: "Return",
-			value: "none"
-		}];
-		const player = this.getPlayer(interaction.user.id);
-		player.items.forEach((item,i) => {
-			options.push({
-				label: toProperFormat(item.type),
-				description: `${item.description}${item.isUsable(this.battle, player.index) ? "" : " (can't use)"}`,
-				value: `i.${i}`
-			})
-		});
-		this.battle.field[player.index].forEach((card,i) => {
-			if (!card || !card.ability) return;
-			options.push({
-				label: `${card.nameSummary}: ${toProperFormat(card.ability)}`,
-				description: `${card.abilityDescription}${card.canActivate(i) ? "" : " (can't activate)"}`,
-				value: `f.${i}`
-			})
-		});
-		const actions = new MessageActionRow().addComponents(
-			this.makeSelectMenu("activate", options).setPlaceholder("Select ability to activate")
-		);
-		const reply = this.makeReply();
-		await interaction.editReply({
-			content: reply.content,
-			embeds: reply.embeds,
-			components: [actions]
-		});
-	}
-	// .inspect
-	// .inspect.[area].[card index]
-	async inspectCard(interaction: SelectMenuInteraction, args: string[]): Promise<void> {
-		if (!args[0]) return;
-		args = args[0].split(".");
-		const field = parseInt(args[0]);
-		const index = parseInt(args[1]);
-		const card = (field >= 0 ? this.battle.field[field] : (field == -1 ? this.getPlayer(interaction.user.id).hand : (<SoloBattle>this.battle).bot.backfield))[index];
-		if (card) {
-			await interaction.editReply({
-				embeds: [{
-					title: ":mag: Inspect",
-					fields: [card.getEmbedDisplay(field >= 0 ? index : -1)]
-				}],
-				components: [this.getInspectOptions(interaction.user.id)]
-			})
-		}
-	}
-	async inspect(interaction: ButtonInteraction): Promise<void> {
-		await interaction.followUp({
-			embeds: [{
-				title: ":mag: Inspect",
-				description: "Select a card from the field or your hand to view full details on"
-			}],
-			components: [this.getInspectOptions(interaction.user.id)],
-			ephemeral: true
-		});
-	}
-	// .resign?.yes
-	async resign(interaction: ButtonInteraction, args: string[]): Promise<void> {
-		if (this.battle.turn < 2) {
-			this.battle.ended = true;
-			await this.interaction.deleteReply();
-		} else if (args[0] == "yes") {
-			this.battle.ended = true;
-			await this.reply();
-		} else {
-			const actions = new MessageActionRow().addComponents(
-				this.makeButton("resign", ["yes"]).setStyle("DANGER").setEmoji("🏳️").setLabel("Resign")
-			)
-			await interaction.followUp({
-				embeds: [{
-					description: "Are you sure you want to resign?"
-				}],
-				components: [actions],
-				ephemeral: true
-			})
-		}
+		return actions;
 	}
 	makeReply(): InteractionReplyOptions {
 		const disabled = !this.battle.isHuman(this.battle.actor);
 		const actor = this.battle.getPlayer(this.battle.actor);
-		const bell = this.battle.mayRingBell || this.mode == "demo";
+		const bell = this.battle.mayRingBell;
 		const hasActive = actor.items.length || this.battle.field[actor.index].filter(c => c?.ability).length;
 		const actions = new MessageActionRow().addComponents(
 			this.makeButton(bell ? "bell" : "draw").setStyle("PRIMARY").setDisabled(disabled).setEmoji(bell ? "🔔" : "🃏"),
@@ -697,14 +685,15 @@ class BattleInteraction extends PersistentCommandInteraction {
 		await interaction.editReply(reply);
 	}
 	isAllowedUser(userID: string): boolean {
-		return this.playerIDs.includes(userID) || this.mode == "demo";
+		return this.playerIDs.includes(userID);
 	}
 	isAllowedAction(userID: string, action: battleAction): boolean {
 		switch (action) {
 			case "confirm":
 				return !this.battle && userID == this.playerIDs[1];
 			case "bell":
-				if (!this.bellMutex && this.mode == "demo") return true;
+				//if (!this.bellMutex) return true;
+				if (this.bellMutex) return false;
 			case "draw":
 			case "play":
 			case "blood":
@@ -807,25 +796,6 @@ export const battle: SlashCommand = {
 	description: "Battling commands",
 	options: [
 		{
-			name: "demo",
-			description: "View a demo battle",
-			type: 1,
-			options: [
-				{
-					name: "type",
-					description: "Type of simulated battle",
-					type: 3,
-					choices: [{name: "Solo", value: "solo"}, {name: "PvP", value: "duel"}],
-					required: true
-				},
-				{
-					name: "auto",
-					description: "Automatically run the battle? (default true)",
-					type: 5
-				}
-			].concat(universalOptions)
-		},
-		{
 			name: "solo",
 			description: "Play a one-off battle vs. the computer",
 			type: 1,
@@ -871,7 +841,7 @@ export const battle: SlashCommand = {
 			]
 		}
 	],
-	run: async(client: Client, interaction: CommandInteraction) => {
+	run: async(interaction: CommandInteraction) => {
 		const cmd = interaction.options.getSubcommand();
 		if (cmd == "continue") {
 			const battle = BattleInteraction.get(interaction.options.getString("id"));
@@ -885,42 +855,12 @@ export const battle: SlashCommand = {
 			await BattleInteraction.create(interaction);
 		}
 	},
-	button: async(client: Client, interaction: ButtonInteraction, args: string[]) => {
+	button: async(interaction: ButtonInteraction, args: string[]) => {
 		const battleInteraction = BattleInteraction.get(args[0]);
-		const action = <battleAction>args[1];
-		if (action == "resign" && !battleInteraction) {
-			//await interaction.message.
-			return;
-		}
-		if (!battleInteraction?.isAllowedAction(interaction.user.id, action)) return;
-		await interaction.deferUpdate();
-		try {
-			await battleInteraction.receiveButton(interaction, action, args.slice(2));
-		} catch (e) {
-			if (e instanceof DiscordAPIError) {
-				console.error(e);
-				await battleInteraction.tokenExpired();
-			} else {
-				await battleInteraction.internalError();
-				throw e;
-			}
-		}
+		await battleInteraction?.receiveButton(interaction, <battleAction>args[1], args);
 	},
-	menu: async(client: Client, interaction: SelectMenuInteraction, args: string[]) => {
+	menu: async(interaction: SelectMenuInteraction, args: string[]) => {
 		const battleInteraction = BattleInteraction.get(args[0]);
-		const action = <battleAction>args[1];
-		if (!battleInteraction?.isAllowedAction(interaction.user.id, action)) return;
-		await interaction.deferUpdate();
-		try {
-			await battleInteraction.receiveMenu(interaction, action, interaction.values);
-		} catch (e) {
-			if (e instanceof DiscordAPIError) {
-				console.error(e);
-				await battleInteraction.tokenExpired();
-			} else {
-				await battleInteraction.internalError();
-				throw e;
-			}
-		}
+		await battleInteraction?.receiveMenu(interaction, <battleAction>args[1]);
 	}
 }

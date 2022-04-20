@@ -4,7 +4,7 @@ import { SlashCommand } from "../Command";
 export const ping: SlashCommand = {
 	name: "ping",
 	description: "Pings the bot",
-	run: async(client: Client, interaction: BaseCommandInteraction) => {
+	run: async(interaction: BaseCommandInteraction) => {
 		const actions = new MessageActionRow()
 			.addComponents(
 				new MessageButton().setCustomId("ping.hello").setLabel("Hello!").setStyle("SUCCESS"),
@@ -17,7 +17,7 @@ export const ping: SlashCommand = {
 			content: `Pong! (delay: ${delay}ms)`
 		})
 	},
-	button: async(client: Client, interaction: ButtonInteraction, args: string[]) => {
+	button: async(interaction: ButtonInteraction, args: string[]) => {
 		switch (args[0]) {
 			case "hello":
 				interaction.update({
