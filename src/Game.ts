@@ -405,6 +405,10 @@ export class Card {
 					}
 				}
 			}
+			if (this.sigils.has("hoarder")) {
+				await Item.magpieLens(this.battle, this.player);
+				this.removeSigil("hoarder");
+			}
 		}
 		const other = (this.owner ? 0 : 1);
 		if (this.sigils.has("magic_armor")) {
@@ -440,9 +444,6 @@ export class Card {
 					}
 				}
 			}
-		}
-		if (this.sigils.has("hoarder")) {
-			await Item.magpieLens(this.battle, this.player);
 		}
 		await this.onMovement(i);
 	}
@@ -570,7 +571,7 @@ export class Card {
 			for (const sigil of this.sigils) {
 				card.addSigil(sigil);
 			}
-			this.removeSigil("haunter");
+			this.sigils.clear();
 		}
 		if (!this.sigils.has("many_lives")) {
 			this.sacrificedFor = t;
@@ -689,7 +690,7 @@ export class Card {
 	}
 	copyExtraSigils(target: Card): void {
 		for (const sigil of this.sigils) {
-			if (!getModel(this.name).sigils.includes(sigil)) {
+			if (!getModel(this.name).sigils.includes(sigil) && sigil != "haunter") {
 				target.addSigil(sigil);
 			}
 		}

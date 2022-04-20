@@ -138,6 +138,20 @@ class BattleInteraction extends PersistentCommandInteraction {
 	selectingPlayer: playerIndex;
 	async uponSelect(source: selectSource, player: playerIndex, defaultVal?: number, args: string[]=[]): Promise<number> {
 		if (!this.battle.isHuman(player)) return defaultVal;
+		const reply = this.makeReply();
+		await this.interaction.editReply({
+			content: reply.content,
+			embeds: reply.embeds
+		});
+		if (this.select) {
+			const oldSelect = this.select;
+			await new Promise<void>(resolve => {
+				this.select = (value: number) => {
+					oldSelect(value);
+					resolve();
+				}
+			});
+		}
 		var title: string;
 		var description: string;
 		const actions = new MessageActionRow();
@@ -329,7 +343,6 @@ class BattleInteraction extends PersistentCommandInteraction {
 		return actions;
 	}
 	async chooseHammer(interaction: ButtonInteraction, arg: string): Promise<void> {
-		console.log(`Hammering with arg: ${arg}`);
 		const choice = parseInt(arg);
 		const idx = this.getPlayerIdx(interaction.user.id);
 		const field = this.battle.field[idx];

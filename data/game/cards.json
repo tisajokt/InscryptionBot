@@ -1415,7 +1415,7 @@
 		"#comment": "(as seen in grimora's rulebook) gains health from dealing damage"
 	},
 	"spirit": {
-		"stats": [0,1,4],
+		"stats": [0,1,5],
 		"cost": "bones",
 		"sigils": ["haunter"],
 		"power_calc": "sigils",

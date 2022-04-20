@@ -6,8 +6,8 @@
 		["flying", "detonator", "swapper", "clinger", "skellify", "immutable"],
 		["sprinter", "burrower", "waterborne", "hefty", "jumper", "guardian", "mighty_leap", "null_conduit", "shield_latch", "transformer", "gem_detonator", "rampager", "hovering", "exploding_guts", "green_mox", "orange_mox", "blue_mox", "random_mox", "fisher", "stun_latch"],
 		["fledgling", "loose_tail", "four_bones", "undying", "spikey", "worthy_sacrifice", "stinky", "digger", "battery", "energy_conduit", "bomb_latch", "gem_guardian", "vessel_printer", "powered_buff", "stone", "scavenger", "piercing", "magic_armor"],
-		["haunter", "blood_guzzler", "gift_bearer", "rabbit_hole", "beehive", "dam_builder", "fecundity", "corpse_eater", "spawn_ant", "sealed_away", "amorphous", "leader", "skeleton_crew", "gem_animator", "ruby_heart", "gemnastics", "buff_conduit", "factory_conduit", "sentry", "double_death", "disentomb", "scholar", "sniper", "brittle_latch", "powered_trifurcated", "blood_lust", "morsel", "gemified", "animate_blood"],
-		["death_touch", "hoarder", "many_lives", "repulsive", "bifurcated", "bellist", "handy", "bomb_spewer", "enlarge", "energy_gun", "looter", "stimulate", "bonehorn", "armored", "cuckoo", "double_strike", "hydra_egg"],
+		["blood_guzzler", "gift_bearer", "rabbit_hole", "beehive", "dam_builder", "fecundity", "corpse_eater", "spawn_ant", "sealed_away", "amorphous", "leader", "skeleton_crew", "gem_animator", "ruby_heart", "gemnastics", "buff_conduit", "factory_conduit", "sentry", "double_death", "disentomb", "scholar", "sniper", "brittle_latch", "powered_trifurcated", "blood_lust", "morsel", "gemified", "animate_blood"],
+		["death_touch", "hoarder", "many_lives", "repulsive", "bifurcated", "bellist", "handy", "bomb_spewer", "enlarge", "energy_gun", "looter", "stimulate", "bonehorn", "armored", "cuckoo", "double_strike", "hydra_egg", "haunter"],
 		["trifurcated", "item_bearer", "steel_trap", "power_dice", "painter"],
 		["moon_strike"]
 	],
@@ -107,7 +107,7 @@
 		"theme": "blood"
 	},
 	"hoarder": {
-		"desc": "(not implemented) when played, choose a card to draw from your deck"
+		"desc": "when played, choose a card to draw from your deck"
 	},
 	"death_touch": {
 		"desc": "any card this card strikes will perish"
@@ -292,7 +292,7 @@
 		"desc": "upon taking damage, swaps its power and health"
 	},
 	"clinger": {
-		"desc": "(not implemented)"
+		"desc": "moves as close as possible to a friendly card that is played or moves"
 	},
 	"sprinter": {
 		"desc": "at the end of your turn, moves to an adjacent spot"
