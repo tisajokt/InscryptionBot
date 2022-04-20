@@ -13,31 +13,27 @@ type battleAction = "confirm"|"draw"|"bell"|"play"|"activate"|"inspect"|"resign"
 @jsonObject
 export class BattleOptions {
 	@jsonMember
-	candles?: number
+	candles?: number;
 	@jsonMember
-	fieldSize?: number
+	fieldSize?: number;
 	@jsonMember
-	goal?: number
+	goal?: number;
 	@jsonMember
-	scale?: number
+	scale?: number;
 	@jsonMember
-	terrain?: cardName|"none"|"random"
+	terrain?: cardName|"none"|"random";
 	@jsonMember
-	sidedeck?: cardName|"random"
+	sidedeck?: cardName|"random";
 	@jsonMember
-	deckSize?: number|"random"
+	deckSize?: number|"random";
 	@jsonMember
-	startKit?: cardName|"none"
+	startKit?: cardName|"none";
 
 	withDefaults(): BattleOptions {
 		const out = new BattleOptions();
-		const _apply = (prop: string) => {
-			if (this[prop] !== undefined) out[prop] = this[prop];
-			else out[prop] = battleDefaults[prop];
-		}
-		//for (let i of ["candles", "fieldSize", "goal", "scale", "terrain", "sidedeck", "deckSize", "startKit"]) {
-		for (let i in this) {
-			_apply(i);
+		for (let prop of ["candles", "fieldSize", "goal", "scale", "terrain", "sidedeck", "deckSize", "startKit"]) {
+		//for (let prop in this) {
+			out[prop] = this[prop] ?? battleDefaults[prop];
 		}
 		return out;
 	}
@@ -238,21 +234,17 @@ class BattleInteraction extends PersistentCommandInteraction {
 	static get(id: string): BattleInteraction {
 		return this.list[id];
 	}
-	static componentActions: Map<battleAction, componentAction> = new Map([
-		["confirm", BattleInteraction.prototype.confirm],
-		["draw", BattleInteraction.prototype.draw],
-		["bell", BattleInteraction.prototype.bell],
-		["play", BattleInteraction.prototype.play],
-		["activate", BattleInteraction.prototype.activate],
-		["inspect", BattleInteraction.prototype.inspect],
-		["resign", BattleInteraction.prototype.resign],
-		["blood", BattleInteraction.prototype.blood],
-		["select", BattleInteraction.prototype.select]
-	]);
 	async receiveComponent(interaction: MessageComponentInteraction, action: battleAction, args: string[]=[]): Promise<void> {
-		if (BattleInteraction.componentActions.has(action)) {
-			console.log(`Received ${action} with ${args.length} args:`, args);
-			await BattleInteraction.componentActions.get(action).call(this, interaction, args);
+		switch (action) {
+			case "confirm": await this.confirm(interaction, args); break;
+			case "draw": await this.draw(interaction, args); break;
+			case "bell": await this.bell(interaction, args); break;
+			case "play": await this.play(interaction, args); break;
+			case "activate": await this.activate(interaction, args); break;
+			case "inspect": await this.inspect(interaction, args); break;
+			case "resign": await this.resign(interaction, args); break;
+			case "blood": await this.blood(interaction, args); break;
+			case "select": await this.select(interaction, args); break;
 		}
 	}
 	async confirm(interaction?: MessageComponentInteraction, args: string[]=[]): Promise<void> {
