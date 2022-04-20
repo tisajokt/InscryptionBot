@@ -1405,6 +1405,7 @@
 		"sigils": ["painter"],
 		"mox": ["blue"],
 		"power_calc": "sigils",
+		"rare": true,
 		"modded": "MoxExpansion"
 	},
 	"vampire": {

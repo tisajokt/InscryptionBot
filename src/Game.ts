@@ -1905,6 +1905,21 @@ export class AutoBattler implements Battler {
 	}
 }
 
+function makeCardFilter(): (card: cardName)=>boolean {
+	// Enforces the following deck rules:
+	// - no duplicate rare cards
+	// - no more than 3 of the same non-rare card
+	// - no more than 5 rare cards total
+	const duplicates = {};
+	var rares = 0;
+	return (card: cardName): boolean => {
+		const model = getModel(card);
+		duplicates[card] = (duplicates[card] || 0) + 1;
+		if (duplicates[card] > (model.rare ? 1 : 3)) return false;
+		return !model.rare || ++rares < 5;
+	}
+}
+
 @jsonObject
 export class Player {
 	@jsonMember
@@ -1944,7 +1959,8 @@ export class Player {
 			return !_themeFilter(c) && !model.mox && !model.is_mox && model.playerValue >= 3;
 		}), 5).filter(c => c);
 		const size = 30 + Math.floor(Math.random() * 15);
-		const selection: cardName[] = randomSelectionFrom(themed, 100).sort(_playerValueSort).slice(0, size - additions.length).concat(additions);
+		const selection: cardName[] = randomSelectionFrom(themed, 100).filter(makeCardFilter())
+			.sort(_playerValueSort).slice(0, size - additions.length).concat(additions);
 		return new Deck(selection);
 	}
 	battlerInstance(battle: Battle, index: playerIndex): PlayerBattler {
