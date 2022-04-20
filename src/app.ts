@@ -2,7 +2,7 @@
 import "reflect-metadata";
 import app_config from "../app_config.json";
 
-import { AppUser } from "./User";
+import { AppUser } from "./AppUser";
 import onReady from "./listeners/ready";
 import onInteractionCreate from "./listeners/interactionCreate";
 

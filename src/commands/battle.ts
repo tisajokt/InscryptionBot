@@ -1,12 +1,11 @@
-import { Client, MessageActionRow, ButtonInteraction, CommandInteraction, InteractionReplyOptions, SelectMenuInteraction, MessageComponentInteraction, DiscordAPIError } from "discord.js";
-import { componentAction, PersistentCommandInteraction, SlashCommand } from "../Command";
-import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, Item, sidedecks, selectSource, modelSummary, sigil } from "../Game";
+import { MessageActionRow, ButtonInteraction, CommandInteraction, InteractionReplyOptions, SelectMenuInteraction, MessageComponentInteraction } from "discord.js";
+import { PersistentCommandInteraction, SlashCommand } from "../Command";
+import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, sidedecks, selectSource, modelSummary, sigil } from "../Game";
 import { Display } from "../Display";
-import { AppUser } from "../User";
-import { generateRandomID, numberEmoji, pickRandom, sleep, toProperCase, toProperFormat } from "../util";
+import { AppUser } from "../AppUser";
+import { numberEmoji, pickRandom, sleep, toProperFormat } from "../util";
 import game_config from "../../data/game/config.json";
 import { jsonMember, jsonObject } from "typedjson";
-import { assert } from "console";
 
 type battleMode = "solo"|"duel";
 type battleAction = "confirm"|"draw"|"bell"|"play"|"activate"|"inspect"|"resign"|"blood"|"select";
@@ -848,11 +847,9 @@ export const battle: SlashCommand = {
 		}
 	},
 	button: async(interaction: ButtonInteraction, args: string[]) => {
-		const battleInteraction = BattleInteraction.get(args[0]);
-		await battleInteraction?.receiveButton(interaction, <battleAction>args[1], args);
+		BattleInteraction.get(args[0])?.receiveButton(interaction, <battleAction>args[1], args);
 	},
 	menu: async(interaction: SelectMenuInteraction, args: string[]) => {
-		const battleInteraction = BattleInteraction.get(args[0]);
-		await battleInteraction?.receiveMenu(interaction, <battleAction>args[1]);
+		BattleInteraction.get(args[0])?.receiveMenu(interaction, <battleAction>args[1]);
 	}
 }

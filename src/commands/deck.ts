@@ -1,6 +1,6 @@
 import { ButtonInteraction, CacheType, Client, CommandInteraction, MessageActionRow, MessageButton, MessageComponentInteraction, SelectMenuInteraction } from "discord.js";
 import { PersistentCommandInteraction, SlashCommand } from "src/Command";
-import { AppUser } from "src/User";
+import { AppUser } from "src/AppUser";
 
 type deckAction = "reset"|"create"|"edit"|"view";
 
@@ -16,6 +16,9 @@ class DeckInteraction extends PersistentCommandInteraction {
 	}
 	cmd(): string {
 		return "deck";
+	}
+	static get(id: string): DeckInteraction {
+		return this.list[id];
 	}
 	async viewCard(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
 		if (args.length != 2) return;
@@ -62,5 +65,11 @@ export const deck: SlashCommand = {
 	run: async(interaction: CommandInteraction) => {
 		await interaction.deferReply();
 		await (new DeckInteraction(interaction)).reply();
+	},
+	button: async(interaction: ButtonInteraction, args: string[]) => {
+		DeckInteraction.get(args[0])?.receiveButton(interaction, <deckAction>args[1], args);
+	},
+	menu: async(interaction: SelectMenuInteraction, args: string[]) => {
+		DeckInteraction.get(args[0])?.receiveMenu(interaction, <deckAction>args[1]);
 	}
 }
