@@ -1,11 +1,10 @@
 import { ButtonInteraction, CommandInteraction, MessageActionRow, MessageComponentInteraction, SelectMenuInteraction } from "discord.js";
-import { PersistentCommandInteraction, SlashCommand } from "../Command";
+import { DLM, PersistentCommandInteraction, SlashCommand } from "../Command";
 import { AppUser } from "../AppUser";
-import { numberEmoji, sidedeckEmoji } from "../util";
-import { Card, cardName, Deck, modelSummary, Player, sidedecks } from "../Game";
-import { Embed } from "../Display";
+import { numberEmoji, sidedeckEmoji, toProperFormat } from "../util";
+import { Card, cardName, Deck, getModel, MAX_NONRARE_DUPLICATES, MAX_RARE_DUPLICATES, MAX_TOTAL_RARES, modelSummary, Player, playerDeckCards, sidedecks } from "../Game";
 
-type deckAction = "main"|"deck";
+type deckAction = "main"|"deck"|"card";
 export function cardNameCount(cards: cardName[]): Map<cardName, number> {
 	const map = new Map();
 	cards.forEach((card) => {
@@ -14,10 +13,16 @@ export function cardNameCount(cards: cardName[]): Map<cardName, number> {
 	return map;
 }
 
+const cardNameSort = (a: cardName, b: cardName): number => {
+	return getModel(a).sortIndex - getModel(b).sortIndex;
+};
+const sortedCards = playerDeckCards.sort(cardNameSort);
+
 class DeckInteraction extends PersistentCommandInteraction {
 	static list: Map<string, DeckInteraction> = new Map();
 	user: AppUser;
 	player: Player;
+	page: number=0;
 	constructor(interaction: CommandInteraction) {
 		super(interaction);
 		this.user = AppUser.get(this.userID);
@@ -33,27 +38,110 @@ class DeckInteraction extends PersistentCommandInteraction {
 	cmd(): string {
 		return "deck";
 	}
-	getDeckOptions(action: deckAction, deck: Deck): any[] {
+	getCardOptions(page: number=this.page): any[] {
+		const optionsMax = 25;
+		const lastPage = Math.ceil(sortedCards.length / optionsMax);
+		page = page >= 0 ? page % lastPage : lastPage-1;
+		this.page = page;
+		return sortedCards.slice(page * optionsMax, (page+1) * optionsMax).map((name) => {
+			return {
+				label: `${getModel(name).rare?"✨ ":""}${modelSummary(name)}`,
+				value: `name${DLM}${name}`,
+				_placeholder: toProperFormat(name)
+			}
+		});
+	}
+	getDeckOptions(deck: Deck): any[] {
 		deck.beforeSerialization();
 		const unmodifiedCards: Map<cardName, number> = cardNameCount(deck._cardNames);
 		const modifiedCards: Card[] = deck._cardObjects;
 		return modifiedCards.map((card) => {
 			return {
-				label: `${card.fullSummary()}`,
-				value: `${action}.special.${deck.cards.indexOf(card)}`
+				label: `${card.fullSummary()} (modified)`,
+				value: `special${DLM}${deck.cards.indexOf(card)}`
 			}
-		}).concat([...unmodifiedCards.entries()].map(([name, count]) => {
+		}).concat([...unmodifiedCards.entries()].sort((a,b)=>cardNameSort(a[0],b[0])).map(([name, count]) => {
 			return {
-				label: `${modelSummary(name)}${count > 1 ? ` x${count}` : ""}`,
-				value: `${action}.name.${name}`
+				label: `${count > 1 ? `x${count} ` : ""}${getModel(name).rare?"✨ ":""}${modelSummary(name)}`,
+				value: `name${DLM}${name}`
 			}
-		}))
+		}));
 	}
-	getPlayerDisplay(player: Player): Embed {
-		return {
-			title: "",
-			description: ""
-		};
+	async cardAction(args: string[]=[]): Promise<void> {
+		if (args.length < 2 || args.length > 3 || !this.player) return;
+		const deck = this.player.deck;
+		const arg: string = args.pop();
+		const count = args[0] === "name" ? deck._cardNames.filter(c => (c === arg)).length : 0;
+		const rares = deck.cards.filter(c => {
+			if (typeof c === "string") {
+				return getModel(c).rare;
+			} else {
+				return c.rare;
+			}
+		}).length;
+		switch (args.join(".")) {
+			// .card.special.[card index]
+			case "special":
+				const card = <Card>deck.cards[arg];
+				await this.interaction.editReply({
+					embeds: [{
+						title: `${toProperFormat(card.name)} (modified)`,
+						fields: [card.getEmbedDisplay()]
+					}],
+					components: [new MessageActionRow().addComponents(
+						this.makeButton("deck", ["cards"]).setEmoji("👈"),
+						this.makeButton("card", ["special", "remove", arg]).setEmoji("🗑️")
+					)]
+				});
+				break;
+			// .card.special.remove.[card index]
+			case "special.remove":
+				deck.cards.splice(parseInt(arg), 1);
+				AppUser.saveUsersData();
+				await this.deckAction(["cards"]);
+				break;
+			// .card.name.[card name]
+			case "name":
+				const deckArg = this.page === undefined ? ["cards"] : ["cards", "add"];
+				if (this.page !== undefined) {
+					this.page--;
+				}
+				await this.interaction.editReply({
+					embeds: [{
+						title: `x${count} ${toProperFormat(arg)}`,
+						fields: [(new Card(arg)).getEmbedDisplay()]
+					}],
+					components: [new MessageActionRow().addComponents(
+						this.makeButton("deck", deckArg).setEmoji("👈"),
+						this.makeButton("card", ["name", "remove", arg]).setEmoji("⬇️"),
+						this.makeButton("card", ["name", "add", arg]).setEmoji("⬆️")
+					)]
+				});
+				break;
+			// .card.name.add.[card name]
+			case "name.add":
+				const model = getModel(arg);
+				if (count < (model.rare ? MAX_RARE_DUPLICATES : MAX_NONRARE_DUPLICATES) && (!model.rare || rares < MAX_TOTAL_RARES)) {
+					deck.cards.push(arg);
+					deck._cardNames.push(arg);
+					AppUser.saveUsersData();
+					await this.cardAction(["name", arg]);
+				}
+				break;
+			// .card.name.remove.[card name]
+			case "name.remove":
+				if (count > 0) {
+					deck.cards.splice(deck.cards.indexOf(arg), 1);
+					deck._cardNames.splice(deck._cardNames.indexOf(arg), 1);
+					AppUser.saveUsersData();
+					if (count === 1) {
+						await this.deckAction(["cards"]);
+					} else {
+						await this.cardAction(["name", arg]);
+					}
+				}
+				break;
+		}
 	}
 	async mainAction(args: string[]=[]): Promise<void> {
 		switch (args.length) {
@@ -70,7 +158,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 			// .main.create
 			case 1:
 				if (args[0] == "create" && this.user.players.length < 5) {
-					this.player = this.user.createPlayer();
+					this.player = this.user.createPlayer("squirrel", ["stoat", "bullfrog", "wolf", "stinkbug"]);
 					await this.deckAction();
 				}
 				break;
@@ -87,7 +175,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 	async deckAction(args: string[]=[]): Promise<void> {
 		if (!this.player) return;
 		const idx = this.user.players.indexOf(this.player);
-		switch (args[0] ?? "overview") {
+		switch (args.join(".") || "overview") {
 			// .deck
 			case "overview":
 				const actions = new MessageActionRow().addComponents(
@@ -106,6 +194,44 @@ class DeckInteraction extends PersistentCommandInteraction {
 			case "sidedeck":
 				this.player.sidedeck = sidedecks[(sidedecks.indexOf(this.player.sidedeck) + 1) % sidedecks.length];
 				await this.deckAction();
+				break;
+			// .deck.cards
+			case "cards":
+				delete this.page;
+				await this.interaction.editReply({
+					embeds: [this.player.getEmbedDisplay()],
+					components: [
+						new MessageActionRow().addComponents(
+							this.makeSelectMenu("card", this.getDeckOptions(this.player.deck)).setPlaceholder("Select a card from your deck")
+						),
+						new MessageActionRow().addComponents(
+							this.makeButton("deck").setEmoji("👈"),
+							this.makeButton("deck", ["cards", "add"]).setEmoji("🆕")
+						)
+					]
+				});
+				break;
+			case "cards.prev":
+				this.page = (this.page ?? 1) - 2;
+			// .deck.cards.add
+			case "cards.add":
+				this.page = (this.page ?? -1) + 1;
+				const options = this.getCardOptions();
+				await this.interaction.editReply({
+					embeds: [this.player.getEmbedDisplay()],
+					components: [
+						new MessageActionRow().addComponents(
+							this.makeSelectMenu("card", options).setPlaceholder(
+								`Add ${options[0]._placeholder}, ${options[1]?._placeholder}...`
+							)
+						),
+						new MessageActionRow().addComponents(
+							this.makeButton("deck", ["cards"]).setEmoji("👈"),
+							this.makeButton("deck", ["cards", "prev"]).setEmoji("◀️"),
+							this.makeButton("deck", ["cards", "add"]).setEmoji("▶️")
+						)
+					]
+				})
 				break;
 			// .deck.delete
 			case "delete":
@@ -143,8 +269,9 @@ class DeckInteraction extends PersistentCommandInteraction {
 		}
 	}
 	async receiveComponent(i: MessageComponentInteraction, action: string, args: string[]): Promise<void> {
-		switch (action) {
+		switch (<deckAction>action) {
 			case "main": this.mainAction(args); break;
+			case "card": this.cardAction(args); break;
 			case "deck": this.deckAction(args); break;
 		}
 	}
@@ -153,10 +280,80 @@ class DeckInteraction extends PersistentCommandInteraction {
 
 export const deck: SlashCommand = {
 	name: "deck",
-	description: "Manage your card decks for duels & sandbox battles",
+	description: "Custom deck commands",
+	options: [
+		{
+			name: "select",
+			description: "Choose which deck to use for battles",
+			type: 1,
+			options: [
+				{
+					name: "deck",
+					description: "Deck index (1-5 to select, 0 to clear selection)",
+					type: 4,
+					min_value: 0,
+					max_value: 5,
+					required: true
+				}
+			]
+		},
+		{
+			name: "rename",
+			description: "Rename one of your card decks",
+			type: 1,
+			options: [
+				{
+					name: "name",
+					description: "Name to give your deck",
+					type: 3,
+					required: true
+				},
+				{
+					name: "deck",
+					description: "Deck index (uses active deck by default)",
+					type: 4,
+					min_value: 1,
+					max_value: 5
+				}
+			]
+		},
+		{
+			name: "manage",
+			description: "Manage your card decks for duels & sandbox battles",
+			type: 1
+		}
+	],
 	run: async(interaction: CommandInteraction) => {
-		await interaction.deferReply();
-		await DeckInteraction.create(interaction);
+		const user = AppUser.get(interaction.user.id);
+		switch (interaction.options.getSubcommand()) {
+			case "select":
+				const active = interaction.options.getInteger("deck", true);
+				if (active > 0 && active <= user.players.length) {
+					user.activePlayer = active - 1;
+				} else {
+					delete user.activePlayer;
+				}
+				await interaction.reply({
+					content: !!user.getActivePlayer() ? `Selected deck #${active}` : "Unselected all decks",
+					ephemeral: true
+				})
+				break;
+			case "rename":
+				const idx = interaction.options.getInteger("deck") ?? user.activePlayer+1;
+				const player = user.players[idx-1];
+				if (player) {
+					player.name = interaction.options.getString("name", true);
+					await interaction.reply({
+						content: `Renamed deck #${idx} to "${player.name}"!`,
+						ephemeral: true
+					});
+				}
+				break;
+			case "manage":
+				await interaction.deferReply();
+				await DeckInteraction.create(interaction);
+				break;
+		}
 	},
 	button: async(interaction: ButtonInteraction, args: string[]) => {
 		await DeckInteraction.get(args[0])?.receiveButton(interaction, <deckAction>args[1], args);

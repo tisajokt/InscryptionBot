@@ -19,7 +19,7 @@ for (let p = 0; p < sigil_data.__powers.length; p++) {
 }
 
 export const terrains: cardName[] = ["", "boulder", "stump", "grand_fir", "frozen_opossum", "moleman", "broken_bot"];
-export const sidedecks: cardName[] = ["squirrel", "empty_vessel", "skeleton", "mox_crystal", "omni_squirrel"];
+export const sidedecks: cardName[] = ["squirrel", "empty_vessel", "skeleton", "mox_crystal", "squirrel-ish"];
 
 export const MAX_ENERGY: number = game_config.maxEnergy;
 export const ITEM_LIMIT: number = game_config.itemLimit;
@@ -57,6 +57,7 @@ export type CardModel = {
 	glitch?: boolean,
 	playerValue?: number,
 	nonplayerValue?: number,
+	sortIndex?: number,
 	vanilla_cabin?: boolean,
 	modded?: boolean|string,
 	inspect?: string,
@@ -125,7 +126,7 @@ export class Card {
 	hammered?: boolean;
 	sacrificedFor?: number;
 	constructor(model: Card|cardName) {
-		if (typeof model == "string") {
+		if (typeof model === "string") {
 			this.name = model;
 			model = <Card>card_models[model];
 		} else {
@@ -139,10 +140,10 @@ export class Card {
 		this.sigils = new Set([...model.sigils]);
 	}
 	static castCardName(card: Card|cardName): Card {
-		return (typeof card == "string") ? new Card(card) : card;
+		return (typeof card === "string") ? new Card(card) : card;
 	}
 	static copyCard(card: Card|cardName): Card|cardName {
-		return (typeof card == "string") ? card : new Card(card);
+		return (typeof card === "string") ? card : new Card(card);
 	}
 	get nameSummary(): string {
 		return toProperFormat(this.name) + (this.hasModifiedSigils ? "*" : "");
@@ -150,7 +151,7 @@ export class Card {
 	fullSummary(i: number=-1): string {
 		return `${this.nameSummary} [${this.powerCalc ? "*" : singleCharStat(i > -1 ? this.getPower(i) : this.stats[0])}/${this.stats[1]}] ${Card.costEmojiDisplay(this.cost, this.stats[2], this.mox)}`;
 	}
-	getEmbedDisplay(i: number, inline: boolean=false): EmbedField {
+	getEmbedDisplay(i: number=-1, inline: boolean=false): EmbedField {
 		const stats = `Stats: \`${i >= 0 ? this.getPower(i) : (this.powerCalc ? "*" : this.stats[0])}/${this.stats[1]}\``;
 		var arr = [stats, this.costEmbedDisplay];
 		if (this.tribe) arr.push(`Tribe: ${this.tribe}`);
@@ -311,7 +312,7 @@ export class Card {
 			this.removeSigil("armored");
 			return false;
 		} else {
-			this.stats[1] -= (damage == Infinity ? this.stats[1] : damage);
+			this.stats[1] -= (damage === Infinity ? this.stats[1] : damage);
 			if (this.stats[1] <= 0) {
 				await this.onDeath(i);
 			}
@@ -336,7 +337,7 @@ export class Card {
 			this.addSigil(pickRandom(possibleSigils));
 			this.removeSigil("random_mox");
 		}
-		if (this.name == "mox_crystal") {
+		if (this.name === "mox_crystal") {
 			const possibleMox: cardName[] = ["emerald_mox", "ruby_mox", "sapphire_mox"];
 			this.transformInto(pickRandom(possibleMox));
 		}
@@ -477,7 +478,7 @@ export class Card {
 		if (chime_trigger) {
 			for (let i = 0; i < this.battle.fieldSize; i++) {
 				const daus = this.battle.field[this.owner][i];
-				if (daus && daus.name == chime_trigger) {
+				if (daus && daus.name === chime_trigger) {
 					if (attacker.sigils.has("armored")) {
 						attacker.removeSigil("armored");
 					} else if (daus.sigils.has("death_touch") && !attacker.sigils.has("stone")) {
@@ -494,7 +495,7 @@ export class Card {
 		if (this.isWide) this.battle.field[this.owner].fill(null);
 		this.stats[1] = Math.min(this.stats[1], 0);
 		const player = this.player;
-		const other = (this.owner == 0) ? 1 : 0;
+		const other = (this.owner === 0) ? 1 : 0;
 		let deaths = 1 + this.battle.getCardsWithSigil(this.owner, "double_death").length;
 		if (this.sigils.has("sealed_away") && !this.hammered) {
 			deaths = 1;
@@ -586,7 +587,7 @@ export class Card {
 			}
 			this.sigils.clear();
 		}
-		if (this.name == "child_13") {
+		if (this.name === "child_13") {
 			this.awakened = !this.awakened;
 			if (this.awakened) {
 				this.stats[0] += 2;
@@ -598,7 +599,7 @@ export class Card {
 		}
 		if (this.getModelProp("9lives")) {
 			this.sacrifices = (this.sacrifices || 0) + 1;
-			if (this.sacrifices == 9) {
+			if (this.sacrifices === 9) {
 				this.name = this.getModelProp("9lives");
 				this.stats = [...getModel(this.name).stats];
 				this.removeSigil("many_lives");
@@ -677,7 +678,7 @@ export class Card {
 			}
 			const _countTribe = (card: Card) => {
 				if (!card) return;
-				if (card.tribe == "all") tribes.all++;
+				if (card.tribe === "all") tribes.all++;
 				else if (card.tribe) tribes[card.tribe] = 1;
 			}
 			for (let k = 0; k <= 1; k++) {
@@ -713,8 +714,8 @@ export class Card {
 	}
 	getCost(): number {
 		var cost = this.stats[2];
-		if (this.sigils.has("gemified") && this.battle.hasMoxColor(this.owner, "blue")) {
-			cost -= (this.cost == "bones" ? 2 : 1);
+		if (this.sigils.has("gemified") && this.battle?.hasMoxColor(this.owner, "blue")) {
+			cost -= (this.cost === "bones" ? 2 : 1);
 		}
 		return Math.max(0, cost);
 	}
@@ -751,7 +752,7 @@ export class Card {
 		var power: number = this.stats[0];
 		switch (this.powerCalc) {
 			case "ant":
-				power = this.battle.field[this.owner].filter(c => c?.powerCalc == "ant").length;
+				power = this.battle.field[this.owner].filter(c => c?.powerCalc === "ant").length;
 				break;
 			case "mirror":
 				for (let j of arr) {
@@ -819,8 +820,8 @@ export class Card {
 			case "mox":
 				if (!this.battle.hasFreeSpace(this.owner)) return false;
 				for (const mox of this.mox) {
-					if (mox == "any") {
-						if (this.battle.countMox(this.owner) == 0) return false;
+					if (mox === "any") {
+						if (this.battle.countMox(this.owner) === 0) return false;
 					} else if (!this.battle.hasMoxColor(this.owner, mox)) {
 						return false;
 					}
@@ -970,7 +971,7 @@ export class Card {
 					break;
 				}
 				for (let mox of this.mox) {
-					if (mox == "any") costValue += 1;
+					if (mox === "any") costValue += 1;
 					else costValue += 3;
 				}
 				break;
@@ -992,7 +993,7 @@ export class Deck implements Drawable {
 		this._cardNames = [];
 		this._cardObjects = [];
 		this.cards.forEach(c => {
-			if (typeof c == "string") {
+			if (typeof c === "string") {
 				this._cardNames.push(c);
 			} else if (!c.isModified) {
 				this._cardNames.push(c.name);
@@ -1181,7 +1182,7 @@ export abstract class Battle {
 	}
 	async placeTerrain(terrain: cardName): Promise<void> {
 		if (this.isSolo() && this.candles[1] >= 3) {
-			if (terrain == "moleman") await this.playCard(new Card("moleman"), Math.floor(Math.random() * this.fieldSize), 1);
+			if (terrain === "moleman") await this.playCard(new Card("moleman"), Math.floor(Math.random() * this.fieldSize), 1);
 			return;
 		}
 		if (!terrain) return;
@@ -1436,7 +1437,7 @@ export abstract class Battle {
 		await this.getPlayer(player).addToHand(card);
 	}
 	hasMoxColor(player: playerIndex, mox: moxColor): boolean {
-		if (mox == "any") {
+		if (mox === "any") {
 			for (let i = 0; i < this.fieldSize; i++) {
 				const card = this.field[player][i];
 				if (!card) continue;
@@ -1551,7 +1552,7 @@ export class SoloBattle extends Battle {
 		this.candles[0] = 1;
 	}
 	async onCandleOut(player: playerIndex): Promise<void> {
-		if (player == 1) {
+		if (player === 1) {
 			this.bot.cardsLeft += this.bot.difficulty;
 			await this.bot.doBossEffect();
 			this.player.hourglassUsed = true;
@@ -1564,7 +1565,7 @@ export class SoloBattle extends Battle {
 		return this.bot;
 	}
 	isHuman(player: playerIndex): boolean {
-		return (player == 0);
+		return (player === 0);
 	}
 	isSolo(): this is SoloBattle {
 		return true;
@@ -1656,12 +1657,12 @@ export class PlayerBattler implements Battler {
 		this.energy = this.capacity;
 		this.fanUsed = false;
 		this.hourglassUsed = false;
-		if (this.battle.turn == 0 && this.battle.candles[0] < this.battle.candles[1]) {
+		if (this.battle.turn === 0 && this.battle.candles[0] < this.battle.candles[1]) {
 			for (let i = 1; i < this.battle.candles[1]; i++) {
 				await this.addToHand(new Card("the_smoke"));
 			}
 		}
-		if (!this.items.some(item => item.type == "hammer") && this.items.length < ITEM_LIMIT) {
+		if (!this.items.some(item => item.type === "hammer") && this.items.length < ITEM_LIMIT) {
 			this.items.push(new Item("hammer"));
 		}
 	}
@@ -1687,7 +1688,7 @@ export class PlayerBattler implements Battler {
 	}
 	async addToHand(card: Card): Promise<void> {
 		if (!card) return;
-		if (this.totem && (card.tribe == this.totem.tribe || card.tribe == "all")) {
+		if (this.totem && (card.tribe === this.totem.tribe || card.tribe === "all")) {
 			card.addSigil(this.totem.sigil);
 		}
 		await card.onDraw(this.battle, this.index);
@@ -1831,7 +1832,7 @@ export class AutoBattler implements Battler {
 	async playSmartBackfield(chance: number=1): Promise<void> {
 		const card = pickRandom(this.cardPool);
 		var i = this.getRandomSmartSlot();
-		if (i == -1 || Math.random() >= chance) i = this.getRandomOpenSlot();
+		if (i === -1 || Math.random() >= chance) i = this.getRandomOpenSlot();
 		if (i > -1) {
 			await this.playBackfield(card, i);
 		}
@@ -1947,7 +1948,7 @@ export class Player {
 		const _themeFilter = (c: cardName) => {
 			const model = getModel(c);
 			if (!model.cost && !model.is_mox && sidedeck != "mox_crystal") return true;
-			if (model.cost == "mox" && !["mox_crystal", "omnisquirrel"].includes(sidedeck)) return false;
+			if (model.cost === "mox" && !["mox_crystal", "omnisquirrel"].includes(sidedeck)) return false;
 			switch (sidedeck) {
 				case "squirrel": return model.themes.has("blood") || model.vanilla_cabin;
 				case "empty_vessel": return model.themes.has("energy");
@@ -2011,16 +2012,44 @@ for (const name in card_models) {
 	
 	if (model.modded && !ENABLED_MODS.has(model.modded.toString()) ||
 		VANILLA_CABIN_ONLY && !model.vanilla_cabin ||
-		NO_MOX && (model.is_mox || model.cost == "mox")) continue;
+		NO_MOX && (model.is_mox || model.cost === "mox")) continue;
 	enabledDeckCards.push(name);
 	if (model.is_terrain) continue;
 	botDeckCards.push(name);
-	if (model.event == "none") continue;
+	if (model.event === "none") continue;
 	playerDeckCards.push(name);//*/
 }
 for (const mod of ENABLED_MODS) {
-	cardPools[mod] = enabledDeckCards.filter(m => getModel(m).modded == mod);
+	cardPools[mod] = enabledDeckCards.filter(m => getModel(m).modded === mod);
 }
 for (const theme of ["blood", "bones", "energy", "mox", "tribal", "conduit"]) {
 	cardPools[`${theme}Theme`] = enabledDeckCards.filter(m => getModel(m).themes.has(theme));
 }
+const cardModelSort = (modelA: CardModel, modelB: CardModel): number => {
+	if (modelA.cost !== modelB.cost) {
+		const costMap = {
+			blood: 1,
+			bones: 2,
+			energy: 3,
+			mox: 4,
+			free: 5
+		};
+		return (costMap[modelA.cost ?? "free"]) - (costMap[modelB.cost ?? "free"]);
+	} else if (modelA.rare !== modelB.rare) {
+		return (modelA.rare ? 0 : 1) - (modelB.rare ? 0 : 1);
+	} else if (modelA.cost === "mox" && modelA.mox.join("/") !== modelB.mox.join("/")) {
+		const moxColorMap = {
+			green: 1,
+			orange: 2,
+			blue: 3
+		}
+		return (moxColorMap[modelA.mox[0]] ?? 0) - (moxColorMap[modelB.mox[0]] ?? 0);
+	} else if (modelA.stats[2] !== modelB.stats[2]) {
+		return modelA.stats[2] - modelB.stats[2];
+	} else {
+		return modelB.playerValue - modelA.playerValue;
+	}
+}
+enabledDeckCards.map(c=>getModel(c)).sort(cardModelSort).forEach((card, i) => {
+	card.sortIndex = i;
+});

@@ -1,6 +1,7 @@
 import { ChatInputApplicationCommandData, Client, BaseCommandInteraction, MessageComponentInteraction, ButtonInteraction, MessageApplicationCommandData, CommandInteraction, TextBasedChannel, MessageButton, MessageSelectMenu, SelectMenuInteraction, DiscordAPIError } from "discord.js";
 import { generateRandomID } from "./util";
 
+export const DLM = ":"; // delimiter
 export interface SlashCommand extends ChatInputApplicationCommandData {
 	run: (interaction: CommandInteraction) => Promise<void>;
 	menu?: (interaction: MessageComponentInteraction, args?: string[]) => Promise<void>;
@@ -34,11 +35,11 @@ export abstract class PersistentCommandInteraction {
 		})
 	}
 	makeButton(action: string, args: string[]=[]): MessageButton {
-		return new MessageButton().setCustomId(`${this.cmd()}.${this.id}.${action}${args.length ? `.${args.join(".")}` : ""}`).setStyle("SECONDARY");
+		return new MessageButton().setCustomId(`${this.cmd()}${DLM}${this.id}${DLM}${action}${args.length ? `${DLM}${args.join(DLM)}` : ""}`).setStyle("SECONDARY");
 	}
 	makeSelectMenu(action: string, options: any[]): MessageSelectMenu {
 		// Discord API limitation: max 25 options
-		return new MessageSelectMenu().setCustomId(`${this.cmd()}.${this.id}.${action}`).setOptions(options.slice(0, 25));
+		return new MessageSelectMenu().setCustomId(`${this.cmd()}${DLM}${this.id}${DLM}${action}`).setOptions(options.slice(0, 25));
 	}
 	abstract isAllowedAction(userID: string, action: string): boolean;
 	abstract receiveComponent(i: MessageComponentInteraction, action: string, args: string[]): Promise<void>;
@@ -48,6 +49,7 @@ export abstract class PersistentCommandInteraction {
 		try {
 			await this.receiveComponent(interaction, action, args);
 		} catch (e) {
+			console.error("Caught an error!");
 			if (e instanceof DiscordAPIError) {
 				console.error(e);
 				await this.tokenExpired();
@@ -58,7 +60,7 @@ export abstract class PersistentCommandInteraction {
 		}
 	}
 	async receiveMenu(interaction: SelectMenuInteraction, action: string): Promise<void> {
-		await this._receiveComponent(interaction, action, (interaction.values[0]||"").split(".").filter(s=>s));
+		await this._receiveComponent(interaction, action, (interaction.values[0]||"").split(DLM).filter(s=>s));
 	}
 	async receiveButton(interaction: ButtonInteraction, action: string, args: string[]): Promise<void> {
 		await this._receiveComponent(interaction, action, args.slice(2));

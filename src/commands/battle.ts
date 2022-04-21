@@ -1,5 +1,5 @@
-import { MessageActionRow, ButtonInteraction, CommandInteraction, InteractionReplyOptions, SelectMenuInteraction, MessageComponentInteraction } from "discord.js";
-import { PersistentCommandInteraction, SlashCommand } from "../Command";
+import { MessageActionRow, ButtonInteraction, CommandInteraction, InteractionReplyOptions, SelectMenuInteraction, MessageComponentInteraction, User } from "discord.js";
+import { DLM, PersistentCommandInteraction, SlashCommand } from "../Command";
 import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, sidedecks, selectSource, modelSummary, sigil } from "../Game";
 import { Display } from "../Display";
 import { AppUser } from "../AppUser";
@@ -11,6 +11,8 @@ type battleMode = "solo"|"duel";
 type battleAction = "confirm"|"draw"|"bell"|"play"|"activate"|"inspect"|"resign"|"blood"|"select";
 @jsonObject
 export class BattleOptions {
+	@jsonMember
+	customDeck?: boolean;
 	@jsonMember
 	candles?: number;
 	@jsonMember
@@ -30,7 +32,7 @@ export class BattleOptions {
 
 	withDefaults(): BattleOptions {
 		const out = new BattleOptions();
-		for (let prop of ["candles", "fieldSize", "goal", "scale", "terrain", "sidedeck", "deckSize", "startKit"]) {
+		for (let prop of ["customDeck", "candles", "fieldSize", "goal", "scale", "terrain", "sidedeck", "deckSize", "startKit"]) {
 		//for (let prop in this) {
 			out[prop] = this[prop] ?? battleDefaults[prop];
 		}
@@ -38,6 +40,7 @@ export class BattleOptions {
 	}
 };
 const battleDefaults = {
+	customDeck: true,
 	candles: game_config.candlesDefault,
 	fieldSize: 4,
 	goal: game_config.goalDefault,
@@ -57,7 +60,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 	constructor(interaction: CommandInteraction) {
 		super(interaction);
 		this.mode = <battleMode>interaction.options.getSubcommand();
-		const other = interaction.options.getUser("user");
+		const other = interaction.options.getUser("user", this.mode === "duel");
 		this.playerIDs = [this.userID, other?.id];
 		if (other?.bot) this.mode = "solo";
 	}
@@ -69,7 +72,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 	}
 	static async create(interaction: CommandInteraction): Promise<BattleInteraction> {
 		const battleInteraction = new BattleInteraction(interaction);
-		if (battleInteraction.mode == "duel") {
+		if (battleInteraction.mode === "duel") {
 			await battleInteraction.confirmAction();
 		} else {
 			await battleInteraction.init();
@@ -82,6 +85,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 		if (this._rawOptions) return this._rawOptions;
 		const opt = this.interaction.options;
 		const _rawOptions = {
+			customDeck: opt.getBoolean("custom_deck"),
 			sidedeck: opt.getString("sidedeck"),
 			candles: opt.getInteger("candles"),
 			fieldSize: opt.getInteger("field_size"),
@@ -90,6 +94,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			startKit: opt.getString("start_kit"),
 			terrain: opt.getString("terrain")
 		};
+		if (_rawOptions.customDeck === undefined) delete _rawOptions.customDeck;
 		if (!_rawOptions.sidedeck) delete _rawOptions.sidedeck;
 		if (!_rawOptions.candles) delete _rawOptions.candles;
 		if (!_rawOptions.fieldSize) delete _rawOptions.fieldSize;
@@ -108,9 +113,9 @@ class BattleInteraction extends PersistentCommandInteraction {
 			AppUser.saveUsersData();
 		}
 		const result = user.battleOptions.withDefaults();
-		if (result.sidedeck == "random") result.sidedeck = pickRandom(sidedecks);
-		if (result.terrain == "random") result.terrain = pickRandom(terrains);
-		else if (result.terrain == "none") result.terrain = "";
+		if (result.sidedeck === "random") result.sidedeck = pickRandom(sidedecks);
+		if (result.terrain === "random") result.terrain = pickRandom(terrains);
+		else if (result.terrain === "none") result.terrain = "";
 		return this._options = result;
 	}
 	getFieldOptions(filter: (card: Card)=>boolean = (c)=>!!c): any[] {
@@ -157,7 +162,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 					if (typeof card != "string" && !card.isModified) {
 						card = card.name;
 					}
-					if (typeof card == "string") {
+					if (typeof card === "string") {
 						if (includedCardNames.has(card)) return null;
 						includedCardNames.add(card);
 						return {
@@ -213,14 +218,24 @@ class BattleInteraction extends PersistentCommandInteraction {
 	async init(): Promise<Battle> {
 		if (this.battle) return this.battle;
 		const options = this.options;
-		const player = new Player(options.sidedeck);
 		switch (this.mode) {
 			case "solo":
-				this.battle = new SoloBattle(player/*User.get(this.userID).soloPlayer*/, this.interaction.options.getInteger("difficulty") || 2, options);
+				this.battle = new SoloBattle(
+					(options.customDeck && AppUser.get(this.userID).getActivePlayer()) || new Player(options.sidedeck),
+					this.interaction.options.getInteger("difficulty") || 2,
+					options
+				);
 				break;
 			case "duel":
-				const player2 = new Player(options.sidedeck);
-				this.battle = new DuelBattle(player/*User.get(this.playerIDs[0]).duelPlayer*/, player2/*User.get(this.playerIDs[1]).duelPlayer*/, options);
+				if (options.customDeck) {
+					this.battle = new DuelBattle(
+						AppUser.get(this.playerIDs[0]).getActivePlayer() || new Player(options.sidedeck),
+						AppUser.get(this.playerIDs[1]).getActivePlayer() || new Player(options.sidedeck),
+						options
+					);
+				} else {
+					this.battle = new DuelBattle(new Player(options.sidedeck), new Player(options.sidedeck), options);
+				}
 				break;
 		}
 		this.battle.uponSelect = this.uponSelect.bind(this);
@@ -228,12 +243,12 @@ class BattleInteraction extends PersistentCommandInteraction {
 			for (let k=0; k<2; k++) {
 				if (!this.battle.isHuman(<playerIndex>k)) continue;
 				const card = new Card(options.startKit);
-				if (card.name == "cat") {
+				if (card.name === "cat") {
 					card.sigils.add("repulsive");
-				} else if (card.name == "rabbit") {
+				} else if (card.name === "rabbit") {
 					card.sigils.add("undying");
 					card.sigils.add("waterborne");
-				} else if (card.name == "omni_squirrel") {
+				} else if (card.name === "squirrel-ish") {
 					card.sigils.add("item_bearer");
 				}
 				await this.battle.getPlayer(<playerIndex>k).addToHand(card);
@@ -278,7 +293,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			return;
 		}
 		// .confirm.decline
-		if (args[0] == "decline") {
+		if (args[0] === "decline") {
 			delete BattleInteraction.list[this.id];
 			await interaction.editReply({
 				embeds: [{
@@ -290,8 +305,8 @@ class BattleInteraction extends PersistentCommandInteraction {
 			return;
 		}
 		// .confirm.accept.[player index]
-		if (args[0] == "accept" && args[1]) {
-			if (args[1] == "0") {
+		if (args[0] === "accept" && args[1]) {
+			if (args[1] === "0") {
 				this.playerIDs = [this.playerIDs[1], this.playerIDs[0]];
 			}
 			await this.init();
@@ -418,7 +433,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			case 1:
 				if (!card?.isPlayable()) return;
 				const actions = this.makeFieldButtons("play", [`${index}`], this.battle.field[player.index], (c) => {
-					if (c) return card.cost != "blood" || c.noSacrifice || card.getCost() == 0 || c.sigils.has("many_lives");
+					if (c) return card.cost != "blood" || c.noSacrifice || card.getCost() === 0 || c.sigils.has("many_lives");
 					return false;
 				});
 				const cost = card.getCost() ? ` for ${card.getCost()}x${card.costEmoji}` : "";
@@ -433,7 +448,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			// .play.[hand index].[field position]
 			case 2:
 				if (!card?.isPlayable()) return;
-				if (card.cost == "blood" && player.blood < card.getCost()) {
+				if (card.cost === "blood" && player.blood < card.getCost()) {
 					await this.bloodAction(interaction, args);
 					return;
 				} else {
@@ -458,7 +473,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 					options.push({
 						label: toProperFormat(item.type),
 						description: `${item.description}${item.isUsable(this.battle, player.index) ? "" : " (can't use)"}`,
-						value: `i.${i}`
+						value: `i${DLM}${i}`
 					})
 				});
 				this.battle.field[player.index].forEach((card,i) => {
@@ -466,7 +481,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 					options.push({
 						label: `${card.nameSummary}: ${toProperFormat(card.ability)}`,
 						description: `${card.abilityDescription}${card.canActivate(i) ? "" : " (can't activate)"}`,
-						value: `f.${i}`
+						value: `f${DLM}${i}`
 					})
 				});
 				const actions = new MessageActionRow().addComponents(
@@ -488,11 +503,11 @@ class BattleInteraction extends PersistentCommandInteraction {
 			case 2:
 				const type = args[0];
 				const index = parseInt(args[1]);
-				if (type == "i") {
+				if (type === "i") {
 					const item = player.items[index];
 					await item?.use(this.battle, player.index);
 					player.items.splice(index, 1);
-				} else if (type == "f") {
+				} else if (type === "f") {
 					const card = this.battle.field[player.index][index];
 					await card.activate(index);
 				}
@@ -521,7 +536,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 				const field = parseInt(args[0]);
 				const index = parseInt(args[1]);
 				if (![-2,-1,0,1].includes(field)) break;
-				const card = (field >= 0 ? this.battle.field[field] : (field == -1 ? this.getPlayer(interaction.user.id).hand : (<SoloBattle>this.battle).bot.backfield))[index];
+				const card = (field >= 0 ? this.battle.field[field] : (field === -1 ? this.getPlayer(interaction.user.id).hand : (<SoloBattle>this.battle).bot.backfield))[index];
 				if (card) {
 					await interaction.editReply({
 						embeds: [{
@@ -597,7 +612,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			const pendingSacrifice = sacrifices.includes(i);
 			actions.addComponents(
 				this.makeButton("blood", [args[0], args[1], pendingSacrifice ? sacrifices.filter(v => v != i).join("-") : sacrifices.concat([i]).join("-")])
-					.setDisabled(!card || card.noSacrifice || i == target)
+					.setDisabled(!card || card.noSacrifice || i === target)
 					.setEmoji(pendingSacrifice ? "🩸" : numberEmoji[i+1])
 			)
 		}
@@ -623,8 +638,8 @@ class BattleInteraction extends PersistentCommandInteraction {
 			options.push({
 				label: card.fullSummary(field >= 0 ? index : -1),
 				description: field >= 0 ? `From player ${field+1}'s field, column ${index+1}` :
-					(field == -1 ? `From your hand, card #${index+1}` : `From opponent's backfield, column ${index+1}`),
-				value: `${field}.${index}`
+					(field === -1 ? `From your hand, card #${index+1}` : `From opponent's backfield, column ${index+1}`),
+				value: `${field}${DLM}${index}`
 			})
 		};
 		this.getPlayer(userID).hand.forEach(_toOption(-1));
@@ -671,7 +686,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			this.makeButton("resign").setStyle("DANGER").setEmoji("🏳️")
 		);
 		const reply = Display.displayBattle(this.battle, "mini-mono", this.battle.ended ? [] : [actions]);
-		if (this.mode == "duel") {
+		if (this.mode === "duel") {
 			reply.content = `<@${this.playerIDs[this.battle.actor]}>'s Turn\n${reply.content||""}`;
 		}
 		return reply;
@@ -694,7 +709,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 	isAllowedAction(userID: string, action: battleAction): boolean {
 		switch (action) {
 			case "confirm":
-				return !this.battle && userID == this.playerIDs[1];
+				return !this.battle && userID === this.playerIDs[1];
 			case "bell":
 				//if (!this.bellMutex) return true;
 				if (this.bellMutex) return false;
@@ -702,9 +717,9 @@ class BattleInteraction extends PersistentCommandInteraction {
 			case "play":
 			case "blood":
 			case "activate":
-				return userID == this.playerIDs[this.battle.actor];
+				return userID === this.playerIDs[this.battle.actor];
 			case "select":
-				return this.selectCallback && userID == this.playerIDs[this.selectingPlayer];
+				return this.selectCallback && userID === this.playerIDs[this.selectingPlayer];
 			case "inspect":
 				return true;
 			case "resign":
@@ -723,52 +738,65 @@ class BattleInteraction extends PersistentCommandInteraction {
 	}
 }
 
+const enum API {
+	subcommand = 1,
+	string = 3,
+	integer = 4,
+	boolean = 5,
+	user = 6,
+	number = 10
+}
 const universalOptions: any = [
+	{
+		name: "custom_deck",
+		description: "Enable custom decks? (overrides sidedeck setting)",
+		type: API.boolean
+	},
 	{
 		name: "sidedeck",
 		description: "Sidedeck to use (default random)",
-		type: 3,
+		type: API.string,
 		choices: [
 			{name: "Random", value: "random"},
 			{name: "Squirrels", value: "squirrel"},
 			{name: "Empty Vessels", value: "empty_vessel"},
 			{name: "Skeletons", value: "skeleton"},
 			{name: "Mox Crystals", value: "mox_crystal"},
-			{name: "Omnisquirrels", value: "omni_squirrel"}
+			{name: "Squirrel-Ish", value: "squirrel-ish"}
 		]
 	},
 	{
 		name: "field_size",
 		description: `Columns on the field? (default ${battleDefaults.fieldSize})`,
-		type: 4,
+		type: API.integer,
 		min_value: 3,
 		max_value: 5
 	},
 	{
 		name: "candles",
 		description: `Number of candles (default ${battleDefaults.candles})`,
-		type: 4,
+		type: API.integer,
 		min_value: 1,
 		max_value: 5
 	},
 	{
 		name: "goal",
 		description: `Goal amount of damage (default ${battleDefaults.goal})`,
-		type: 4,
+		type: API.integer,
 		min_value: 3,
 		max_value: 10
 	},
 	{
 		name: "scale",
 		description: "Starting damage (+N is player 1 advantage, -N is AI/player 2 advantage)",
-		type: 4,
+		type: API.integer,
 		min_value: -2,
 		max_value: 2
 	},
 	{
 		name: "terrain",
 		description: `Terrain to place on the field at the start (default ${battleDefaults.terrain})`,
-		type: 3,
+		type: API.string,
 		choices: [
 			{name: "None", value: "none"},
 			{name: "Random", value: "random"},
@@ -783,13 +811,13 @@ const universalOptions: any = [
 	{
 		name: "start_kit",
 		description: `Card(s) to give players at the start (default ${battleDefaults.startKit})`,
-		type: 3,
+		type: API.string,
 		choices: [
 			{name: "None", value: "none"},
 			{name: "Black Goat", value: "black_goat"},
 			{name: "Mrs. Bomb", value: "mrs._bomb"},
 			{name: "Magpie", value: "magpie"},
-			{name: "Omnisquirrel w/ Item Bearer", value: "omni_squirrel"},
+			{name: "Squirrel-Ish w/ Item Bearer", value: "squirrel-ish"},
 			{name: "Rabbit w/ Undying & Waterborne", value: "rabbit"},
 			{name: "Cat w/ Repulsive", value: "cat"}
 		]
@@ -847,8 +875,8 @@ export const battle: SlashCommand = {
 	],
 	run: async(interaction: CommandInteraction) => {
 		const cmd = interaction.options.getSubcommand();
-		if (cmd == "continue") {
-			const battle = BattleInteraction.get(interaction.options.getString("id"));
+		if (cmd === "continue") {
+			const battle = BattleInteraction.get(interaction.options.getString("id", true));
 			if (battle?.battle && battle.playerIDs.includes(interaction.user.id)
 				&& !battle.battle.ended) {
 				await interaction.deferReply();

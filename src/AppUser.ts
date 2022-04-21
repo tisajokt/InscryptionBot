@@ -1,7 +1,7 @@
 import { readFileSync, writeFile } from "fs";
 import { jsonArrayMember, jsonMember, jsonObject, TypedJSON } from "typedjson";
 import { BattleOptions } from "./commands/battle";
-import { cardName, Player } from "./Game";
+import { Card, cardName, Player } from "./Game";
 import { resolve } from "path";
 
 const usersDataFilePath = resolve(__dirname, "../data/user/users.json");
@@ -67,11 +67,12 @@ export class AppUser {
 	getActivePlayer(): Player {
 		return this.players[this.activePlayer];
 	}
-	createPlayer(sidedeck?: cardName): Player {
+	createPlayer(sidedeck?: cardName, deck?: (cardName|Card)[]): Player {
 		if (this.players.length < 5) {
-			const player = new Player(sidedeck);
+			const player = new Player(sidedeck, deck);
 			this.activePlayer = this.players.length;
 			this.players.push(player);
+			AppUser.saveUsersData();
 			return player;
 		}
 	}
