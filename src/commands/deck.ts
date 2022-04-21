@@ -194,17 +194,18 @@ class DeckInteraction extends PersistentCommandInteraction {
 			// .deck.cards
 			case "cards":
 				delete this.page;
+				const deckCardsMenu = new MessageActionRow().addComponents(
+					this.makeButton("deck").setEmoji("👈"),
+					this.makeButton("deck", ["cards", "add"]).setEmoji("🆕")
+				);
 				await this.interaction.editReply({
 					embeds: [this.player.getEmbedDisplay()],
-					components: [
+					components: this.player.deck.cards.length ? [
 						new MessageActionRow().addComponents(
 							this.makeSelectMenu("card", this.getDeckOptions(this.player.deck)).setPlaceholder("Select a card from your deck")
 						),
-						new MessageActionRow().addComponents(
-							this.makeButton("deck").setEmoji("👈"),
-							this.makeButton("deck", ["cards", "add"]).setEmoji("🆕")
-						)
-					]
+						deckCardsMenu
+					] : [deckCardsMenu]
 				});
 				break;
 			// .deck.cards.prev
@@ -235,6 +236,16 @@ class DeckInteraction extends PersistentCommandInteraction {
 				break;
 			// .deck.delete
 			case "delete":
+				await this.interaction.followUp({
+					content: `Are you sure you want to delete deck #${idx+1}, "${this.player.name ?? "Unnamed Deck"}"?`,
+					ephemeral: true,
+					components: [
+						new MessageActionRow().addComponents(this.makeButton("deck", ["delete", "yes"]).setLabel("Delete").setEmoji("🗑️").setStyle("DANGER"))
+					]
+				})
+				break;
+			// .deck.delete.yes
+			case "delete.yes":
 				if (this.user.activePlayer == idx) {
 					delete this.user.activePlayer;
 				} else if (this.user.activePlayer > idx) {

@@ -678,14 +678,17 @@ class BattleInteraction extends PersistentCommandInteraction {
 		const actor = this.battle.getPlayer(this.battle.actor);
 		const bell = this.battle.mayRingBell;
 		const hasActive = actor.items.length || this.battle.field[actor.index].filter(c => c?.ability).length;
+		const inspectButton = this.makeButton("inspect").setEmoji("🔍");
 		const actions = new MessageActionRow().addComponents(
 			this.makeButton(bell ? "bell" : "draw").setStyle("PRIMARY").setDisabled(disabled).setEmoji(bell ? "🔔" : "🃏"),
 			this.makeButton("play").setDisabled(!bell || !actor.hand.length).setEmoji("🖐️"),
 			this.makeButton("activate").setDisabled(!hasActive).setEmoji("⚡"),
-			this.makeButton("inspect").setEmoji("🔍"),
+			inspectButton,
 			this.makeButton("resign").setStyle("DANGER").setEmoji("🏳️")
 		);
-		const reply = Display.displayBattle(this.battle, "mini-mono", this.battle.ended ? [] : [actions]);
+		const reply = Display.displayBattle(this.battle, "mini-mono", this.battle.ended ? [
+			new MessageActionRow().addComponents(inspectButton)
+		] : [actions]);
 		if (this.mode === "duel") {
 			reply.content = `<@${this.playerIDs[this.battle.actor]}>'s Turn\n${reply.content||""}`;
 		}

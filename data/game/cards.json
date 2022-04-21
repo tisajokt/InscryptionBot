@@ -223,6 +223,7 @@
 	},
 	"pack_mule": {
 		"stats": [0,5,0],
+		"sigils": ["sprinter"],
 		"tribe": "hooved",
 		"event": "none",
 		"vanilla_cabin": true
@@ -619,7 +620,7 @@
 		"tribe": "avian"
 	},
 	"lammergeier": {
-		"stats": [0,3,4],
+		"stats": [0,4,3],
 		"cost": "blood",
 		"sigils": ["flying"],
 		"tribe": "avian",
