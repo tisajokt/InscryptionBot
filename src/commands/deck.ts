@@ -102,17 +102,13 @@ class DeckInteraction extends PersistentCommandInteraction {
 				break;
 			// .card.name.[card name]
 			case "name":
-				const deckArg = this.page === undefined ? ["cards"] : ["cards", "add"];
-				if (this.page !== undefined) {
-					this.page--;
-				}
 				await this.interaction.editReply({
 					embeds: [{
 						title: `x${count} ${toProperFormat(arg)}`,
 						fields: [(new Card(arg)).getEmbedDisplay()]
 					}],
 					components: [new MessageActionRow().addComponents(
-						this.makeButton("deck", deckArg).setEmoji("👈"),
+						this.makeButton("deck", this.page === undefined ? ["cards"] : ["cards", "add"]).setEmoji("👈"),
 						this.makeButton("card", ["name", "remove", arg]).setEmoji("⬇️"),
 						this.makeButton("card", ["name", "add", arg]).setEmoji("⬆️")
 					)]
@@ -211,11 +207,15 @@ class DeckInteraction extends PersistentCommandInteraction {
 					]
 				});
 				break;
+			// .deck.cards.prev
 			case "cards.prev":
 				this.page = (this.page ?? 1) - 2;
+			// .deck.cards.next
+			case "cards.next":
+				this.page = (this.page ?? -1) + 1;
 			// .deck.cards.add
 			case "cards.add":
-				this.page = (this.page ?? -1) + 1;
+				this.page = this.page ?? 0;
 				const options = this.getCardOptions();
 				await this.interaction.editReply({
 					embeds: [this.player.getEmbedDisplay()],
@@ -228,7 +228,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 						new MessageActionRow().addComponents(
 							this.makeButton("deck", ["cards"]).setEmoji("👈"),
 							this.makeButton("deck", ["cards", "prev"]).setEmoji("◀️"),
-							this.makeButton("deck", ["cards", "add"]).setEmoji("▶️")
+							this.makeButton("deck", ["cards", "next"]).setEmoji("▶️")
 						)
 					]
 				})
