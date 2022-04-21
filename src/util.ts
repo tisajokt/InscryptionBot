@@ -61,3 +61,10 @@ export const costEmoji = {
 	orange_mox: "🔶",
 	any_mox: "❔"
 };
+export const sidedeckEmoji = {
+	squirrel: "🐿️",
+	empty_vessel: "📟",
+	skeleton: "☠️",
+	mox_crystal: "💠",
+	omni_squirrel: "🐿️"
+};

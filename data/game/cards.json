@@ -21,9 +21,12 @@
 	"empty_vessel": {
 		"stats": [0,2,1],
 		"cost": "energy",
+		"sigils": ["capacitor"],
 		"is_conduit": true,
+		"no_sacrifice": true,
 		"no_bones": true,
-		"event": "none"
+		"event": "none",
+		"#comment": "cannot be sacrificed & yields no bones, but gains the capacitor sigil as a direct utility for tech decks"
 	},
 	"gem_vessel": {
 		"stats": [0,2,1],

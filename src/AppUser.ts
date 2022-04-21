@@ -1,12 +1,14 @@
 import { readFileSync, writeFile } from "fs";
 import { jsonArrayMember, jsonMember, jsonObject, TypedJSON } from "typedjson";
 import { BattleOptions } from "./commands/battle";
-import { Player } from "./Game";
+import { cardName, Player } from "./Game";
 import { resolve } from "path";
 
 const usersDataFilePath = resolve(__dirname, "../data/user/users.json");
 
-@jsonObject
+@jsonObject({
+	onDeserialized: "onDeserialized"
+})
 export class AppUser {
 	@jsonMember
 	id: string;
@@ -14,6 +16,8 @@ export class AppUser {
 	battleOptions: BattleOptions;
 	@jsonArrayMember(Player)
 	players: Player[];
+	@jsonMember
+	activePlayer: number;
 	constructor(id: string) {
 		this.id = id;
 		this.battleOptions = new BattleOptions();
@@ -56,6 +60,20 @@ export class AppUser {
 			});
 		});
 		return AppUser.savePromise;
+	}
+	onDeserialized(): void {
+		AppUser.usersMap.set(this.id, this);
+	}
+	getActivePlayer(): Player {
+		return this.players[this.activePlayer];
+	}
+	createPlayer(sidedeck?: cardName): Player {
+		if (this.players.length < 5) {
+			const player = new Player(sidedeck);
+			this.activePlayer = this.players.length;
+			this.players.push(player);
+			return player;
+		}
 	}
 }
 const userSerializer = new TypedJSON(AppUser);

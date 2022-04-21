@@ -70,7 +70,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 	static async create(interaction: CommandInteraction): Promise<BattleInteraction> {
 		const battleInteraction = new BattleInteraction(interaction);
 		if (battleInteraction.mode == "duel") {
-			await battleInteraction.confirm();
+			await battleInteraction.confirmAction();
 		} else {
 			await battleInteraction.init();
 			await battleInteraction.reply();
@@ -113,7 +113,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 		else if (result.terrain == "none") result.terrain = "";
 		return this._options = result;
 	}
-	getFieldOptions(filter: (card: Card)=>boolean = (c)=>!!c) {
+	getFieldOptions(filter: (card: Card)=>boolean = (c)=>!!c): any[] {
 		return this.battle.field[0].map((card, i) => {
 			return card ? {
 				card: card,
@@ -150,14 +150,27 @@ class BattleInteraction extends PersistentCommandInteraction {
 		const other = player ? 0 : 1;
 		switch (source) {
 			case "magpie":
+				const includedCardNames = new Set<cardName>();
 				title = "🔍 Magpie's Eye";
 				description = "Choose a card to draw from your deck";
 				actions.addComponents(this.makeSelectMenu("select", this.battle.getPlayer(player).deck.cards.map((card, i) => {
-					return {
-						label: typeof card == "string" ? modelSummary(card) : card.fullSummary(-1),
-						value: `${i}`
-					};
-				})));
+					if (typeof card != "string" && !card.isModified) {
+						card = card.name;
+					}
+					if (typeof card == "string") {
+						if (includedCardNames.has(card)) return null;
+						includedCardNames.add(card);
+						return {
+							label: modelSummary(card),
+							value: `${i}`
+						};
+					} else {
+						return {
+							label: card.fullSummary(-1),
+							value: `${i}`
+						};
+					}
+				}).filter(c => c)));
 				break;
 			case "sniper":
 				title = "🎯 Sniper";
@@ -235,18 +248,18 @@ class BattleInteraction extends PersistentCommandInteraction {
 	}
 	async receiveComponent(interaction: MessageComponentInteraction, action: battleAction, args: string[]=[]): Promise<void> {
 		switch (action) {
-			case "confirm": await this.confirm(interaction, args); break;
-			case "draw": await this.draw(interaction, args); break;
-			case "bell": await this.bell(interaction, args); break;
-			case "play": await this.play(interaction, args); break;
-			case "activate": await this.activate(interaction, args); break;
-			case "inspect": await this.inspect(interaction, args); break;
-			case "resign": await this.resign(interaction, args); break;
-			case "blood": await this.blood(interaction, args); break;
-			case "select": await this.select(interaction, args); break;
+			case "confirm": await this.confirmAction(interaction, args); break;
+			case "draw": await this.drawAction(interaction, args); break;
+			case "bell": await this.bellAction(interaction, args); break;
+			case "play": await this.playAction(interaction, args); break;
+			case "activate": await this.activateAction(interaction, args); break;
+			case "inspect": await this.inspectAction(interaction, args); break;
+			case "resign": await this.resignAction(interaction, args); break;
+			case "blood": await this.bloodAction(interaction, args); break;
+			case "select": await this.selectAction(interaction, args); break;
 		}
 	}
-	async confirm(interaction?: MessageComponentInteraction, args: string[]=[]): Promise<void> {
+	async confirmAction(interaction?: MessageComponentInteraction, args: string[]=[]): Promise<void> {
 		// on init of duel battle
 		if (!args[0]) {
 			if (this.mode != "duel") return;
@@ -286,7 +299,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			return;
 		}
 	}
-	async draw(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
+	async drawAction(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
 		switch (args.length) {
 			// .draw
 			case 0:
@@ -358,7 +371,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 				break;
 		}
 	}
-	async bell(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
+	async bellAction(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
 		// .bell
 		const battle = this.battle;
 		if (this.bellMutex || !battle.mayRingBell) return;
@@ -378,7 +391,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			delete BattleInteraction[this.id];
 		}
 	}
-	async play(interaction: MessageComponentInteraction, args: string[], edit?: boolean): Promise<void> {
+	async playAction(interaction: MessageComponentInteraction, args: string[], edit?: boolean): Promise<void> {
 		const index = parseInt(args[0]);
 		const target = parseInt(args[1]);
 		const player = this.getPlayer(interaction.user.id);
@@ -421,19 +434,19 @@ class BattleInteraction extends PersistentCommandInteraction {
 			case 2:
 				if (!card?.isPlayable()) return;
 				if (card.cost == "blood" && player.blood < card.getCost()) {
-					await this.blood(interaction, args);
+					await this.bloodAction(interaction, args);
 					return;
 				} else {
 					await player.playFromHand(index, target);
 					player.blood = 0;
 					await this.reply();
-					await this.play(interaction, [], true);
+					await this.playAction(interaction, [], true);
 				}
 				break;
 		}
 	}
-	async activate(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
-		const player = this.getPlayer(interaction.user.id)
+	async activateAction(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
+		const player = this.getPlayer(interaction.user.id);
 		switch (args.length) {
 			// .activate
 			case 0:
@@ -484,17 +497,17 @@ class BattleInteraction extends PersistentCommandInteraction {
 					await card.activate(index);
 				}
 				if (player.items.length > 0 || this.battle.field[player.index].some((c,i) => c?.ability && c.canActivate(i))) {
-					return await this.activate(interaction, []);
+					return await this.activateAction(interaction, []);
 				}
 				await this.reply();
 				break;
 		}
 	}
-	async inspect(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
+	async inspectAction(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
 		switch (args.length) {
 			// .inspect
 			case 0:
-				await this.interaction.followUp({
+				await interaction.followUp({
 					embeds: [{
 						title: ":mag: Inspect",
 						description: "Select a card from the field or your hand to view full details on"
@@ -521,7 +534,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 				break;
 		}
 	}
-	async resign(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
+	async resignAction(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
 		if (this.battle.turn < 2) {
 			this.battle.ended = true;
 			await this.interaction.deleteReply();
@@ -548,13 +561,13 @@ class BattleInteraction extends PersistentCommandInteraction {
 				break;
 		}
 	}
-	async select(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
+	async selectAction(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
 		// .select
-		this.select && this.selectCallback(parseInt(args[0]));
+		this.selectCallback && this.selectCallback(parseInt(args[0]));
 		await interaction.deleteReply();
 		await this.refresh();
 	}
-	async blood(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
+	async bloodAction(interaction: MessageComponentInteraction, args: string[]): Promise<void> {
 		// .blood.[hand index].[field position]?.[i0-i1-...]
 		if (args.length < 2) return;
 		const player = this.getPlayer(interaction.user.id);
@@ -575,7 +588,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			for (let k of sacrifices) {
 				await field[k]?.onSacrifice(k, card, target);
 			}
-			await this.play(interaction, [args[0], args[1]]);
+			await this.playAction(interaction, [args[0], args[1]]);
 			return;
 		}
 		const actions = new MessageActionRow();
@@ -691,7 +704,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			case "activate":
 				return userID == this.playerIDs[this.battle.actor];
 			case "select":
-				return this.select && userID == this.playerIDs[this.selectingPlayer];
+				return this.selectCallback && userID == this.playerIDs[this.selectingPlayer];
 			case "inspect":
 				return true;
 			case "resign":

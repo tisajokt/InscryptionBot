@@ -4,7 +4,7 @@
 		["brittle", "withering"],
 		["annoying", "stunned"],
 		["flying", "detonator", "swapper", "clinger", "skellify", "immutable"],
-		["sprinter", "burrower", "waterborne", "hefty", "jumper", "guardian", "mighty_leap", "null_conduit", "shield_latch", "transformer", "gem_detonator", "rampager", "hovering", "exploding_guts", "green_mox", "orange_mox", "blue_mox", "random_mox", "fisher", "stun_latch"],
+		["sprinter", "burrower", "waterborne", "hefty", "jumper", "guardian", "mighty_leap", "null_conduit", "shield_latch", "transformer", "gem_detonator", "rampager", "hovering", "exploding_guts", "green_mox", "orange_mox", "blue_mox", "random_mox", "fisher", "stun_latch", "capacitor"],
 		["fledgling", "loose_tail", "four_bones", "undying", "spikey", "worthy_sacrifice", "stinky", "digger", "battery", "energy_conduit", "bomb_latch", "gem_guardian", "vessel_printer", "powered_buff", "stone", "scavenger", "piercing", "magic_armor"],
 		["blood_guzzler", "gift_bearer", "rabbit_hole", "beehive", "dam_builder", "fecundity", "corpse_eater", "spawn_ant", "sealed_away", "amorphous", "leader", "skeleton_crew", "gem_animator", "ruby_heart", "gemnastics", "buff_conduit", "factory_conduit", "sentry", "double_death", "disentomb", "scholar", "sniper", "brittle_latch", "powered_trifurcated", "blood_lust", "morsel", "gemified", "animate_blood"],
 		["death_touch", "hoarder", "many_lives", "repulsive", "bifurcated", "bellist", "handy", "bomb_spewer", "enlarge", "energy_gun", "looter", "stimulate", "bonehorn", "armored", "cuckoo", "double_strike", "hydra_egg", "haunter"],
@@ -17,6 +17,10 @@
 	},
 	"immutable": {
 		"desc": "cannot lose or gain sigils"
+	},
+	"capacitor": {
+		"desc": "activate: sacrifice self and regenerate 1x🔋 energy",
+		"active": true
 	},
 	"painter": {
 		"desc": "if you control all mox colors, you may activate: choose a card to gain a randomly chosen sigil for 4x🔋 energy",

@@ -2,7 +2,7 @@
 import sigil_data from "../data/game/sigils.json";
 import card_models from "../data/game/cards.json";
 import game_config from "../data/game/config.json";
-import { padTrim, pickRandom, sleep, randomSelectionFrom, toProperCase, abbreviate, toProperFormat, singleCharStat, costEmoji } from "./util";
+import { padTrim, pickRandom, sleep, randomSelectionFrom, toProperCase, abbreviate, toProperFormat, singleCharStat, costEmoji, sidedeckEmoji } from "./util";
 import { EmbedField, Embed } from "src/Display";
 import { jsonArrayMember, jsonMember, jsonObject, jsonSetMember } from "typedjson";
 import { BattleOptions } from "./commands/battle";
@@ -19,7 +19,7 @@ for (let p = 0; p < sigil_data.__powers.length; p++) {
 }
 
 export const terrains: cardName[] = ["", "boulder", "stump", "grand_fir", "frozen_opossum", "moleman", "broken_bot"];
-export const sidedecks: cardName[] = ["squirrel", "empty_vessel", "skeleton", "mox_crystal"];
+export const sidedecks: cardName[] = ["squirrel", "empty_vessel", "skeleton", "mox_crystal", "omni_squirrel"];
 
 export const MAX_ENERGY: number = game_config.maxEnergy;
 export const ITEM_LIMIT: number = game_config.itemLimit;
@@ -27,6 +27,9 @@ export const FECUNDITY_NERF: boolean = game_config.fecundityNerf;
 export const VANILLA_CABIN_ONLY: boolean = game_config.vanillaCabinOnly;
 export const NO_MOX: boolean = game_config.noMox;
 export const ENABLED_MODS: Set<string> = new Set(game_config.enabledMods);
+export const MAX_TOTAL_RARES: number = game_config.maxTotalRares;
+export const MAX_RARE_DUPLICATES: number = game_config.maxRareDuplicates;
+export const MAX_NONRARE_DUPLICATES: number = game_config.maxNonrareDuplicates;
 
 export const slow_mode = false;
 export const AI_SPEED: number = slow_mode ? 500 : 0;
@@ -65,7 +68,7 @@ export type cardTribe = "canine"|"insect"|"reptile"|"avian"|"hooved"|"squirrel"|
 export type cardCost = "free"|"blood"|"bones"|"energy"|"mox";
 export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"bones"|"battery"|"armor"|"pliers"|"hourglass"|"fan"|"wiseclock"|"skinning_knife"|"lens"|"hammer";
 export type moxColor = "blue"|"green"|"orange"|"any";
-export type sigil = "immutable"|"skellify"|"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering"|"moon_strike"|"animate_blood"|"fisher"|"stunned"|"stun_latch"|"painter"|"clinger";
+export type sigil = "immutable"|"skellify"|"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering"|"moon_strike"|"animate_blood"|"fisher"|"stunned"|"stun_latch"|"painter"|"clinger"|"capacitor";
 export type playerIndex = 0|1;
 export type bossType = "prospector"|"angler"|"trader"|"moon";
 export type selectSource = "magpie"|"skinning_knife"|"sniper"|"hammer"|"latch";
@@ -144,7 +147,7 @@ export class Card {
 	get nameSummary(): string {
 		return toProperFormat(this.name) + (this.hasModifiedSigils ? "*" : "");
 	}
-	fullSummary(i: number): string {
+	fullSummary(i: number=-1): string {
 		return `${this.nameSummary} [${this.powerCalc ? "*" : singleCharStat(i > -1 ? this.getPower(i) : this.stats[0])}/${this.stats[1]}] ${Card.costEmojiDisplay(this.cost, this.stats[2], this.mox)}`;
 	}
 	getEmbedDisplay(i: number, inline: boolean=false): EmbedField {
@@ -225,6 +228,7 @@ export class Card {
 				return this.player.hand.length > 0;
 			case "hovering":
 			case "skellify":
+			case "capacitor":
 				return true;
 			default:
 				return false;
@@ -233,6 +237,10 @@ export class Card {
 	async activate(i: number): Promise<void> {
 		if (!this.canActivate(i)) return;
 		switch (this.ability) {
+			case "capacitor":
+				await this.onDeath(i);
+				this.player.energy = Math.min(this.player.capacity, this.player.energy + 1);
+				break;
 			case "painter":
 				this.player.energy -= 4;
 				await this.latchEffect(pickRandom(amorphousSigils));
@@ -284,7 +292,7 @@ export class Card {
 				const discards = this.player.hand;
 				this.player.hand = [];
 				this.player.drawFrom(this.player.deck, true, discards.length);
-				this.player.deck.cards = this.player.deck.cards.concat(discards.filter(c => c.name != this.player.sidedeck.card.name));
+				this.player.deck.cards = this.player.deck.cards.concat(discards.filter(c => c.name != this.player.sidedeck.card));
 				this.removeSigil("handy");
 				break;
 		}
@@ -894,19 +902,6 @@ export class Card {
 	get cost(): cardCost {
 		return getModel(this.name).cost || "free";
 	}
-	get sidedeckIcon(): string {
-		switch (this.name) {
-			case "skeleton":
-				return "☠️";
-			case "mox_crystal":
-				return "💠";
-			case "empty_vessel":
-				return "📟";
-			case "squirrel":
-			default:
-				return "🐿️";
-		}
-	}
 	get costEmoji(): string {
 		return costEmoji[this.cost] || "";
 	}
@@ -1033,9 +1028,9 @@ export class Deck implements Drawable {
 	}
 }
 export class SideDeck implements Drawable {
-	card: Card;
+	card: cardName;
 	count: number;
-	constructor(card: Card, count: number=20) {
+	constructor(card: cardName, count: number=20) {
 		this.card = card;
 		this.count = count;
 	}
@@ -1154,7 +1149,7 @@ export class Item {
 				await Item.skinningKnife(battle.getAbsoluteIndex(select), select%battle.fieldSize);
 				break;
 			case "hammer":
-				await battle.getPlayer(player).useHammer(await battle.waitForSelection("hammer", player, 0));
+				await battle.getPlayer(player).useHammer(await battle.waitForSelection("hammer", player, 0), true);
 				break;
 			case "lens":
 				await Item.magpieLens(battle, battle.getPlayer(player));
@@ -1652,7 +1647,7 @@ export class PlayerBattler implements Battler {
 		return `${cards} ${mox} ${energy} ${bones}`;
 	}
 	get sidedeckIcon(): string {
-		return Card.castCardName(this.sidedeck.card).sidedeckIcon;
+		return sidedeckEmoji[this.sidedeck.card] ?? sidedeckEmoji.squirrel;
 	}
 	async setupTurn(): Promise<void> {
 		this.drawn = (this.battle.turn < 2);
@@ -1665,6 +1660,9 @@ export class PlayerBattler implements Battler {
 			for (let i = 1; i < this.battle.candles[1]; i++) {
 				await this.addToHand(new Card("the_smoke"));
 			}
+		}
+		if (!this.items.some(item => item.type == "hammer") && this.items.length < ITEM_LIMIT) {
+			this.items.push(new Item("hammer"));
 		}
 	}
 	endTurn(): void {
@@ -1727,9 +1725,12 @@ export class PlayerBattler implements Battler {
 	get field(): Card[] {
 		return this.battle.field[this.index];
 	}
-	async useHammer(i: number): Promise<void> {
-		if (this.drawn || !this.field[i]) return;
-		this.drawn = true;
+	async useHammer(i: number, ignoreDraw?: boolean): Promise<void> {
+		if (!this.field[i]) return;
+		if (!ignoreDraw) {
+			if (this.drawn) return;
+			else this.drawn = true;
+		}
 		const card = this.field[i];
 		card.hammered = true;
 		await card.takeDamage(i, 100);
@@ -1912,26 +1913,32 @@ function makeCardFilter(): (card: cardName)=>boolean {
 	return (card: cardName): boolean => {
 		const model = getModel(card);
 		duplicates[card] = (duplicates[card] || 0) + 1;
-		if (duplicates[card] > (model.rare ? 1 : 3)) return false;
-		return !model.rare || ++rares < 5;
+		if (duplicates[card] > (model.rare ? MAX_RARE_DUPLICATES : MAX_NONRARE_DUPLICATES)) return false;
+		return !model.rare || ++rares < MAX_TOTAL_RARES;
 	}
 }
 
 @jsonObject
 export class Player {
 	@jsonMember
+	name: string;
+	@jsonMember
 	deck: Deck;
 	@jsonMember
-	sidedeck: Card;
+	sidedeck: cardName;
 	@jsonMember
 	totem: Totem;
 	@jsonMember
 	boonBones: number = 0;
 	constructor(sidedeck?: cardName, deck?: (cardName|Card)[]) {
-		//this.deck = new Deck(randomSelectionFrom(default_deck, 20 + Math.floor(Math.random() * 30)));
-		if (!sidedeck) sidedeck = pickRandom(sidedecks);
-		this.sidedeck = new Card(sidedeck);
-		this.deck = deck ? new Deck(deck) : Player.generateDeck(sidedeck);
+		this.sidedeck = sidedeck ?? pickRandom(sidedecks);
+		this.deck = deck ? new Deck(deck) : Player.generateDeck(this.sidedeck);
+	}
+	getEmbedDisplay(): Embed {
+		return {
+			title: `📋 ${this.name ?? "Unnamed Deck"}`,
+			description: `Sidedeck: ${toProperFormat(this.sidedeck)}\n# Cards in Deck: ${this.deck.cards.length}`
+		};
 	}
 	static generateDeck(sidedeck: cardName): Deck {
 		const _playerValueSort = (a,b) => {
@@ -1973,7 +1980,7 @@ export class Player {
 		})
 		player.drawFrom(player.deck, true, 2);
 		player.drawn = true;
-		player.bones += this.boonBones || (this.sidedeck.noSacrifice ? 1 : 0);
+		player.bones += this.boonBones || (getModel(this.sidedeck).no_sacrifice ? 1 : 0);
 		return player;
 	}
 }

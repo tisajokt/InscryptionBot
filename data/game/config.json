@@ -7,5 +7,8 @@
 	"candlesDefault": 2,
 	"goalDefault": 5,
 	"scaleDefault": -1,
-	"enabledMods": ["MoxExpansion", "GrimoraRulebook", "Zak"]
+	"enabledMods": ["MoxExpansion", "GrimoraRulebook", "Zak"],
+	"maxTotalRares": 5,
+	"maxRareDuplicates": 1,
+	"maxNonrareDuplicates": 3
 }
