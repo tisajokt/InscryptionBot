@@ -2,6 +2,7 @@ import { ChatInputApplicationCommandData, Client, BaseCommandInteraction, Messag
 import { generateRandomID } from "./util";
 
 export const DLM = ":"; // delimiter
+export const MAX_OPTIONS = 25;
 export interface SlashCommand extends ChatInputApplicationCommandData {
 	run: (interaction: CommandInteraction) => Promise<void>;
 	menu?: (interaction: MessageComponentInteraction, args?: string[]) => Promise<void>;
@@ -39,7 +40,7 @@ export abstract class PersistentCommandInteraction {
 	}
 	makeSelectMenu(action: string, options: any[]): MessageSelectMenu {
 		// Discord API limitation: max 25 options
-		return new MessageSelectMenu().setCustomId(`${this.cmd()}${DLM}${this.id}${DLM}${action}`).setOptions(options.slice(0, 25));
+		return new MessageSelectMenu().setCustomId(`${this.cmd()}${DLM}${this.id}${DLM}${action}`).setOptions(options.slice(0, MAX_OPTIONS));
 	}
 	abstract isAllowedAction(userID: string, action: string): boolean;
 	abstract receiveComponent(i: MessageComponentInteraction, action: string, args: string[]): Promise<void>;

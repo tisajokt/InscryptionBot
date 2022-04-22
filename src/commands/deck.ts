@@ -1,5 +1,5 @@
 import { ButtonInteraction, CommandInteraction, MessageActionRow, MessageComponentInteraction, SelectMenuInteraction } from "discord.js";
-import { DLM, PersistentCommandInteraction, SlashCommand } from "../Command";
+import { DLM, MAX_OPTIONS, PersistentCommandInteraction, SlashCommand } from "../Command";
 import { AppUser } from "../AppUser";
 import { numberEmoji, sidedeckEmoji, toProperFormat } from "../util";
 import { Card, cardName, Deck, getModel, MAX_NONRARE_DUPLICATES, MAX_RARE_DUPLICATES, MAX_TOTAL_RARES, modelSummary, Player, playerDeckCards, sidedecks } from "../Game";
@@ -39,11 +39,10 @@ class DeckInteraction extends PersistentCommandInteraction {
 		return "deck";
 	}
 	getCardOptions(page: number=this.page): any[] {
-		const optionsMax = 25;
-		const lastPage = Math.ceil(sortedCards.length / optionsMax);
+		const lastPage = Math.ceil(sortedCards.length / MAX_OPTIONS);
 		page = page >= 0 ? page % lastPage : lastPage-1;
 		this.page = page;
-		return sortedCards.slice(page * optionsMax, (page+1) * optionsMax).map((name) => {
+		return sortedCards.slice(page * MAX_OPTIONS, (page+1) * MAX_OPTIONS).map((name) => {
 			return {
 				label: `${getModel(name).rare?"✨ ":""}${modelSummary(name)}`,
 				value: `name${DLM}${name}`,
@@ -117,7 +116,8 @@ class DeckInteraction extends PersistentCommandInteraction {
 			// .card.name.add.[card name]
 			case "name.add":
 				const model = getModel(arg);
-				if (count < (model.rare ? MAX_RARE_DUPLICATES : MAX_NONRARE_DUPLICATES) && (!model.rare || rares < MAX_TOTAL_RARES)) {
+				if (count < (model.rare ? MAX_RARE_DUPLICATES : MAX_NONRARE_DUPLICATES) && (!model.rare || rares < MAX_TOTAL_RARES) &&
+					(count > 0 || this.player.countDistinctCards() < Math.min(25, MAX_OPTIONS))) {
 					deck.cards.push(arg);
 					deck._cardNames.push(arg);
 					AppUser.saveUsersData();
@@ -345,7 +345,7 @@ export const deck: SlashCommand = {
 					delete user.activePlayer;
 				}
 				await interaction.reply({
-					content: !!user.getActivePlayer() ? `Selected deck #${active}` : "Unselected all decks",
+					content: !!user.getActivePlayer() ? `Selected deck #${active}, "${user.getActivePlayer().name ?? "Unnamed Deck"}"` : "Unselected all decks",
 					ephemeral: true
 				})
 				break;

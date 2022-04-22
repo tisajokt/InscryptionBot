@@ -1,7 +1,7 @@
 import { readFileSync, writeFile } from "fs";
 import { jsonArrayMember, jsonMember, jsonObject, TypedJSON } from "typedjson";
 import { BattleOptions } from "./commands/battle";
-import { Card, cardName, Player } from "./Game";
+import { Card, cardName, MIN_COMPETITIVE_CARDS, Player } from "./Game";
 import { resolve } from "path";
 
 const usersDataFilePath = resolve(__dirname, "../data/user/users.json");
@@ -64,8 +64,15 @@ export class AppUser {
 	onDeserialized(): void {
 		AppUser.usersMap.set(this.id, this);
 	}
-	getActivePlayer(): Player {
-		return this.players[this.activePlayer];
+	getActivePlayer(competitive: boolean=false): Player {
+		if (!competitive) {
+			return this.players[this.activePlayer];
+		} else {
+			const player = this.players[this.activePlayer];
+			if (player && player.deck.cards.length >= MIN_COMPETITIVE_CARDS) {
+				return player;
+			}
+		}
 	}
 	createPlayer(sidedeck?: cardName, deck?: (cardName|Card)[]): Player {
 		if (this.players.length < 5) {

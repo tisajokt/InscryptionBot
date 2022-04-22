@@ -229,8 +229,8 @@ class BattleInteraction extends PersistentCommandInteraction {
 			case "duel":
 				if (options.customDeck) {
 					this.battle = new DuelBattle(
-						AppUser.get(this.playerIDs[0]).getActivePlayer() || new Player(options.sidedeck),
-						AppUser.get(this.playerIDs[1]).getActivePlayer() || new Player(options.sidedeck),
+						AppUser.get(this.playerIDs[0]).getActivePlayer(true) || new Player(options.sidedeck),
+						AppUser.get(this.playerIDs[1]).getActivePlayer(true) || new Player(options.sidedeck),
 						options
 					);
 				} else {

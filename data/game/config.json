@@ -10,5 +10,6 @@
 	"enabledMods": ["MoxExpansion", "GrimoraRulebook"],
 	"maxTotalRares": 5,
 	"maxRareDuplicates": 1,
-	"maxNonrareDuplicates": 3
+	"maxNonrareDuplicates": 3,
+	"minCompetitiveCards": 20
 }

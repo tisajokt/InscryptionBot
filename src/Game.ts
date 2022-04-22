@@ -30,6 +30,7 @@ export const ENABLED_MODS: Set<string> = new Set(game_config.enabledMods);
 export const MAX_TOTAL_RARES: number = game_config.maxTotalRares;
 export const MAX_RARE_DUPLICATES: number = game_config.maxRareDuplicates;
 export const MAX_NONRARE_DUPLICATES: number = game_config.maxNonrareDuplicates;
+export const MIN_COMPETITIVE_CARDS: number = game_config.minCompetitiveCards;
 
 export const slow_mode = false;
 export const AI_SPEED: number = slow_mode ? 500 : 0;
@@ -146,7 +147,7 @@ export class Card {
 		return (typeof card === "string") ? card : new Card(card);
 	}
 	get nameSummary(): string {
-		return toProperFormat(this.name) + (this.hasModifiedSigils ? "*" : "");
+		return toProperFormat(this.name) + (this.hasUnfamiliarSigils ? "*" : "");
 	}
 	fullSummary(i: number=-1): string {
 		return `${this.nameSummary} [${this.powerCalc ? "*" : singleCharStat(i > -1 ? this.getPower(i) : this.stats[0])}/${this.stats[1]}] ${Card.costEmojiDisplay(this.cost, this.stats[2], this.mox)}`;
@@ -839,6 +840,37 @@ export class Card {
 		}
 		return false;
 	}
+	get hasUnfamiliarSigils(): boolean {
+		const model = getModel(this.name);
+		const sigils = this.sigils;
+		for (const sigil of sigils) {
+			switch (sigil) {
+				case "armored":
+					if (!model.sigils.includes(sigil) && !model.sigils.includes("magic_armor")) return true;
+					break;
+				case "green_mox":
+				case "orange_mox":
+				case "blue_mox":
+					if (!model.sigils.includes(sigil) && !model.sigils.includes("random_mox")) return true;
+					break;
+				default:
+					if (!model.sigils.includes(sigil)) return true;
+			}
+		}
+		for (const sigil of model.sigils) {
+			switch (sigil) {
+				case "magic_armor":
+					if (!sigils.has(sigil) && !sigils.has("armored")) return true;
+					break;
+				case "random_mox":
+					if (!sigils.has(sigil) && !["green_mox", "orange_mox", "blue_mox"].some((s: sigil) => sigils.has(s))) return true;
+					break;
+				default:
+					if (!sigils.has(sigil)) return true;
+			}
+		}
+		return false;
+	}
 	get isModified(): boolean {
 		const model = getModel(this.name);
 		if (this.stats[0] != model.stats[0] || this.stats[1] != model.stats[1]) return true;
@@ -1481,15 +1513,7 @@ export abstract class Battle {
 		return blood;*/
 	}
 	countMox(player: playerIndex): number {
-		var count = 0;
-		for (let i = 0; i < this.fieldSize; i++) {
-			const card = this.field[player][i];
-			if (!card) continue;
-			if (card.sigils.has("blue_mox")) count++;
-			if (card.sigils.has("green_mox")) count++;
-			if (card.sigils.has("orange_mox")) count++;
-		}
-		return count;
+		return this.field[player].reduce((v,card)=>(v+(card?.isMox?1:0)),0);
 	}
 	hasCircuit(player: playerIndex): boolean {
 		var count = 0;
@@ -1935,10 +1959,36 @@ export class Player {
 		this.sidedeck = sidedeck ?? pickRandom(sidedecks);
 		this.deck = deck ? new Deck(deck) : Player.generateDeck(this.sidedeck);
 	}
+	countDistinctCards(): number {
+		const distinctCards = new Set<cardName>();
+		var rareCount = 0;
+		this.deck.cards.forEach(c => {
+			if (typeof c === "string") {
+				distinctCards.add(c);
+				if (getModel(c).rare) rareCount++;
+			} else {
+				distinctCards.add(c.name);
+				if (c.rare) rareCount++;
+			}
+		});
+		return [...distinctCards].length;
+	}
 	getEmbedDisplay(): Embed {
+		const distinctCards = new Set<cardName>();
+		var rareCount = 0;
+		this.deck.cards.forEach(c => {
+			if (typeof c === "string") {
+				distinctCards.add(c);
+				if (getModel(c).rare) rareCount++;
+			} else {
+				distinctCards.add(c.name);
+				if (c.rare) rareCount++;
+			}
+		});
+		const competitive = (this.deck.cards.length >= MIN_COMPETITIVE_CARDS);
 		return {
 			title: `📋 ${this.name ?? "Unnamed Deck"}`,
-			description: `Sidedeck: ${toProperFormat(this.sidedeck)}\n# Cards in Deck: ${this.deck.cards.length}`
+			description: `Sidedeck: ${toProperFormat(this.sidedeck)}\nCards in Deck: ${this.deck.cards.length}${competitive?"":"*"} (${[...distinctCards].length} distinct)\nRare Cards: ${rareCount}/${MAX_TOTAL_RARES}${competitive?"":`\n*To duel other players, you need at least ${MIN_COMPETITIVE_CARDS} cards`}`
 		};
 	}
 	static generateDeck(sidedeck: cardName): Deck {
