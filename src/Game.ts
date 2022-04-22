@@ -59,6 +59,7 @@ export type CardModel = {
 	playerValue?: number,
 	nonplayerValue?: number,
 	sortIndex?: number,
+	bot_playable?: boolean,
 	vanilla_cabin?: boolean,
 	modded?: boolean|string,
 	inspect?: string,
@@ -498,6 +499,13 @@ export class Card {
 		const player = this.player;
 		const other = (this.owner === 0) ? 1 : 0;
 		let deaths = 1 + this.battle.getCardsWithSigil(this.owner, "double_death").length;
+		if (this.name === "pack_mule" && this.battle.isHuman(other)) {
+			const otherPlayer = this.battle.getPlayer(other);
+			await otherPlayer.addToHand(new Card("squirrel"));
+			await otherPlayer.addToHand(new Card(pickRandom(enabledDeckCards.filter(c => (getModel(c).cost === "blood" && getModel(c).stats[2] === 1)))));
+			await otherPlayer.addToHand(new Card(pickRandom(enabledDeckCards.filter(c => (getModel(c).cost === "blood" && getModel(c).stats[2] === 2)))));
+			await otherPlayer.addToHand(new Card(pickRandom(enabledDeckCards.filter(c => (getModel(c).cost === "bones" && getModel(c).stats[2] <= 6)))));
+		}
 		if (this.sigils.has("sealed_away") && !this.hammered) {
 			deaths = 1;
 			await this.battle.playCard(this.createWithExtraSigils(this.getModelProp("sealed_away") || "opossum", "sealed_away"), i, this.owner);
@@ -918,10 +926,11 @@ export class Card {
 			case "insect":
 				return "wriggling_leg";
 			case "canine":
+				return "canine_tail";
 			case "hooved":
 				return "furry_tail";
 			default:
-				return "tail";
+				return this.cost === "mox" ? "sparkling_dust" : "tail";
 		}
 	}
 	get pelt(): cardName {
@@ -929,7 +938,7 @@ export class Card {
 			case "canine":
 				return "wolf_pelt";
 			default:
-				return this.rare ? "golden_pelt" : "rabbit_pelt";
+				return this.rare ? "golden_pelt" : (this.cost === "energy" ? "holopelt" : "rabbit_pelt");
 		}
 	}
 	get cost(): cardCost {
@@ -1244,7 +1253,7 @@ export abstract class Battle {
 			return true;
 		} else {
 			this.scale = 0;
-			this.onCandleOut(player);
+			await this.onCandleOut(player);
 			return false;
 		}
 	}
@@ -2038,11 +2047,12 @@ export class Player {
 
 for (const name in card_models) {
 	const model = getModel(name);
-	model.stats = model.stats || [0,1,0];
-	model.sigils = model.sigils || [];
+	model.stats ??= [0,1,0];
+	model.sigils ??= [];
 	model.playerValue = (new Card(name)).cardPlayerValue;
 	model.nonplayerValue = (new Card(name)).cardNonplayerValue;
-	model.abbrev = model.abbrev || abbreviate(name, 6);
+	model.abbrev ??= abbreviate(name, 6);
+	model.bot_playable ??= model.stats[0] > 0;
 	model.themes = new Set();
 	if (model.cost) model.themes.add(model.cost);
 	if (model.tribe) model.themes.add("tribal");
@@ -2065,7 +2075,7 @@ for (const name in card_models) {
 		NO_MOX && (model.is_mox || model.cost === "mox")) continue;
 	enabledDeckCards.push(name);
 	if (model.is_terrain) continue;
-	botDeckCards.push(name);
+	if (model.bot_playable) botDeckCards.push(name);
 	if (model.event === "none") continue;
 	playerDeckCards.push(name);//*/
 }

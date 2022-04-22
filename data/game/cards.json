@@ -9,7 +9,8 @@
 	"rabid_squirrel": {
 		"stats": [1,3,0],
 		"tribe": "squirrel",
-		"event": "none"
+		"event": "none",
+		"bot_playable": false
 	},
 	"skeleton": {
 		"stats": [1,1,0],
@@ -62,6 +63,7 @@
 		"stats": [1,1,0],
 		"tribe": "reptile",
 		"rare": true,
+		"bot_playable": false,
 		"vanilla_cabin": true
 	},
 	"skink": {
@@ -75,6 +77,10 @@
 		"stats": [0,2,0],
 		"event": "none",
 		"vanilla_cabin": true
+	},
+	"sparkling_dust": {
+		"stats": [0,2,0],
+		"event": "none"
 	},
 	"wriggling_tail": {
 		"stats": [0,2,0],
@@ -94,10 +100,21 @@
 		"event": "none",
 		"vanilla_cabin": true
 	},
-	"furry_tail": {
+	"canine_tail": {
 		"stats": [0,2,0],
+		"tribe": "canine",
 		"event": "none",
 		"vanilla_cabin": true
+	},
+	"furry_tail": {
+		"stats": [0,2,0],
+		"tribe": "hooved",
+		"event": "none",
+		"vanilla_cabin": true
+	},
+	"holopelt": {
+		"stats": [0,1,0],
+		"event": "none"
 	},
 	"black_goat": {
 		"stats": [0,1,1],
@@ -233,6 +250,7 @@
 		"cost": "blood",
 		"sigils": ["burrower"],
 		"grows_into": "moleman",
+		"bot_playable": true,
 		"vanilla_cabin": true
 	},
 	"moleman": {
@@ -240,6 +258,7 @@
 		"cost": "blood",
 		"sigils": ["burrower", "mighty_leap"],
 		"rare": true,
+		"bot_playable": true,
 		"vanilla_cabin": true
 	},
 	"magpie": {
@@ -377,6 +396,7 @@
 		"sigils": ["four_bones"],
 		"event": "none",
 		"rare": true,
+		"bot_playable": false,
 		"vanilla_cabin": true
 	},
 	"amalgam": {
@@ -397,6 +417,7 @@
 		"stats": [0,3,1],
 		"cost": "blood",
 		"sigils": ["stinky"],
+		"bot_playable": true,
 		"vanilla_cabin": true
 	},
 	"the_daus": {
@@ -411,18 +432,21 @@
 		"cost": "blood",
 		"power_calc": "bell",
 		"chime_trigger": "the_daus",
+		"bot_playable": false,
 		"vanilla_cabin": true
 	},
 	"mirror_tentacle": {
 		"stats": [0,3,1],
 		"cost": "blood",
 		"power_calc": "mirror",
+		"bot_playable": false,
 		"vanilla_cabin": true
 	},
 	"hand_tentacle": {
 		"stats": [0,1,1],
 		"cost": "blood",
 		"power_calc": "hand",
+		"bot_playable": false,
 		"vanilla_cabin": true
 	},
 	"grand_fir": {
@@ -452,6 +476,7 @@
 		"tribe": "insect",
 		"power_calc": "ant",
 		"grows_into": "queen_ant",
+		"bot_playable": true,
 		"vanilla_cabin": true
 	},
 	"flying_ant": {
@@ -461,6 +486,7 @@
 		"tribe": "insect",
 		"power_calc": "ant",
 		"grows_into": "queen_ant",
+		"bot_playable": true,
 		"vanilla_cabin": true
 	},
 	"queen_ant": {
@@ -469,6 +495,7 @@
 		"sigils": ["spawn_ant"],
 		"tribe": "insect",
 		"power_calc": "ant",
+		"bot_playable": true,
 		"vanilla_cabin": true
 	},
 	"tadpole": {
@@ -531,6 +558,7 @@
 		"sigils": ["fledgling"],
 		"grows_into": "raven",
 		"tribe": "avian",
+		"bot_playable": true,
 		"vanilla_cabin": true
 	},
 	"mantis": {
@@ -555,6 +583,7 @@
 		"tribe": "insect",
 		"grows_into": "strange_pupa",
 		"rare": true,
+		"bot_playable": true,
 		"vanilla_cabin": true
 	},
 	"strange_pupa": {
@@ -573,6 +602,7 @@
 		"sigils": ["flying"],
 		"tribe": "insect",
 		"rare": true,
+		"bot_playable": false,
 		"vanilla_cabin": true,
 		"event": "none"
 	},
@@ -624,7 +654,8 @@
 		"cost": "blood",
 		"sigils": ["flying"],
 		"tribe": "avian",
-		"power_calc": "bones"
+		"power_calc": "bones",
+		"bot_playable": true
 	},
 	"bloodhound": {
 		"stats": [2,3,2],
@@ -649,7 +680,8 @@
 		"cost": "blood",
 		"sigils": ["sprinter"],
 		"power_calc": "sacrifices",
-		"tribe": "hooved"
+		"tribe": "hooved",
+		"bot_playable": true
 	},
 	"strange_frog": {
 		"stats": [1,2,1],
@@ -673,6 +705,7 @@
 		"sigils": ["sealed_away"],
 		"sealed_away": "great_white",
 		"no_sacrifice": true,
+		"bot_playable": true,
 		"vanilla_cabin": true,
 		"inspect": "\"Go fish.\""
 	},
@@ -738,6 +771,7 @@
 	"gold_nugget": {
 		"stats": [0,2,0],
 		"no_sacrifice": true,
+		"event": "none",
 		"vanilla_cabin": true
 	},
 
@@ -760,7 +794,8 @@
 		"cost": "energy",
 		"sigils": ["mighty_leap", "sentry", "spikey", "sniper"],
 		"fish_gifts": true,
-		"event": "none"
+		"event": "none",
+		"bot_playable": false
 	},
 	"bad_fish": {
 		"stats": [0,1,3],
@@ -787,13 +822,15 @@
 		"stats": [0,1,1],
 		"cost": "energy",
 		"sigils": ["bomb_latch"],
-		"no_sacrifice": true
+		"no_sacrifice": true,
+		"bot_playable": true
 	},
 	"shield_latcher": {
 		"stats": [0,1,2],
 		"cost": "energy",
 		"sigils": ["shield_latch"],
-		"no_sacrifice": true
+		"no_sacrifice": true,
+		"bot_playable": true
 	},
 	"gem_detonator": {
 		"stats": [1,2,3],
@@ -812,7 +849,8 @@
 		"stats": [0,5,0],
 		"sigils": ["burrower", "steel_trap"],
 		"no_sacrifice": true,
-		"event": "none"
+		"event": "none",
+		"bot_playable": true
 	},
 	"crystal_bud": {
 		"stats": [0,1,0],
@@ -896,13 +934,15 @@
 		"stats": [0,4,6],
 		"cost": "energy",
 		"sigils": ["transformer"],
-		"transformer_attack": 4
+		"transformer_attack": 4,
+		"bot_playable": true
 	},
 	"ghost_ship": {
 		"stats": [0,1,4],
 		"cost": "bones",
 		"sigils": ["waterborne", "sprinter"],
-		"trail": "skeleton"
+		"trail": "skeleton",
+		"bot_playable": true
 	},
 	"bonehound": {
 		"stats": [2,3,7],
@@ -924,7 +964,8 @@
 	"l33pb0t": {
 		"stats": [0,2,1],
 		"cost": "energy",
-		"sigils": ["mighty_leap"]
+		"sigils": ["mighty_leap"],
+		"bot_playable": true
 	},
 	"explode_bot": {
 		"stats": [1,1,2],
@@ -956,7 +997,8 @@
 	"sentry_drone": {
 		"stats": [0,1,1],
 		"cost": "energy",
-		"sigils": ["sentry"]
+		"sigils": ["sentry"],
+		"bot_playable": true
 	},
 	"plasma_jimmy": {
 		"stats": [0,3,2],
@@ -973,13 +1015,15 @@
 		"stats": [0,2,2],
 		"cost": "energy",
 		"sigils": ["buff_conduit"],
-		"is_conduit": true
+		"is_conduit": true,
+		"bot_playable": true
 	},
 	"factory_conduit": {
 		"stats": [0,2,3],
 		"cost": "energy",
 		"sigils": ["factory_conduit"],
-		"is_conduit": true
+		"is_conduit": true,
+		"bot_playable": true
 	},
 	"energy_conduit": {
 		"stats": [1,2,3],
@@ -1053,7 +1097,8 @@
 	},
 	"mage_pupil": {
 		"stats": [1,1,0],
-		"sigils": ["gem_dependent"]
+		"sigils": ["gem_dependent"],
+		"bot_playable": false
 	},
 	"blue_mage": {
 		"stats": [0,1,0],
@@ -1132,6 +1177,7 @@
 		"cost": "mox",
 		"mox": ["orange"],
 		"power_calc": "damage",
+		"bot_playable": true,
 		"#comment": "powers up from receiving damage"
 	},
 	"green_mage": {
@@ -1139,6 +1185,7 @@
 		"cost": "mox",
 		"mox": ["green"],
 		"power_calc": "mox",
+		"bot_playable": true,
 		"#comment": "now powered by all mox, not just green"
 	},
 	"junior_sage": {
@@ -1238,7 +1285,8 @@
 		"stats": [0,2,3],
 		"cost": "bones",
 		"sigils": ["fledgling"],
-		"grows_into": "mummy_lord"
+		"grows_into": "mummy_lord",
+		"bot_playable": true
 	},
 	"mummy_lord": {
 		"stats": [3,3,8],
@@ -1411,6 +1459,7 @@
 		"sigils": ["painter"],
 		"mox": ["blue"],
 		"power_calc": "sigils",
+		"bot_playable": true,
 		"modded": "MoxExpansion"
 	},
 	"vampire": {
@@ -1427,6 +1476,7 @@
 		"power_calc": "sigils",
 		"no_bones": true,
 		"rare": true,
+		"bot_playable": true,
 		"modded": "GrimoraRulebook",
 		"#comment": "(similar to as seen in grimora's rulebook) when sacrificed for something, transfers its sigils; upon death, a card with this sigil returns to the hand as a spirit"
 	},
@@ -1439,6 +1489,7 @@
 		"cost": "bones",
 		"sigils": ["exploding_guts", "withering", "repulsive"],
 		"no_sacrifice": true,
+		"bot_playable": true,
 		"modded": "GrimoraRulebook",
 		"#comment": "(as seen in grimora's rulebook) fills the field with guts upon death"
 	},
@@ -1491,7 +1542,7 @@
 		"stats": [2,2,2],
 		"cost": "blood",
 		"sigils": ["waterborne", "piercing"],
-		"modded": true
+		"modded": "Vanilla+"
 	},
 	"glitched_card": {
 		"glitch": true,
