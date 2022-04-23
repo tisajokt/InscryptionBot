@@ -471,6 +471,10 @@ export class Card {
 				}
 			}
 		}
+		if (this.sigils.has("gem_dependent") && !this.battle.countMox(this.owner)) {
+			await this.onDeath(i);
+			return;
+		}
 		await this.onMovement(i);
 	}
 	async onHit(attacker: Card): Promise<void> {
@@ -579,6 +583,15 @@ export class Card {
 				if (this.battle.field[other][i]) await this.battle.field[other][i].takeDamage(i, 10);
 				if (i-1 >= 0 && this.battle.field[this.owner][i-1]) await this.battle.field[this.owner][i-1].takeDamage(i-1, 10);
 				if (i+1 < this.battle.fieldSize && this.battle.field[this.owner][i+1]) await this.battle.field[this.owner][i+1].takeDamage(i+1, 10);
+			}
+		}
+		if (this.isMox && !this.battle.countMox(this.owner)) {
+			for (let i = 0; i < this.battle.fieldSize; i++) {
+				const card = this.battle.field[this.owner][i];
+				if (card?.sigils.has("gem_dependent")) {
+					await card.onDeath(i);
+					if (this.battle.countMox(this.owner)) break;
+				}
 			}
 		}
 		// Last green mox is destroyed, update health of gemified cards
@@ -724,6 +737,9 @@ export class Card {
 				this.transformInto("hydra");
 			}
 		}
+	}
+	async dependencyCheck(): Promise<void> {
+		
 	}
 	createWithExtraSigils(cardName: cardName, sigil: sigil=null): Card {
 		const card = new Card(cardName);
