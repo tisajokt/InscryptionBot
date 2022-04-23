@@ -1,4 +1,4 @@
-import { ChatInputApplicationCommandData, Client, BaseCommandInteraction, MessageComponentInteraction, ButtonInteraction, MessageApplicationCommandData, CommandInteraction, TextBasedChannel, MessageButton, MessageSelectMenu, SelectMenuInteraction, DiscordAPIError } from "discord.js";
+import { ChatInputApplicationCommandData, BaseCommandInteraction, MessageComponentInteraction, ButtonInteraction, MessageApplicationCommandData, CommandInteraction, TextBasedChannel, MessageButton, MessageSelectMenu, SelectMenuInteraction, DiscordAPIError } from "discord.js";
 import { generateRandomID } from "./util";
 
 export const DLM = ":"; // delimiter
@@ -52,7 +52,6 @@ export abstract class PersistentCommandInteraction {
 		} catch (e) {
 			console.error("Caught an error!");
 			if (e instanceof DiscordAPIError) {
-				console.error(e);
 				await this.tokenExpired();
 			} else {
 				await this.internalError();

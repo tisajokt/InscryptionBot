@@ -168,11 +168,12 @@
 		"tribe": "hooved"
 	},
 	"stinkbug": {
-		"stats": [1,2,2],
+		"stats": [1,2,3],
 		"cost": "bones",
 		"sigils": ["stinky"],
 		"tribe": "insect",
-		"vanilla_cabin": true
+		"vanilla_cabin": true,
+		"#comment": "increased cost to 3 bones"
 	},
 	"cat": {
 		"stats": [0,1,1],
@@ -1435,6 +1436,20 @@
 
 
 
+	"assembled_mage": {
+		"stats": [1,1,2],
+		"cost": "bones",
+		"sigils": ["sealed_away"],
+		"sealed_away": "stirring_bones",
+		"no_bones": true,
+		"bot_playable": false
+	},
+	"stirring_bones": {
+		"stats": [0,2,0],
+		"sigils": ["gem_dependent", "fledgling"],
+		"grows_into": "assembled_mage",
+		"event": "none"
+	},
 	"summoning_circle": {
 		"stats": [0,1,0],
 		"cost": "mox",

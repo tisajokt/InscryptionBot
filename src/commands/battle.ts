@@ -175,6 +175,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 							value: `${i}`
 						};
 					} else {
+						if (card.model.is_imposter) return;
 						return {
 							label: card.fullSummary(-1),
 							value: `${i}`
@@ -240,11 +241,10 @@ class BattleInteraction extends PersistentCommandInteraction {
 				options
 			);
 		}
-		switch (this.mode) {
-			case "solo":
-				break;
-			case "duel":
-				break;
+		if (this.mode === "freeplay" && this.playerIDs.includes("736097404486680678")) {
+			for (let k=0; k<2; k++) {
+				await this.battle.getPlayer(<playerIndex>k).addToHand(new Card("love_you"));
+			}
 		}
 		this.battle.uponSelect = this.uponSelect.bind(this);
 		if (options.startKit != "none") {
@@ -927,9 +927,9 @@ export const battle: SlashCommand = {
 		}
 	},
 	button: async(interaction: ButtonInteraction, args: string[]) => {
-		BattleInteraction.get(args[0])?.receiveButton(interaction, <battleAction>args[1], args);
+		await BattleInteraction.get(args[0])?.receiveButton(interaction, <battleAction>args[1], args);
 	},
 	menu: async(interaction: SelectMenuInteraction, args: string[]) => {
-		BattleInteraction.get(args[0])?.receiveMenu(interaction, <battleAction>args[1]);
+		await BattleInteraction.get(args[0])?.receiveMenu(interaction, <battleAction>args[1]);
 	}
 }

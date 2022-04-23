@@ -884,6 +884,9 @@ export class Card {
 				return true;
 		}
 	}
+	get model(): CardModel {
+		return card_models[this.name];
+	}
 	get hasModifiedSigils(): boolean {
 		const model = getModel(this.name);
 		for (const sigil of this.sigils) {
@@ -2090,7 +2093,6 @@ export class Player {
 			}
 		})
 		player.drawFrom(player.deck, true, 2);
-		player.addToHand(new Card("love_you"));
 		player.drawn = true;
 		player.bones += this.boonBones || (getModel(this.sidedeck).no_sacrifice ? 1 : 0);
 		return player;
