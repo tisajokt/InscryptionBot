@@ -1440,6 +1440,7 @@
 		"cost": "mox",
 		"sigils": ["beast_summon"],
 		"mox": ["orange"],
+		"no_sacrifice": true,
 		"modded": "MoxExpansion"
 	},
 	"defense_mage": {
