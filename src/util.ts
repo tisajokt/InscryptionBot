@@ -24,7 +24,7 @@ export function singleCharStat(stat: number): string {
 	return stat < 10 ? `${stat}` : "!";
 }
 export function abbreviate(str: string, len: number): string {
-	str = str.split(/[ _]/).map(s => toProperCase(s)).join(" ");
+	str = toProperFormat(str);
 	if (str.length <= len) return str;
 	const arr = str.split(/[ -]/).map(s => toProperCase(s));
 	switch (arr.length) {

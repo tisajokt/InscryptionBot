@@ -242,6 +242,7 @@
 		"stats": [0,5,0],
 		"sigils": ["sprinter"],
 		"tribe": "hooved",
+		"uncuttable": true,
 		"event": "none",
 		"vanilla_cabin": true
 	},
@@ -1088,7 +1089,8 @@
 		"stats": [2,2,2],
 		"cost": "blood",
 		"sigils": ["item_bearer"],
-		"event": "pack"
+		"event": "pack",
+		"rare": true
 	},
 	"gift_bot": {
 		"stats": [0,2,2],
@@ -1324,10 +1326,10 @@
 	"headless_horseman": {
 		"stats": [5,5,13],
 		"cost": "bones",
-		"sigils": ["flying", "sprinter"],
+		"sigils": ["flying", "sprinter", "stunned"],
 		"tribe": "hooved",
 		"rare": true,
-		"#comment": "added hooved tribe"
+		"#comment": "added hooved tribe, and gave stunned sigil"
 	},
 	"obol": {
 		"stats": [0,2,3],
@@ -1416,9 +1418,38 @@
 		"cost": "bones",
 		"sigils": ["double_death"]
 	},
+	"bridge_rails": {
+		"stats": [0,6,0],
+		"no_sacrifice": true,
+		"no_bones": true,
+		"event": "none"
+	},
+	"ijiraq": {
+		"stats": [4,1,0],
+		"sigils": ["repulsive"],
+		"rare": true,
+		"inspect": "...?",
+		"is_imposter": true,
+		"bot_playable": false
+	},
 
 
 
+	"summoning_circle": {
+		"stats": [0,1,0],
+		"cost": "mox",
+		"sigils": ["beast_summon"],
+		"mox": ["orange"],
+		"modded": "MoxExpansion"
+	},
+	"defense_mage": {
+		"stats": [0,1,0],
+		"cost": "mox",
+		"sigils": ["magic_armor", "opportunist"],
+		"mox": ["blue"],
+		"modded": "MoxExpansion",
+		"bot_playable": true
+	},
 	"squirrel-ish": {
 		"stats": [0,1,0],
 		"sigils": ["random_mox", "skellify"],
@@ -1430,7 +1461,7 @@
 		"#comment": "combines the functionality of gem vessels, squirrels, & skeletons"
 	},
 	"bloodstone": {
-		"stats": [0,3,2],
+		"stats": [0,1,2],
 		"cost": "blood",
 		"sigils": ["worthy_sacrifice"],
 		"no_sacrifice": true,
@@ -1447,13 +1478,13 @@
 		"#comment": "while on the field, you may sacrifice cards which aren't normally sacrificeable"
 	},
 	"combat_mage": {
-		"stats": [1,1,0],
+		"stats": [0,1,0],
 		"cost": "mox",
-		"sigils": ["stun_latch"],
+		"sigils": ["stun_latch", "combative"],
 		"mox": ["green"],
 		"modded": "MoxExpansion"
 	},
-	"arcane_artistan": {
+	"arcane_artisan": {
 		"stats": [0,1,0],
 		"cost": "mox",
 		"sigils": ["painter"],
@@ -1473,7 +1504,6 @@
 		"stats": [0,1,5],
 		"cost": "bones",
 		"sigils": ["haunter"],
-		"power_calc": "sigils",
 		"no_bones": true,
 		"rare": true,
 		"bot_playable": true,
@@ -1513,6 +1543,7 @@
 		"sigils": ["moon_strike", "mighty_leap", "stone", "immutable"],
 		"modded": "special",
 		"wide": true,
+		"uncuttable": true,
 		"event": "none",
 		"vanilla_cabin": true,
 		"inspect": "So much value..."
@@ -1529,6 +1560,7 @@
 		"sigils": ["moon_strike", "mighty_leap", "stone", "immutable"],
 		"power_calc": "mirror",
 		"wide": true,
+		"uncuttable": true,
 		"event": "none",
 		"modded": "Bosses"
 	},
@@ -1536,6 +1568,7 @@
 		"stats": [2,80,0],
 		"sigils": ["moon_strike", "mighty_leap", "stone", "immutable"],
 		"wide": true,
+		"uncuttable": true,
 		"modded": "special"
 	},
 	"piranha": {

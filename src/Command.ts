@@ -46,8 +46,8 @@ export abstract class PersistentCommandInteraction {
 	abstract receiveComponent(i: MessageComponentInteraction, action: string, args: string[]): Promise<void>;
 	async _receiveComponent(interaction: MessageComponentInteraction, action: string, args: string[]): Promise<void> {
 		if (!this?.isAllowedAction(interaction.user.id, action)) return;
-		await interaction.deferUpdate();
 		try {
+			await interaction.deferUpdate();
 			await this.receiveComponent(interaction, action, args);
 		} catch (e) {
 			console.error("Caught an error!");
@@ -65,6 +65,9 @@ export abstract class PersistentCommandInteraction {
 	}
 	async receiveButton(interaction: ButtonInteraction, action: string, args: string[]): Promise<void> {
 		await this._receiveComponent(interaction, action, args.slice(2));
+	}
+	async editReply(interaction: MessageComponentInteraction, content): Promise<void> {
+		await interaction.editReply(content);
 	}
 	abstract tokenExpired(): Promise<void>;
 	async internalError(): Promise<void> {

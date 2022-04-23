@@ -700,7 +700,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 		await this.interaction.editReply({
 			content: reply.content,
 			embeds: reply.embeds
-		});
+		}).catch(console.error);
 	}
 	async reply(interaction: CommandInteraction|MessageComponentInteraction=this.interaction): Promise<void> {
 		const reply = this.makeReply();
