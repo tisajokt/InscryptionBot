@@ -708,7 +708,7 @@
 		"no_sacrifice": true,
 		"bot_playable": true,
 		"vanilla_cabin": true,
-		"inspect": "\"Go fish.\""
+		"inspect": "Go fish."
 	},
 	"wolverine": {
 		"stats": [1,3,5],
@@ -1456,7 +1456,7 @@
 		"tribe": "squirrel",
 		"is_mox": true,
 		"is_conduit": true,
-		"inspect": "\"Not quite a squirrel?\"",
+		"inspect": "Not quite a squirrel?",
 		"modded": "Squirrelish",
 		"#comment": "combines the functionality of gem vessels, squirrels, & skeletons"
 	},
@@ -1594,6 +1594,13 @@
 		"inspect": "<3",
 		"modded": "Zak"
 	},
+	"love_you": {
+		"stats": [0,17,0],
+		"sigils": ["undying", "free_paint"],
+		"rare": true,
+		"inspect": "so heckin much :>",
+		"modded": "Zak"
+	},
 	"nipple": {
 		"stats": [1,3,1],
 		"cost": "blood",
@@ -1605,7 +1612,7 @@
 	"goobert": {
 		"stats": [0,1,0],
 		"sigils": ["withering", "death_touch", "spikey"],
-		"inspect": "\"sOoOo much AGONY~\"",
+		"inspect": "sOoOo much AGONY~",
 		"modded": "Zak"
 	}
 }

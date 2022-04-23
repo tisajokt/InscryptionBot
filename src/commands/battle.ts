@@ -1,13 +1,13 @@
 import { MessageActionRow, ButtonInteraction, CommandInteraction, InteractionReplyOptions, SelectMenuInteraction, MessageComponentInteraction, User } from "discord.js";
 import { DLM, PersistentCommandInteraction, SlashCommand } from "../Command";
-import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, sidedecks, selectSource, modelSummary, sigil } from "../Game";
+import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, sidedecks, selectSource, modelSummary, sigil, Deck } from "../Game";
 import { Display } from "../Display";
 import { AppUser } from "../AppUser";
 import { numberEmoji, pickRandom, sleep, toProperFormat } from "../util";
 import game_config from "../../data/game/config.json";
 import { jsonMember, jsonObject } from "typedjson";
 
-type battleMode = "solo"|"duel";
+type battleMode = "solo"|"duel"|"freeplay";
 type battleAction = "confirm"|"draw"|"bell"|"play"|"activate"|"inspect"|"resign"|"blood"|"select";
 @jsonObject
 export class BattleOptions {
@@ -55,6 +55,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 	static list: Map<string, BattleInteraction> = new Map();
 	battle: Battle;
 	mode: battleMode;
+	twoPlayers: boolean;
 	playerIDs: string[];
 	bellMutex: boolean;
 	constructor(interaction: CommandInteraction) {
@@ -62,7 +63,11 @@ class BattleInteraction extends PersistentCommandInteraction {
 		this.mode = <battleMode>interaction.options.getSubcommand();
 		const other = interaction.options.getUser("user", this.mode === "duel");
 		this.playerIDs = [this.userID, other?.id];
-		if (other?.bot) this.mode = "solo";
+		this.twoPlayers = !!other;
+		if (other?.bot) {
+			this.mode = "solo";
+			this.twoPlayers = false;
+		}
 	}
 	storeID(): void {
 		BattleInteraction.list[this.id] = this;
@@ -72,7 +77,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 	}
 	static async create(interaction: CommandInteraction): Promise<BattleInteraction> {
 		const battleInteraction = new BattleInteraction(interaction);
-		if (battleInteraction.mode === "duel") {
+		if (battleInteraction.twoPlayers) {
 			await battleInteraction.confirmAction();
 		} else {
 			await battleInteraction.init();
@@ -218,24 +223,27 @@ class BattleInteraction extends PersistentCommandInteraction {
 	async init(): Promise<Battle> {
 		if (this.battle) return this.battle;
 		const options = this.options;
-		switch (this.mode) {
-			case "solo":
-				this.battle = new SoloBattle(
-					(options.customDeck && AppUser.get(this.userID).getActivePlayer()) || new Player(options.sidedeck),
-					this.interaction.options.getInteger("difficulty") || 2,
+		if (this.twoPlayers) {
+			if (options.customDeck) {
+				this.battle = new DuelBattle(
+					AppUser.get(this.playerIDs[0]).getActivePlayer(this.mode === "duel") || new Player(options.sidedeck),
+					AppUser.get(this.playerIDs[1]).getActivePlayer(this.mode === "duel") || new Player(options.sidedeck),
 					options
 				);
+			} else {
+				this.battle = new DuelBattle(new Player(options.sidedeck), new Player(options.sidedeck), options);
+			}
+		} else {
+			this.battle = new SoloBattle(
+				(options.customDeck && AppUser.get(this.userID).getActivePlayer()) || new Player(options.sidedeck),
+				this.interaction.options.getInteger("difficulty") || 2,
+				options
+			);
+		}
+		switch (this.mode) {
+			case "solo":
 				break;
 			case "duel":
-				if (options.customDeck) {
-					this.battle = new DuelBattle(
-						AppUser.get(this.playerIDs[0]).getActivePlayer(true) || new Player(options.sidedeck),
-						AppUser.get(this.playerIDs[1]).getActivePlayer(true) || new Player(options.sidedeck),
-						options
-					);
-				} else {
-					this.battle = new DuelBattle(new Player(options.sidedeck), new Player(options.sidedeck), options);
-				}
 				break;
 		}
 		this.battle.uponSelect = this.uponSelect.bind(this);
@@ -277,7 +285,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 	async confirmAction(interaction?: MessageComponentInteraction, args: string[]=[]): Promise<void> {
 		// on init of duel battle
 		if (!args[0]) {
-			if (this.mode != "duel") return;
+			if (!this.twoPlayers) return;
 			const actions = new MessageActionRow().addComponents(
 				this.makeButton("confirm", ["accept", "0"]).setEmoji(numberEmoji[1]),
 				this.makeButton("confirm", ["accept", "1"]).setEmoji(numberEmoji[2]),
@@ -318,6 +326,13 @@ class BattleInteraction extends PersistentCommandInteraction {
 		switch (args.length) {
 			// .draw
 			case 0:
+				if (this.mode === "freeplay") {
+					const player = this.battle.getPlayer(this.battle.actor);
+					if (!this.battle.hasDrawOption("deck")) {
+						player.deck = new Deck((AppUser.get(this.playerIDs[this.battle.actor]).getActivePlayer() || new Player(player.sidedeck.card)).deck.cards);
+					}
+					player.sidedeck.count = 20;
+				}
 				const actions = new MessageActionRow().addComponents(
 					this.makeButton("draw", ["deck"]).setDisabled(!this.battle.hasDrawOption("deck")).setEmoji("🃏"),
 					this.makeButton("draw", ["sidedeck"]).setDisabled(!this.battle.hasDrawOption("sidedeck")).setEmoji(this.battle.getPlayer(this.battle.actor).sidedeckIcon),
@@ -674,6 +689,12 @@ class BattleInteraction extends PersistentCommandInteraction {
 		return actions;
 	}
 	makeReply(): InteractionReplyOptions {
+		if (this.mode === "freeplay") {
+			const candles = Math.max(...this.battle.candles);
+			this.battle.scale = 0;
+			this.battle.candles = [candles, candles];
+			this.battle.ended = false;
+		}
 		const disabled = !this.battle.isHuman(this.battle.actor);
 		const actor = this.battle.getPlayer(this.battle.actor);
 		const bell = this.battle.mayRingBell;
@@ -689,7 +710,10 @@ class BattleInteraction extends PersistentCommandInteraction {
 		const reply = Display.displayBattle(this.battle, "mini-mono", this.battle.ended ? [
 			new MessageActionRow().addComponents(inspectButton)
 		] : [actions]);
-		if (this.mode === "duel") {
+		if (this.mode === "freeplay") {
+			reply.content = reply.content.replace(/```(.|\n)*i+\([ *]+\/[ *]+\)i+\n/, "```");
+		}
+		if (this.twoPlayers) {
 			reply.content = `<@${this.playerIDs[this.battle.actor]}>'s Turn\n${reply.content||""}`;
 		}
 		return reply;
@@ -859,6 +883,18 @@ export const battle: SlashCommand = {
 					description: "User to challenge",
 					type: 6,
 					required: true
+				}
+			].concat(universalOptions)
+		},
+		{
+			name: "freeplay",
+			description: "Play with an infinite deck and no player damage",
+			type: 1,
+			options: [
+				{
+					name: "user",
+					description: "User to challenge (optional)",
+					type: 6
 				}
 			].concat(universalOptions)
 		},

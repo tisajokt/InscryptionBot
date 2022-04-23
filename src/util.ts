@@ -66,5 +66,7 @@ export const sidedeckEmoji = {
 	empty_vessel: "📟",
 	skeleton: "☠️",
 	mox_crystal: "💠",
-	"squirrel-ish": "🦤"
+	"squirrel-ish": "🦤",
+	bee: "🐝",
+	tadpole: "🐸"
 };
