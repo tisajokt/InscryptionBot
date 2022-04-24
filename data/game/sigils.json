@@ -43,7 +43,7 @@
 		"desc": "may strike waterborne cards while submerged"
 	},
 	"blood_guzzler": {
-		"desc": "gains health equal to damage dealt to other cards"
+		"desc": "gains +1 health after dealing damage to another card"
 	},
 	"animate_blood": {
 		"desc": "while on the field, you may sacrifice any card; when played, draw a bloodstone",

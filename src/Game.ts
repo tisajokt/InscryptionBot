@@ -1356,7 +1356,7 @@ export abstract class Battle {
 		if (await target.takeDamage(j, attacker.sigils.has("death_touch") && !target.sigils.has("stone") ? Infinity : power)) {
 			await target.onHit(attacker);
 			if (attacker.sigils.has("blood_guzzler") && prevHealth > target.stats[1]) {
-				attacker.stats[1] += Math.max(0, prevHealth - Math.max(0, target.stats[1]));
+				attacker.stats[1]++;
 			}
 			if (target.stats[1] <= 0) {
 				if (attacker.sigils.has("piercing")) {
