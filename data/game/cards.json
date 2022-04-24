@@ -678,7 +678,7 @@
 		"sigils": ["scavenger"]
 	},
 	"red_hart": {
-		"stats": [0,1,2],
+		"stats": [0,2,2],
 		"cost": "blood",
 		"sigils": ["sprinter"],
 		"power_calc": "sacrifices",
@@ -904,9 +904,9 @@
 	"insectodrone": {
 		"stats": [1,1,3],
 		"cost": "energy",
-		"sigils": ["flying"],
+		"sigils": ["hovering"],
 		"tribe": "insect",
-		"#comment": "added insect tribe"
+		"#comment": "added insect tribe, and replaced flying with hovering"
 	},
 	"3D_printer": {
 		"stats": [0,3,3],
@@ -1531,9 +1531,9 @@
 		"event": "none"
 	},
 	"rotting_mound": {
-		"stats": [0,3,5],
+		"stats": [0,3,4],
 		"cost": "bones",
-		"sigils": ["exploding_guts", "withering", "repulsive"],
+		"sigils": ["exploding_guts", "withering"],
 		"no_sacrifice": true,
 		"bot_playable": true,
 		"modded": "GrimoraRulebook",

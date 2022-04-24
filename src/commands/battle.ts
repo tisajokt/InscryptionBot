@@ -193,8 +193,9 @@ class BattleInteraction extends PersistentCommandInteraction {
 				description = "Choose a card of yours to hammer";
 				this.makeFieldButtons("select", [], this.battle.field[player], (c) => !c, actions);
 				break;
+			case "paint":
 			case "latch":
-				title = `💫 Latch: ${toProperFormat(args[0])}`;
+				title = `${source === "latch" ? "💫 Latch" : "🎨 Paint"}: ${toProperFormat(args[0])}`;
 				description = `Choose a card to receive the _${args[0].replaceAll("_", " ")}_ sigil`;
 				actions.addComponents(this.makeSelectMenu("select", this.getFieldOptions(c => c && !c.sigils.has(<sigil>args[0]))));
 				break;

@@ -2,9 +2,9 @@ import { ButtonInteraction, CommandInteraction, MessageActionRow, MessageCompone
 import { DLM, MAX_OPTIONS, PersistentCommandInteraction, SlashCommand } from "../Command";
 import { AppUser } from "../AppUser";
 import { numberEmoji, sidedeckEmoji, toProperFormat } from "../util";
-import { Card, cardName, Deck, getModel, MAX_NONRARE_DUPLICATES, MAX_RARE_DUPLICATES, MAX_TOTAL_RARES, modelSummary, Player, playerDeckCards, sidedecks } from "../Game";
+import { amorphousSigils, Card, cardName, Deck, getModel, MAX_NONRARE_DUPLICATES, MAX_RARE_DUPLICATES, MAX_TOTAL_RARES, modelSummary, Player, playerDeckCards, sidedecks } from "../Game";
 
-type deckAction = "main"|"deck"|"card";
+type deckAction = "main"|"deck"|"card"|"special";
 export function cardNameCount(cards: cardName[]): Map<cardName, number> {
 	const map = new Map();
 	cards.forEach((card) => {
@@ -23,6 +23,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 	user: AppUser;
 	player: Player;
 	page: number=0;
+	lastMenu: "view"|"cards"|"sigils"="view";
 	constructor(interaction: CommandInteraction) {
 		super(interaction);
 		this.user = AppUser.get(this.userID);
@@ -38,13 +39,10 @@ class DeckInteraction extends PersistentCommandInteraction {
 	cmd(): string {
 		return "deck";
 	}
-	getCardOptions(page: number=this.page): any[] {
-		const lastPage = Math.ceil(sortedCards.length / MAX_OPTIONS);
-		page = page >= 0 ? page % lastPage : lastPage-1;
-		this.page = page;
-		return sortedCards.slice(page * MAX_OPTIONS, (page+1) * MAX_OPTIONS).map((name) => {
+	getCardOptions(): any[] {
+		return this.getPagedOptions(sortedCards).map((name) => {
 			return {
-				label: `${getModel(name).rare?"✨ ":""}${modelSummary(name)}`,
+				label: `${getModel(name).rare?"✨ ":""}${modelSummary(name)} (${getModel(name).playerValue})`,
 				value: `name${DLM}${name}`,
 				_placeholder: toProperFormat(name)
 			}
@@ -54,7 +52,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 		deck.beforeSerialization();
 		const unmodifiedCards: Map<cardName, number> = cardNameCount(deck._cardNames);
 		const modifiedCards: Card[] = deck._cardObjects;
-		return modifiedCards.map((card) => {
+		return this.getPagedOptions(modifiedCards.map((card) => {
 			return {
 				label: `${card.fullSummary()} (modified)`,
 				value: `special${DLM}${deck.cards.indexOf(card)}`
@@ -64,7 +62,57 @@ class DeckInteraction extends PersistentCommandInteraction {
 				label: `${count > 1 ? `x${count} ` : ""}${getModel(name).rare?"✨ ":""}${modelSummary(name)}`,
 				value: `name${DLM}${name}`
 			}
-		}));
+		})));
+	}
+	getSigilOptions(): any[] {
+		return this.getPagedOptions(amorphousSigils).map((sigil) => {
+			return {
+				label: toProperFormat(sigil),
+				value: sigil
+			}
+		});
+	}
+	getPagedOptions(options: any[]): any[] {
+		const lastPage = Math.ceil(options.length / MAX_OPTIONS);
+		this.page = this.page < 0 ? lastPage-1 : (this.page ?? 0) % lastPage;
+		return options.slice(this.page * MAX_OPTIONS, (this.page+1) * MAX_OPTIONS);
+	}
+	async specialAction(args: string[]=[]): Promise<void> {
+		// .special.totem
+		// .special.totem.[tribe].[sigil]
+		// .special.item
+		// .special.item.[add|remove].[item]
+		// .special.custom
+		switch (args[0] ?? "menu") {
+			case "menu":
+				await this.interaction.editReply({
+					embeds: [this.player.getEmbedDisplay()],
+					components: [new MessageActionRow().addComponents(
+						this.makeButton("deck").setEmoji("👈"),
+						this.makeButton("special", ["totem"]).setEmoji("🗿"),
+						this.makeButton("special", ["item"]).setEmoji("⌛")
+					)]
+				});
+				break;
+			case "totem":
+				const tribe = args[1];
+				if (!tribe) {
+					await this.interaction.editReply({
+						embeds: [this.player.getEmbedDisplay()],
+						components: [new MessageActionRow().addComponents(
+							this.makeButton("special", ["totem", "canine"]).setEmoji("🐺"),
+							this.makeButton("special", ["totem", "hooved"]).setEmoji("🦌"),
+							this.makeButton("special", ["totem", "insect"]).setEmoji("🐞"),
+							this.makeButton("special", ["totem", "reptile"]).setEmoji("🐸"),
+							this.makeButton("special", ["totem", "avian"]).setEmoji("🦉")
+						)]
+					})
+					break;
+				}
+				break;
+			case "item":
+				break;
+		}
 	}
 	async cardAction(args: string[]=[]): Promise<void> {
 		if (args.length < 2 || args.length > 3 || !this.player) return;
@@ -107,7 +155,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 						fields: [(new Card(arg)).getEmbedDisplay()]
 					}],
 					components: [new MessageActionRow().addComponents(
-						this.makeButton("deck", this.page === undefined ? ["cards"] : ["cards", "add"]).setEmoji("👈"),
+						this.makeButton("deck", [this.lastMenu]).setEmoji("👈"),
 						this.makeButton("card", ["name", "remove", arg]).setEmoji("⬇️"),
 						this.makeButton("card", ["name", "add", arg]).setEmoji("⬆️")
 					)]
@@ -116,8 +164,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 			// .card.name.add.[card name]
 			case "name.add":
 				const model = getModel(arg);
-				if (count < (model.rare ? MAX_RARE_DUPLICATES : MAX_NONRARE_DUPLICATES) && (!model.rare || rares < MAX_TOTAL_RARES) &&
-					(count > 0 || this.player.countDistinctCards() < Math.min(25, MAX_OPTIONS))) {
+				if (count < (model.rare ? MAX_RARE_DUPLICATES : MAX_NONRARE_DUPLICATES) && (!model.rare || rares < MAX_TOTAL_RARES)) {
 					deck.cards.push(arg);
 					deck._cardNames.push(arg);
 					AppUser.saveUsersData();
@@ -175,10 +222,10 @@ class DeckInteraction extends PersistentCommandInteraction {
 			// .deck
 			case "overview":
 				const actions = new MessageActionRow().addComponents(
-					this.makeButton("main", []).setEmoji("👈"),
+					this.makeButton("main").setEmoji("👈"),
 					this.makeButton("deck", ["sidedeck"]).setEmoji(sidedeckEmoji[this.player.sidedeck] || sidedeckEmoji.squirrel),
-					this.makeButton("deck", ["cards"]).setEmoji("🗃️"),
-					this.makeButton("deck", ["special"]).setEmoji("✨"),
+					this.makeButton("deck", ["view"]).setEmoji("🗃️"),
+					this.makeButton("special").setEmoji("✨"),
 					this.makeButton("deck", ["delete"]).setEmoji("🗑️").setStyle("DANGER"),
 				);
 				await this.interaction.editReply({
@@ -191,13 +238,20 @@ class DeckInteraction extends PersistentCommandInteraction {
 				this.player.sidedeck = sidedecks[(sidedecks.indexOf(this.player.sidedeck) + 1) % sidedecks.length];
 				await this.deckAction();
 				break;
-			// .deck.cards
-			case "cards":
-				delete this.page;
-				const deckCardsMenu = new MessageActionRow().addComponents(
+			case "view.next":
+				this.page++;
+			// .deck.view
+			case "view":
+				if (this.lastMenu !== "view") {
+					this.lastMenu = "view";
+					this.page = 0;
+				}
+				const components = [
 					this.makeButton("deck").setEmoji("👈"),
-					this.makeButton("deck", ["cards", "add"]).setEmoji("🆕")
-				);
+					this.makeButton("deck", ["cards"]).setEmoji("🆕"),
+					this.makeButton("deck", ["view", "next"]).setEmoji("▶️")
+				];
+				const deckCardsMenu = new MessageActionRow().addComponents(components);
 				await this.interaction.editReply({
 					embeds: [this.player.getEmbedDisplay()],
 					components: this.player.deck.cards.length ? [
@@ -210,13 +264,16 @@ class DeckInteraction extends PersistentCommandInteraction {
 				break;
 			// .deck.cards.prev
 			case "cards.prev":
-				this.page = (this.page ?? 1) - 2;
+				this.page -= 2;
 			// .deck.cards.next
 			case "cards.next":
-				this.page = (this.page ?? -1) + 1;
+				this.page++;
 			// .deck.cards.add
-			case "cards.add":
-				this.page = this.page ?? 0;
+			case "cards":
+				if (this.lastMenu !== "cards") {
+					this.lastMenu = "cards";
+					this.page = 0;
+				}
 				const options = this.getCardOptions();
 				await this.interaction.editReply({
 					embeds: [this.player.getEmbedDisplay()],
@@ -227,7 +284,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 							)
 						),
 						new MessageActionRow().addComponents(
-							this.makeButton("deck", ["cards"]).setEmoji("👈"),
+							this.makeButton("deck", ["view"]).setEmoji("👈"),
 							this.makeButton("deck", ["cards", "prev"]).setEmoji("◀️"),
 							this.makeButton("deck", ["cards", "next"]).setEmoji("▶️")
 						)
@@ -281,9 +338,10 @@ class DeckInteraction extends PersistentCommandInteraction {
 	}
 	async receiveComponent(i: MessageComponentInteraction, action: string, args: string[]): Promise<void> {
 		switch (<deckAction>action) {
-			case "main": this.mainAction(args); break;
-			case "card": this.cardAction(args); break;
-			case "deck": this.deckAction(args); break;
+			case "main": await this.mainAction(args); break;
+			case "card": await this.cardAction(args); break;
+			case "deck": await this.deckAction(args); break;
+			case "special": await this.specialAction(args); break;
 		}
 	}
 	async tokenExpired(): Promise<void> {}
