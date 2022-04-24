@@ -247,7 +247,7 @@ export class Card {
 			case "handy":
 				return this.player.hand.length > 0;
 			case "phase_shift":
-				return this.battle.field[this.owner].some(c => !c);
+				return this.player.energy >= 1 && this.battle.field[this.owner].some(c => !c);
 			case "hovering":
 			case "skellify":
 			case "capacitor":
@@ -323,6 +323,7 @@ export class Card {
 			case "phase_shift":
 				const options = this.battle.field[this.owner].map((c,j) => !c ? j : -1).filter(j => (j > -1));
 				this.move(i, pickRandom(options));
+				this.player.energy--;
 				break;
 		}
 		this.cooldown = (this.cooldown ?? 0) + 1;
@@ -2154,8 +2155,6 @@ export class Player {
 			}
 		})
 		player.drawFrom(player.deck, true, 2);
-		player.addToHand(new Card("curve_hopper"));
-		player.addToHand(new Card("queen_bee"));
 		player.drawn = true;
 		player.bones += this.boonBones || (getModel(this.sidedeck).no_sacrifice ? 1 : 0);
 		return player;

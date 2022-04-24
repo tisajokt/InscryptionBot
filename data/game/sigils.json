@@ -19,7 +19,7 @@
 		"desc": "gains +1 power while unopposed"
 	},
 	"phase_shift": {
-		"desc": "activate: randomly move to another position on your side of the field",
+		"desc": "activate: randomly move to another position on your side of the field for 1x🔋 energy",
 		"active": true
 	},
 	"stinger": {

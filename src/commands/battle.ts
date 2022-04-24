@@ -203,6 +203,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			this.selectCallback = (value: number) => {
 				delete this.selectCallback;
 				resolve(value);
+				this.refresh();
 			}
 		});
 	}
@@ -559,7 +560,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			// .resign.yes
 			case "yes":
 				this.battle.ended = true;
-				this.battle.winner = this.playerIDs.indexOf(interaction.user.id) ? 1 : 0;
+				this.battle.winner = this.playerIDs.indexOf(interaction.user.id) ? 0 : 1;
 				await this.reply();
 				break;
 			// .resign

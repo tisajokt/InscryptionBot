@@ -214,7 +214,9 @@
 	"grizzly": {
 		"stats": [4,6,3],
 		"cost": "blood",
-		"vanilla_cabin": true
+		"sigils": ["fisher"],
+		"vanilla_cabin": true,
+		"#comment": "added fisher sigil"
 	},
 	"urayuli": {
 		"stats": [7,7,4],
@@ -940,6 +942,7 @@
 		"cost": "energy",
 		"sigils": ["transformer"],
 		"transformer_attack": 4,
+		"transformer_sigil": "fisher",
 		"bot_playable": true
 	},
 	"ghost_ship": {
