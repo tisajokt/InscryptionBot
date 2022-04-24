@@ -123,23 +123,6 @@ class BattleInteraction extends PersistentCommandInteraction {
 		else if (result.terrain === "none") result.terrain = "";
 		return this._options = result;
 	}
-	getFieldOptions(filter: (card: Card)=>boolean = (c)=>!!c): any[] {
-		return this.battle.field[0].map((card, i) => {
-			return card ? {
-				card: card,
-				label: card.fullSummary(i),
-				description: `From player 1's field, column ${i+1}`,
-				value: `${card.absoluteIndex(i)}`
-			} : null;
-		}).concat(this.battle.field[1].map((card, i) => {
-			return card ? {
-				card: card,
-				label: card.fullSummary(i),
-				description: `From player 2's field, column ${i+1}`,
-				value: `${card.absoluteIndex(i)}`
-			} : null;
-		})).filter(option => filter(option?.card));
-	}
 	selectCallback: (value: number)=>void;
 	selectingPlayer: playerIndex;
 	async uponSelect(source: selectSource, player: playerIndex, defaultVal?: number, args: string[]=[]): Promise<number> {
@@ -576,6 +559,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			// .resign.yes
 			case "yes":
 				this.battle.ended = true;
+				this.battle.winner = this.playerIDs.indexOf(interaction.user.id) ? 1 : 0;
 				await this.reply();
 				break;
 			// .resign
@@ -680,6 +664,23 @@ class BattleInteraction extends PersistentCommandInteraction {
 			this.makeSelectMenu("play", options).setPlaceholder("Pick a card")
 		) : null;
 	}
+	getFieldOptions(filter: (card: Card)=>boolean = (c)=>!!c): any[] {
+		return this.battle.field[0].map((card, i) => {
+			return card ? {
+				card: card,
+				label: card.fullSummary(i),
+				description: `From player 1's field, column ${i+1}`,
+				value: `${card.absoluteIndex(i)}`
+			} : null;
+		}).concat(this.battle.field[1].map((card, i) => {
+			return card ? {
+				card: card,
+				label: card.fullSummary(i),
+				description: `From player 2's field, column ${i+1}`,
+				value: `${card.absoluteIndex(i)}`
+			} : null;
+		})).filter(option => filter(option?.card));
+	}
 	makeFieldButtons(action: battleAction, args: string[], field: Card[], disable: (c: Card) => boolean, row?: MessageActionRow): MessageActionRow {
 		const actions = row || new MessageActionRow();
 		for (let i = 0; i < field.length; i++) {
@@ -702,21 +703,24 @@ class BattleInteraction extends PersistentCommandInteraction {
 		const bell = this.battle.mayRingBell;
 		const hasActive = actor.items.length || this.battle.field[actor.index].filter(c => c?.ability).length;
 		const inspectButton = this.makeButton("inspect").setEmoji("🔍");
-		const actions = new MessageActionRow().addComponents(
-			this.makeButton(bell ? "bell" : "draw").setStyle("PRIMARY").setDisabled(disabled).setEmoji(bell ? "🔔" : "🃏"),
-			this.makeButton("play").setDisabled(!bell || !actor.hand.length).setEmoji("🖐️"),
-			this.makeButton("activate").setDisabled(!hasActive).setEmoji("⚡"),
-			inspectButton,
-			this.makeButton("resign").setStyle("DANGER").setEmoji("🏳️")
-		);
 		const reply = Display.displayBattle(this.battle, "mini-mono", this.battle.ended ? [
 			new MessageActionRow().addComponents(inspectButton)
-		] : [actions]);
+		] : [new MessageActionRow().addComponents(
+			this.makeButton(bell ? "bell" : "draw").setStyle("PRIMARY").setDisabled(disabled).setEmoji(bell ? "🔔" : "🃏"),
+			this.makeButton("play").setDisabled(!bell || !actor.hand.length).setEmoji("🖐️"),
+			this.makeButton("activate").setDisabled(!bell || !hasActive).setEmoji("⚡"),
+			inspectButton,
+			this.makeButton("resign").setStyle("DANGER").setEmoji("🏳️")
+		)]);
 		if (this.mode === "freeplay") {
 			reply.content = reply.content.replace(/```(.|\n)*i+\([ *]+\/[ *]+\)i+\n/, "```");
 		}
 		if (this.twoPlayers) {
-			reply.content = `<@${this.playerIDs[this.battle.actor]}>'s Turn\n${reply.content||""}`;
+			if (this.battle.ended) {
+				reply.content = `<@${this.playerIDs[this.battle.winner]}> wins vs. <@${this.playerIDs[1-this.battle.winner]}>!\n${reply.content||""}`;
+			} else {
+				reply.content = `<@${this.playerIDs[this.battle.actor]}>'s turn\n${reply.content||""}`;
+			}
 		}
 		return reply;
 	}
@@ -740,12 +744,13 @@ class BattleInteraction extends PersistentCommandInteraction {
 			case "confirm":
 				return !this.battle && userID === this.playerIDs[1];
 			case "bell":
-				//if (!this.bellMutex) return true;
 				if (this.bellMutex) return false;
-			case "draw":
+				else return userID === this.playerIDs[this.battle.actor];
 			case "play":
-			case "blood":
 			case "activate":
+				if (!this.battle.mayRingBell) return false;
+			case "draw":
+			case "blood":
 				return userID === this.playerIDs[this.battle.actor];
 			case "select":
 				return this.selectCallback && userID === this.playerIDs[this.selectingPlayer];

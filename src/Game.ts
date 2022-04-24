@@ -1290,6 +1290,7 @@ export abstract class Battle {
 	fieldSize: number;
 	field: Card[][];
 	ended: boolean = false;
+	winner: playerIndex;
 	players: Battler[];
 	starvation: number;
 	terrain: cardName;
@@ -1549,6 +1550,7 @@ export abstract class Battle {
 
 		if (await this.damage(damage)) {
 			this.ended = true;
+			this.winner = actor;
 			return true;
 		} else {
 			if (!this.isHuman(actor) || !this.getPlayer(actor).hourglassUsed) {
