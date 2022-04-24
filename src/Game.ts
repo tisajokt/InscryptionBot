@@ -255,6 +255,7 @@ export class Card {
 				this.player.energy -= 4;
 			case "free_paint":
 				await this.latchEffect(pickRandom(amorphousSigils), true);
+				this.cooldown = 0;
 				break;
 			case "stimulate":
 				this.player.energy -= 2;
@@ -307,7 +308,7 @@ export class Card {
 				this.removeSigil("handy");
 				break;
 		}
-		this.cooldown++;
+		this.cooldown = (this.cooldown ?? 0) + 1;
 	}
 	async move(from: number, to: number, force: boolean=false): Promise<boolean> {
 		if (this.battle.field[this.owner][to] && !force) return false;
@@ -338,7 +339,7 @@ export class Card {
 		}
 		if (this.humanOwner && getModel(this.name).is_imposter && this.player?.deck.cards.length > 0) {
 			this.isImposter = this.name;
-			this.transformInto(pickRandom(this.player.deck.cards.map(c => (typeof c === "string" ? c : c.name))));
+			this.transformInto(pickRandom(this.player.deck.cards.map(c => (typeof c === "string" ? c : c.name)).filter(c => !getModel(c).is_imposter)));
 		}
 		if (this.sigils.has("amorphous")) {
 			do {
@@ -705,7 +706,7 @@ export class Card {
 				await this.player.addToHand(summon);
 			}
 		}
-		this.cooldown = Math.max(0, this.cooldown-1);
+		this.cooldown = Math.max(0, (this.cooldown ?? 0) - 1);
 		this.moved = false;
 	}
 	transformInto(card: cardName): void {
@@ -1050,11 +1051,9 @@ export class Card {
 		var extraValue = 0;
 		if (this.isConduit) extraValue += 1;
 		switch (this.model.power_calc) {
-			case "hand":
-				extraValue += 7;
-				break;
 			case "bones":
 			case "bell":
+			case "hand":
 				extraValue += 6;
 				break;
 			case "mox":
@@ -1355,7 +1354,7 @@ export abstract class Battle {
 		const prevHealth = target.stats[1];
 		if (await target.takeDamage(j, attacker.sigils.has("death_touch") && !target.sigils.has("stone") ? Infinity : power)) {
 			await target.onHit(attacker);
-			if (attacker.sigils.has("blood_guzzler")) {
+			if (attacker.sigils.has("blood_guzzler") && prevHealth > target.stats[1]) {
 				attacker.stats[1] += Math.max(0, prevHealth - Math.max(0, target.stats[1]));
 			}
 			if (target.stats[1] <= 0) {

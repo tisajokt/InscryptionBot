@@ -1,6 +1,6 @@
 import { MessageActionRow, ButtonInteraction, CommandInteraction, InteractionReplyOptions, SelectMenuInteraction, MessageComponentInteraction, User } from "discord.js";
 import { DLM, PersistentCommandInteraction, SlashCommand } from "../Command";
-import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, sidedecks, selectSource, modelSummary, sigil, Deck } from "../Game";
+import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, sidedecks, selectSource, modelSummary, sigil, Deck, getModel } from "../Game";
 import { Display } from "../Display";
 import { AppUser } from "../AppUser";
 import { numberEmoji, pickRandom, sleep, toProperFormat } from "../util";
@@ -168,6 +168,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 						card = card.name;
 					}
 					if (typeof card === "string") {
+						if (getModel(card).is_imposter) return;
 						if (includedCardNames.has(card)) return null;
 						includedCardNames.add(card);
 						return {

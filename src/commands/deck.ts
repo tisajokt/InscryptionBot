@@ -90,7 +90,8 @@ class DeckInteraction extends PersistentCommandInteraction {
 					components: [new MessageActionRow().addComponents(
 						this.makeButton("deck").setEmoji("👈"),
 						this.makeButton("special", ["totem"]).setEmoji("🗿"),
-						this.makeButton("special", ["item"]).setEmoji("⌛")
+						this.makeButton("special", ["item"]).setEmoji("⌛"),
+						this.makeButton("special", ["custom"]).setEmoji("🖨️")
 					)]
 				});
 				break;
