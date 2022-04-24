@@ -191,8 +191,9 @@
 	},
 	"bee": {
 		"stats": [1,1,0],
-		"sigils": ["flying"],
+		"sigils": ["flying", "stinger"],
 		"tribe": "insect",
+		"grows_into": "queen_bee",
 		"event": "none",
 		"vanilla_cabin": true
 	},
@@ -201,6 +202,7 @@
 		"cost": "blood",
 		"sigils": ["beehive"],
 		"tribe": "insect",
+		"grows_into": "queen_bee",
 		"vanilla_cabin": true
 	},
 	"great_white": {
@@ -842,7 +844,7 @@
 		"#comment": "gemified by default"
 	},
 	"squirrel_ball": {
-		"stats": [0,1,1],
+		"stats": [0,2,1],
 		"cost": "blood",
 		"sigils": ["sprinter"],
 		"tribe": "squirrel",
@@ -1058,7 +1060,9 @@
 	"curve_hopper": {
 		"stats": [2,3,4],
 		"cost": "energy",
-		"rare": true
+		"sigils": ["phase_shift"],
+		"rare": true,
+		"#comment": "added phase shift sigil, allowing it to 'hop' elsewhere"
 	},
 	"thick_droid": {
 		"stats": [1,4,5],
@@ -1210,8 +1214,8 @@
 		"mox": ["green"]
 	},
 	"bleene's_mox": {
-		"stats": [0,2,0],
-		"sigils": ["blue_mox", "green_mox"],
+		"stats": [0,3,0],
+		"sigils": ["blue_mox", "green_mox", "magic_armor"],
 		"is_mox": true,
 		"no_sacrifice": true,
 		"rare": true
@@ -1231,8 +1235,8 @@
 		"rare": true
 	},
 	"goranj's_mox": {
-		"stats": [0,2,0],
-		"sigils": ["orange_mox", "green_mox"],
+		"stats": [0,3,0],
+		"sigils": ["orange_mox", "green_mox", "magic_armor"],
 		"is_mox": true,
 		"no_sacrifice": true,
 		"rare": true
@@ -1252,8 +1256,8 @@
 		"rare": true
 	},
 	"orlu's_mox": {
-		"stats": [0,2,0],
-		"sigils": ["blue_mox", "orange_mox"],
+		"stats": [0,3,0],
+		"sigils": ["blue_mox", "orange_mox", "magic_armor"],
 		"is_mox": true,
 		"no_sacrifice": true,
 		"rare": true
@@ -1283,7 +1287,8 @@
 		"sigils": ["brittle"]
 	},
 	"bone_heap": {
-		"sigils": ["enlarge"]
+		"sigils": ["enlarge"],
+		"rare": true
 	},
 	"sarcophagus": {
 		"stats": [0,2,3],
@@ -1301,7 +1306,8 @@
 		"cost": "bones",
 		"sigils": ["four_bones"]
 	},
-	"frank_&stein": {
+	"frank_&_stein": {
+		"abbrev": "Fra&St",
 		"stats": [2,2,5],
 		"cost": "bones"
 	},
@@ -1437,19 +1443,36 @@
 
 
 
+	"discharge_bot": {
+		"stats": [-2,2,3],
+		"cost": "energy",
+		"power_calc": "discharge",
+		"rare": true,
+		"modded": "PO3+"
+	},
+	"queen_bee": {
+		"stats": [1,3,2],
+		"cost": "blood",
+		"sigils": ["leader", "beehive", "flying", "stinger"],
+		"tribe": "insect",
+		"rare": true,
+		"modded": "Vanilla+"
+	},
 	"assembled_mage": {
 		"stats": [1,1,2],
 		"cost": "bones",
 		"sigils": ["sealed_away"],
 		"sealed_away": "stirring_bones",
 		"no_bones": true,
+		"modded": "MoxExpansion",
 		"bot_playable": false
 	},
 	"stirring_bones": {
 		"stats": [0,2,0],
 		"sigils": ["gem_dependent", "fledgling"],
 		"grows_into": "assembled_mage",
-		"event": "none"
+		"event": "none",
+		"modded": "MoxExpansion"
 	},
 	"summoning_circle": {
 		"stats": [0,1,0],

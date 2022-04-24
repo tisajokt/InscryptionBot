@@ -55,6 +55,17 @@ export type CardModel = {
 	is_terrain?: boolean,
 	is_imposter?: boolean,
 	power_calc?: string,
+	pelt_value?: number,
+	is_pelt_lice?: boolean,
+	undying_powerup?: boolean,
+	chime_trigger?: cardName,
+	fish_gifts?: boolean,
+	kraken?: boolean,
+	transformer_attack?: number,
+	transformer_sigil?: sigil,
+	trail?: cardName,
+	sealed_away?: cardName,
+	uncuttable?: boolean,
 	wide?: boolean,
 	glitch?: boolean,
 	playerValue?: number,
@@ -70,15 +81,15 @@ export type CardModel = {
 export type cardName = string;
 export type cardTribe = "canine"|"insect"|"reptile"|"avian"|"hooved"|"squirrel"|"all";
 export type cardCost = "free"|"blood"|"bones"|"energy"|"mox";
-export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"bones"|"battery"|"armor"|"pliers"|"hourglass"|"fan"|"wiseclock"|"skinning_knife"|"lens"|"hammer";
+export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"mrs._bomb"|"bones"|"battery"|"armor"|"pliers"|"hourglass"|"fan"|"wiseclock"|"skinning_knife"|"lens"|"hammer";
 export type moxColor = "blue"|"green"|"orange"|"any";
 export type sigil = "immutable"|"moon_strike"|"free_paint"|
-"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering"|"skellify"|"animate_blood"|"fisher"|"stunned"|"stun_latch"|"painter"|"clinger"|"capacitor"|"opportunist"|"combative"|"beast_summon"|"exploding_guts";
+"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering"|"skellify"|"animate_blood"|"fisher"|"stunned"|"stun_latch"|"painter"|"clinger"|"capacitor"|"opportunist"|"combative"|"beast_summon"|"exploding_guts"|"phase_shift"|"stinger";
 export type playerIndex = 0|1;
 export type bossType = "prospector"|"angler"|"trader"|"moon";
 export type selectSource = "magpie"|"skinning_knife"|"sniper"|"hammer"|"latch"|"paint";
 
-export const amorphousSigils: sigil[] = ["spawn_ant", "rabbit_hole", "fecundity", "battery", "item_bearer", "dam_builder", "bellist", "beehive", "spikey", "swapper", "corpse_eater", "undying", "steel_trap", "four_bones", "scavenger", "blood_lust", "fledgling", "armored", "death_touch", "stone", "piercing", "leader", "annoying", "stinky", "mighty_leap", "waterborne", "flying", "brittle", "sentry", "trifurcated", "bifurcated", "double_strike", "looter", "many_lives", "worthy_sacrifice", "gem_animator", "gemified", "random_mox", "digger", "morsel", "repulsive", "cuckoo", "guardian", "sealed_away", "sprinter", "scholar", "gemnastics", "stimulate", "enlarge", "energy_gun", "disentomb", "powered_buff", "powered_trifurcated", "gem_guardian", "sniper", "transformer", "burrower", "vessel_printer", "bonehorn", "skeleton_crew", "rampager", "detonator", "bomb_spewer", "power_dice", "gem_detonator", "brittle_latch", "bomb_latch", "shield_latch", "hefty", "jumper", "loose_tail", "hovering", "energy_conduit", "magic_armor", "handy", "double_death", "gift_bearer", "hoarder", "withering", "skellify", "animate_blood", "fisher", "stunned", "stun_latch", "painter", "clinger", "capacitor", "opportunist", "combative", "beast_summon", "exploding_guts"];
+export const amorphousSigils: sigil[] = ["spawn_ant", "rabbit_hole", "fecundity", "battery", "item_bearer", "dam_builder", "bellist", "beehive", "spikey", "swapper", "corpse_eater", "undying", "steel_trap", "four_bones", "scavenger", "blood_lust", "fledgling", "armored", "death_touch", "stone", "piercing", "leader", "annoying", "stinky", "mighty_leap", "waterborne", "flying", "brittle", "sentry", "trifurcated", "bifurcated", "double_strike", "looter", "many_lives", "worthy_sacrifice", "gem_animator", "gemified", "random_mox", "digger", "morsel", "repulsive", "cuckoo", "guardian", "sealed_away", "sprinter", "scholar", "gemnastics", "stimulate", "enlarge", "energy_gun", "disentomb", "powered_buff", "powered_trifurcated", "gem_guardian", "sniper", "transformer", "burrower", "vessel_printer", "bonehorn", "skeleton_crew", "rampager", "detonator", "bomb_spewer", "power_dice", "gem_detonator", "brittle_latch", "bomb_latch", "shield_latch", "hefty", "jumper", "loose_tail", "hovering", "energy_conduit", "magic_armor", "handy", "double_death", "gift_bearer", "hoarder", "withering", "skellify", "animate_blood", "fisher", "stunned", "stun_latch", "painter", "clinger", "capacitor", "opportunist", "combative", "beast_summon", "exploding_guts", "phase_shift", "stinger"];
 export const botSigils = amorphousSigils.filter((sigil) => {
 	return !sigil_data[sigil].active && !sigil_data.__player_sigils.includes(sigil);
 });
@@ -163,7 +174,7 @@ export class Card {
 		const stats = `Stats: \`${i >= 0 ? this.getPower(i) : (this.powerCalc ? "*" : this.stats[0])}/${this.stats[1]}\``;
 		var arr = [stats, this.costEmbedDisplay];
 		if (this.tribe) arr.push(`Tribe: ${this.tribe}`);
-		if (this.powerCalc) arr.push(`*${this.powerString}` + (this.stats[0] ? `, ${this.stats[0] > 0 ? "plus" : "minus"} ${this.stats[0]}` : ""));
+		if (this.powerCalc) arr.push(`*${this.powerString}` + (this.stats[0] ? `, ${this.stats[0] > 0 ? "plus" : "minus"} ${Math.abs(this.stats[0])}` : ""));
 		if (this.noSacrifice) arr.push("Cannot be sacrificed");
 		if (this.noBones) arr.push("Yields no bones on death");
 		if (this.isConduit) arr.push("Acts as a conduit");
@@ -235,6 +246,8 @@ export class Card {
 				return this.battle.hasCircuit(this.owner) && this.player.energy < this.player.capacity;
 			case "handy":
 				return this.player.hand.length > 0;
+			case "phase_shift":
+				return this.battle.field[this.owner].some(c => !c);
 			case "hovering":
 			case "skellify":
 			case "capacitor":
@@ -307,6 +320,10 @@ export class Card {
 				this.player.deck.cards = this.player.deck.cards.concat(discards.filter(c => c.name != this.player.sidedeck.card));
 				this.removeSigil("handy");
 				break;
+			case "phase_shift":
+				const options = this.battle.field[this.owner].map((c,j) => !c ? j : -1).filter(j => (j > -1));
+				this.move(i, pickRandom(options));
+				break;
 		}
 		this.cooldown = (this.cooldown ?? 0) + 1;
 	}
@@ -334,7 +351,7 @@ export class Card {
 		this.battle = battle;
 		this.owner = owner;
 		this.humanOwner = battle.isHuman(owner);
-		if (this.getModelProp("glitch")) {
+		if (this.model.glitch) {
 			this.transformInto(pickRandom(enabledDeckCards));
 		}
 		if (this.humanOwner && getModel(this.name).is_imposter && this.player?.deck.cards.length > 0) {
@@ -418,16 +435,16 @@ export class Card {
 				this.player.energy = Math.min(this.player.capacity, this.player.energy + 1);
 			}
 			if (this.sigils.has("item_bearer") && this.player.items.length < ITEM_LIMIT) {
-				const possibleItems: itemType[] = ["squirrel", "black_goat", "boulder", "frozen_opossum", "bones", "battery", "armor", "pliers", "hourglass", "fan", "lens", "hammer", "skinning_knife"];
+				const possibleItems: itemType[] = ["squirrel", "black_goat", "boulder", "mrs._bomb", "frozen_opossum", "bones", "battery", "armor", "pliers", "hourglass", "fan", "lens", "hammer", "skinning_knife"];
 				this.player.items.push(new Item(pickRandom(possibleItems)));
 			}
 			if (this.sigils.has("gemnastics")) {
 				this.player.drawFrom(this.player.deck, true, this.battle.countMox(this.owner));
 			}
-			if (this.getModelProp("pelt_value") && this.battle.hasFreeSpace(this.owner)) {
+			if (this.model.pelt_value && this.battle.hasFreeSpace(this.owner)) {
 				for (let j = 0; j < this.player.hand.length; j++) {
 					const lice = this.player.hand[j];
-					if (lice && lice.getModelProp("is_pelt_lice")) {
+					if (lice && lice.model.is_pelt_lice) {
 						while (!(await this.battle.playCard(lice, Math.floor(Math.random() * this.battle.fieldSize), this.owner)));
 						break;
 					}
@@ -497,7 +514,7 @@ export class Card {
 		if (this.sigils.has("swapper") && this.stats[1]) {
 			this.stats = [this.stats[1], this.stats[0], this.stats[2]];
 		}
-		const chime_trigger = this.getModelProp("chime_trigger");
+		const chime_trigger = this.model.chime_trigger;
 		if (chime_trigger) {
 			for (let i = 0; i < this.battle.fieldSize; i++) {
 				const daus = this.battle.field[this.owner][i];
@@ -548,7 +565,7 @@ export class Card {
 				deaths = 1;
 			} else if (this.sigils.has("undying")) {
 				this.stats[1] = this.baseHP || getModel(this.name).stats[1];
-				if (this.getModelProp("undying_powerup")) {
+				if (this.model.undying_powerup) {
 					this.stats[0] += deaths;
 					this.stats[1] += deaths;
 				}
@@ -567,7 +584,7 @@ export class Card {
 		}
 		while (deaths--) {
 			if (this.sigils.has("gift_bearer")) {
-				const cardPool = this.getModelProp("fish_gifts") ? ["bad_fish", "good_fish", "more_fish"] : playerDeckCards;
+				const cardPool = this.model.fish_gifts ? ["bad_fish", "good_fish", "more_fish"] : playerDeckCards;
 				await this.battle.addToHand(new Card(pickRandom(cardPool)), this.owner);
 			}
 			if (this.sigils.has("steel_trap")) {
@@ -645,10 +662,10 @@ export class Card {
 				this.removeSigil("flying");
 			}
 		}
-		if (this.getModelProp("9lives")) {
+		if (this.model["9lives"]) {
 			this.sacrifices = (this.sacrifices || 0) + 1;
 			if (this.sacrifices === 9) {
-				this.name = this.getModelProp("9lives");
+				this.name = this.model["9lives"];
 				this.stats = [...getModel(this.name).stats];
 				this.removeSigil("many_lives");
 			}
@@ -660,7 +677,7 @@ export class Card {
 		}
 	}
 	async onSetup(i: number): Promise<void> {
-		if (this.sigils.has("waterborne") && this.getModelProp("kraken")) {
+		if (this.sigils.has("waterborne") && this.model.kraken) {
 			const tentacles = ["bell_tentacle", "hand_tentacle", "mirror_tentacle"];
 			this.name = pickRandom(tentacles);
 			this.stats = [...getModel(this.name).stats];
@@ -686,11 +703,11 @@ export class Card {
 		if (this.sigils.has("transformer")) {
 			this.awakened = !this.awakened;
 			if (this.awakened) {
-				this.stats[0] += this.getModelProp("transformer_attack") || 0;
-				if (this.getModelProp("transformer_sigil")) this.addSigil(this.getModelProp("transformer_sigil"));
+				this.stats[0] += this.model.transformer_attack || 0;
+				if (this.model.transformer_sigil) this.addSigil(this.model.transformer_sigil);
 			} else {
-				this.stats[0] -= this.getModelProp("transformer_attack") || 0;
-				if (this.getModelProp("transformer_sigil")) this.removeSigil(this.getModelProp("transformer_sigil"));
+				this.stats[0] -= this.model.transformer_attack || 0;
+				if (this.model.transformer_sigil) this.removeSigil(this.model.transformer_sigil);
 			}
 		}
 		if (this.humanOwner) {
@@ -803,6 +820,8 @@ export class Card {
 				return "Power equal to # sigils this card has"
 			case "damage":
 				return "More powerful as this card takes damage"
+			case "discharge":
+				return "Power equal to used energy capacity"
 			default:
 				return ""
 		}
@@ -818,7 +837,7 @@ export class Card {
 			case "mirror":
 				for (let j of arr) {
 					const otherCard = this.battle.field[other][j];
-					if (otherCard && otherCard.getModelProp("power_calc") != "mirror") {
+					if (otherCard && otherCard.model.power_calc != "mirror") {
 						power = Math.max(power, otherCard.getPower(j));
 					}
 				}
@@ -840,6 +859,9 @@ export class Card {
 				break;
 			case "sigils":
 				power = [...this.sigils].length;
+				break;
+			case "discharge":
+				power = Math.floor(this.player.capacity - this.player.energy);
 				break;
 			case "damage":
 				power = Math.max(0, (this.baseHP || getModel(this.name).stats[1]) - this.stats[1]);
@@ -868,9 +890,6 @@ export class Card {
 			if (this.sigils.has("powered_buff")) power += 2;
 		}
 		return Math.max(0, power);
-	}
-	getModelProp(prop: string) {
-		return getModel(this.name)[prop];
 	}
 	isPlayable(maxRawValue: number=Infinity): boolean {
 		const cost = this.getCost();
@@ -945,8 +964,8 @@ export class Card {
 		return this.hasModifiedSigils;
 	}
 	get abbrev(): string {
-		if (this.getModelProp("abbrev")) return this.getModelProp("abbrev");
-		return this.getModelProp("abbrev") || (this.name.match(" ") ? this.name.split(" ").map(c => c[0]).join("") : this.name.substring(0, 3));
+		if (this.model.abbrev) return this.model.abbrev;
+		return this.model.abbrev || (this.name.match(" ") ? this.name.split(" ").map(c => c[0]).join("") : this.name.substring(0, 3));
 	}
 	get rare(): boolean {
 		return !!getModel(this.name).rare;
@@ -1002,7 +1021,7 @@ export class Card {
 		}
 	}
 	get sealedCard(): cardName {
-		return this.getModelProp("sealed_away") ?? "opossum";
+		return this.model.sealed_away ?? "opossum";
 	}
 	get cost(): cardCost {
 		return getModel(this.name).cost || "free";
@@ -1051,6 +1070,9 @@ export class Card {
 		var extraValue = 0;
 		if (this.isConduit) extraValue += 1;
 		switch (this.model.power_calc) {
+			case "discharge":
+				extraValue += 8;
+				break;
 			case "bones":
 			case "bell":
 			case "hand":
@@ -1181,7 +1203,7 @@ export class Item {
 		}
 	}
 	static async skinningKnife(card: Card, i: number): Promise<void> {
-		if (card && card.stats[1] > 0 && !card.getModelProp("uncuttable")) {
+		if (card && card.stats[1] > 0 && !card.model.uncuttable) {
 			await card.takeDamage(i, Infinity);
 			if (card.humanOwner) {
 				// steel trap/skinning knife now retains the killed card's extra sigils, gives gold pelts for rares, and rabbit pelts for non-canines
@@ -1214,6 +1236,7 @@ export class Item {
 			case "black_goat":
 			case "boulder":
 			case "frozen_opossum":
+			case "mrs._bomb":
 				return `Draw a ${toProperFormat(this.type)}`;
 			case "bones":
 				return "Gain 4 bones";
@@ -1243,6 +1266,7 @@ export class Item {
 			case "squirrel":
 			case "black_goat":
 			case "boulder":
+			case "mrs._bomb":
 			case "frozen_opossum":
 				await battle.addToHand(new Card(this.type), player);
 				break;
@@ -1355,7 +1379,7 @@ export abstract class Battle {
 		const prevHealth = target.stats[1];
 		if (await target.takeDamage(j, attacker.sigils.has("death_touch") && !target.sigils.has("stone") ? Infinity : power)) {
 			await target.onHit(attacker);
-			if (attacker.sigils.has("blood_guzzler") && prevHealth > target.stats[1]) {
+			if (attacker.sigils.has("blood_guzzler") && prevHealth > target.stats[1] && !target.sigils.has("stone")) {
 				attacker.stats[1]++;
 			}
 			if (target.stats[1] <= 0) {
@@ -1408,7 +1432,13 @@ export abstract class Battle {
 					}
 				}
 				if (otherCard) {
-					damage = await this.attackCard(card, otherCard, power, other, j);
+					const stinger = card.sigils.has("stinger");
+					damage = await this.attackCard(card, otherCard, power + (stinger ? 2 : 0), other, j);
+					if (stinger) {
+						card.stats[0] = 0;
+						card.addSigil("withering");
+						card.removeSigil("stinger");
+					}
 				} else {
 					damage = power;
 				}
@@ -1488,7 +1518,7 @@ export abstract class Battle {
 			const rampager = card.sigils.has("rampager");
 			const hefty = card.sigils.has("hefty");
 			const jumper = card.sigils.has("jumper");
-			const trail = card.getModelProp("trail");
+			const trail = card.model.trail;
 			if (card.sigils.has("sprinter") || card.sigils.has("skeleton_crew") || rampager || hefty || jumper) {
 				let d = (card.sprintToLeft ? -1 : 1);
 				let t = i + d;
@@ -2124,6 +2154,8 @@ export class Player {
 			}
 		})
 		player.drawFrom(player.deck, true, 2);
+		player.addToHand(new Card("curve_hopper"));
+		player.addToHand(new Card("queen_bee"));
 		player.drawn = true;
 		player.bones += this.boonBones || (getModel(this.sidedeck).no_sacrifice ? 1 : 0);
 		return player;
