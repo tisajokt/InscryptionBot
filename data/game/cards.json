@@ -86,6 +86,7 @@
 		"stats": [0,2,0],
 		"tribe": "reptile",
 		"event": "none",
+		"grows_into": "skink",
 		"vanilla_cabin": true
 	},
 	"wriggling_leg": {
@@ -931,7 +932,7 @@
 		"transformer_sigil": "flying"
 	},
 	"qu177": {
-		"stats": [2,2,5],
+		"stats": [2,2,4],
 		"cost": "energy",
 		"sigils": ["transformer"],
 		"transformer_attack": -1,
@@ -1442,6 +1443,12 @@
 		"inspect": "...?",
 		"is_imposter": true,
 		"bot_playable": false
+	},
+	"melter": {
+		"stats": [2,2,5],
+		"cost": "energy",
+		"sigils": ["sealed_away"],
+		"sealed_away": "m3atb0t"
 	},
 
 

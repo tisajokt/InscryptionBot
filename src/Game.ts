@@ -18,7 +18,7 @@ for (let p = 0; p < sigil_data.__powers.length; p++) {
 	}
 }
 
-export const terrains: cardName[] = ["", "boulder", "stump", "grand_fir", "frozen_opossum", "moleman", "broken_bot"];
+export const terrains: cardName[] = ["", "boulder", "stump", "grand_fir", "frozen_opossum", "moleman", "broken_bot", "bridge_rails"];
 export const sidedecks: cardName[] = ["squirrel", "empty_vessel", "skeleton", "mox_crystal", "bee", "tadpole", "squirrel-ish"];
 
 export const MAX_ENERGY: number = game_config.maxEnergy;
@@ -68,6 +68,7 @@ export type CardModel = {
 	uncuttable?: boolean,
 	wide?: boolean,
 	glitch?: boolean,
+	rawValue?: number,
 	playerValue?: number,
 	nonplayerValue?: number,
 	sortIndex?: number,
@@ -84,12 +85,13 @@ export type cardCost = "free"|"blood"|"bones"|"energy"|"mox";
 export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"mrs._bomb"|"bones"|"battery"|"armor"|"pliers"|"hourglass"|"fan"|"wiseclock"|"skinning_knife"|"lens"|"hammer";
 export type moxColor = "blue"|"green"|"orange"|"any";
 export type sigil = "immutable"|"moon_strike"|"free_paint"|
-"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"annoying"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"brittle"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gem_dependent"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"withering"|"skellify"|"animate_blood"|"fisher"|"stunned"|"stun_latch"|"painter"|"clinger"|"capacitor"|"opportunist"|"combative"|"beast_summon"|"exploding_guts"|"phase_shift"|"stinger";
+"gem_dependent"|"stunned"|"annoying"|"brittle"|"withering"|
+"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"skellify"|"animate_blood"|"fisher"|"stun_latch"|"painter"|"clinger"|"capacitor"|"opportunist"|"combative"|"beast_summon"|"exploding_guts"|"phase_shift"|"stinger";
 export type playerIndex = 0|1;
 export type bossType = "prospector"|"angler"|"trader"|"moon";
 export type selectSource = "magpie"|"skinning_knife"|"sniper"|"hammer"|"latch"|"paint";
 
-export const amorphousSigils: sigil[] = ["spawn_ant", "rabbit_hole", "fecundity", "battery", "item_bearer", "dam_builder", "bellist", "beehive", "spikey", "swapper", "corpse_eater", "undying", "steel_trap", "four_bones", "scavenger", "blood_lust", "fledgling", "armored", "death_touch", "stone", "piercing", "leader", "annoying", "stinky", "mighty_leap", "waterborne", "flying", "brittle", "sentry", "trifurcated", "bifurcated", "double_strike", "looter", "many_lives", "worthy_sacrifice", "gem_animator", "gemified", "random_mox", "digger", "morsel", "repulsive", "cuckoo", "guardian", "sealed_away", "sprinter", "scholar", "gemnastics", "stimulate", "enlarge", "energy_gun", "disentomb", "powered_buff", "powered_trifurcated", "gem_guardian", "sniper", "transformer", "burrower", "vessel_printer", "bonehorn", "skeleton_crew", "rampager", "detonator", "bomb_spewer", "power_dice", "gem_detonator", "brittle_latch", "bomb_latch", "shield_latch", "hefty", "jumper", "loose_tail", "hovering", "energy_conduit", "magic_armor", "handy", "double_death", "gift_bearer", "hoarder", "withering", "skellify", "animate_blood", "fisher", "stunned", "stun_latch", "painter", "clinger", "capacitor", "opportunist", "combative", "beast_summon", "exploding_guts", "phase_shift", "stinger"];
+export const amorphousSigils: sigil[] = ["spawn_ant", "rabbit_hole", "fecundity", "battery", "item_bearer", "dam_builder", "bellist", "beehive", "spikey", "swapper", "corpse_eater", "undying", "steel_trap", "four_bones", "scavenger", "blood_lust", "fledgling", "armored", "death_touch", "stone", "piercing", "leader", "stinky", "mighty_leap", "waterborne", "flying", "sentry", "trifurcated", "bifurcated", "double_strike", "looter", "many_lives", "worthy_sacrifice", "gem_animator", "gemified", "random_mox", "digger", "morsel", "repulsive", "cuckoo", "guardian", "sealed_away", "sprinter", "scholar", "gemnastics", "stimulate", "enlarge", "energy_gun", "disentomb", "powered_buff", "powered_trifurcated", "gem_guardian", "sniper", "transformer", "burrower", "vessel_printer", "bonehorn", "skeleton_crew", "rampager", "detonator", "bomb_spewer", "power_dice", "gem_detonator", "brittle_latch", "bomb_latch", "shield_latch", "hefty", "jumper", "loose_tail", "hovering", "energy_conduit", "magic_armor", "handy", "double_death", "gift_bearer", "hoarder", "skellify", "animate_blood", "fisher", "stun_latch", "painter", "clinger", "capacitor", "opportunist", "combative", "beast_summon", "exploding_guts", "phase_shift", "stinger"];
 export const botSigils = amorphousSigils.filter((sigil) => {
 	return !sigil_data[sigil].active && !sigil_data.__player_sigils.includes(sigil);
 });
@@ -1069,7 +1071,16 @@ export class Card {
 			return sigil_data[c].power;
 		}).reduce((acc, cur) => (acc + cur), 0);
 		var extraValue = 0;
-		if (this.isConduit) extraValue += 1;
+		if (this.sigils.has("transformer")) {
+			extraValue += this.model.transformer_attack ?? 0;
+			extraValue += this.model.transformer_sigil ? sigil_data[this.model.transformer_sigil].power : 0;
+		}
+		if (this.sigils.has("sealed_away") && this.model.sealed_away) {
+			extraValue += Math.ceil((getModel(this.model.sealed_away).rawValue ?? (new Card(this.model.sealed_away)).cardRawValue) / 2);
+		}
+		if (this.isConduit) extraValue++;
+		if (this.model.trail) extraValue++;
+		if (this.model.undying_powerup) extraValue += 3;
 		switch (this.model.power_calc) {
 			case "discharge":
 				extraValue += 8;
@@ -1105,8 +1116,6 @@ export class Card {
 				costValue = this.stats[2] * 3;
 				break;
 			case "energy":
-				costValue = this.stats[2] * 2;
-				break;
 			case "bones":
 				costValue = this.stats[2];
 				break;
@@ -1334,8 +1343,21 @@ export abstract class Battle {
 			return;
 		}
 		if (!terrain) return;
-		await this.playCard(new Card(terrain), Math.floor(Math.random() * this.fieldSize), 0);
-		await this.playCard(new Card(terrain), Math.floor(Math.random() * this.fieldSize), 1);
+		if (terrain === "bridge_rails") {
+			for (let k of [0,1]) {
+				await this.playCard(new Card("bridge_rails"), 0, <playerIndex>k);
+				await this.playCard(new Card("bridge_rails"), this.fieldSize-1, <playerIndex>k);
+			}
+			const bot = this.getBot();
+			if (bot) {
+				bot.cardsLeft += 2;
+				await bot.playBackfield("bridge_rails", 0);
+				await bot.playBackfield("bridge_rails", this.fieldSize-1);
+			}
+		} else {
+			await this.playCard(new Card(terrain), Math.floor(Math.random() * this.fieldSize), 0);
+			await this.playCard(new Card(terrain), Math.floor(Math.random() * this.fieldSize), 1);
+		}
 	}
 	get actor(): playerIndex {
 		return <playerIndex>(this.turn % 2);
@@ -2165,8 +2187,6 @@ for (const name in card_models) {
 	const model = getModel(name);
 	model.stats ??= [0,1,0];
 	model.sigils ??= [];
-	model.playerValue = (new Card(name)).cardPlayerValue;
-	model.nonplayerValue = (new Card(name)).cardNonplayerValue;
 	model.abbrev ??= abbreviate(name, 6);
 	model.bot_playable ??= model.stats[0] > 0;
 	model.themes = new Set();
@@ -2194,6 +2214,13 @@ for (const name in card_models) {
 	if (model.bot_playable) botDeckCards.push(name);
 	if (model.event === "none") continue;
 	playerDeckCards.push(name);//*/
+}
+for (const name in card_models) {
+	const model = getModel(name);
+	const card = new Card(name);
+	model.rawValue = card.cardRawValue;
+	model.playerValue = card.cardPlayerValue;
+	model.nonplayerValue = card.cardNonplayerValue;
 }
 for (const mod of ENABLED_MODS) {
 	cardPools[mod] = enabledDeckCards.filter(m => getModel(m).modded === mod);

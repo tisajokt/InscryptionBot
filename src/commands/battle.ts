@@ -840,7 +840,8 @@ const universalOptions: any = [
 			{name: "Grand Fir (0/5, mighty leap)", value: "grand_fir"},
 			{name: "Frozen Opossum (0/5, frozen away)", value: "frozen_opossum"},
 			{name: "Moleman (0/6, burrowing, mighty leap)", value: "moleman"},
-			{name: "Broken Bot (0/1, detonator)", value: "broken_bot"}
+			{name: "Broken Bot (0/1, detonator)", value: "broken_bot"},
+			{name: "Bridge Rails (0/6)", value: "bridge_rails"}
 		]
 	},
 	{
