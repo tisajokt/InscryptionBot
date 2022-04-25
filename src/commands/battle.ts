@@ -656,7 +656,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 		const options = this.getPlayer(userID).hand.sort((a,b) => ((a.isPlayable()?0:1) - (b.isPlayable()?0:1)))
 			.map((card,i) => {
 				return {
-					label: `${card.nameSummary} [${card.stats[0]}/${card.stats[1]}]`,
+					label: `${card.nameSummary} [${card.stats[0]}${card.model.no_sacrifice?":":"/"}${card.stats[1]}]`,
 					description: `${card.costEmbedDisplay}${card.isPlayable() ? "" : " (can't play)"}`,
 					value: `${i}`
 				}

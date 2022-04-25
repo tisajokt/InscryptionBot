@@ -110,7 +110,7 @@ export function getModel(card: cardName): CardModel {
 }
 export function modelSummary(card: cardName): string {
 	const model = getModel(card);
-	return `${toProperFormat(card)} [${model.power_calc ? "*" : singleCharStat(model.stats[0])}/${model.stats[1]}] ${Card.costEmojiDisplay(model.cost, model.stats[2], model.mox) || "free"}`;
+	return `${toProperFormat(card)} [${model.power_calc ? "*" : singleCharStat(model.stats[0])}${model.no_sacrifice?":":"/"}${model.stats[1]}] ${Card.costEmojiDisplay(model.cost, model.stats[2], model.mox) || "free"}`;
 }
 
 export interface Drawable {
@@ -170,7 +170,7 @@ export class Card {
 		return toProperFormat(this.name) + (this.hasUnfamiliarSigils ? "*" : "");
 	}
 	fullSummary(i: number=-1): string {
-		return `${this.nameSummary} [${this.powerCalc ? "*" : singleCharStat(i > -1 ? this.getPower(i) : this.stats[0])}/${this.stats[1]}] ${Card.costEmojiDisplay(this.cost, this.stats[2], this.mox)}`;
+		return `${this.nameSummary} [${this.powerCalc ? "*" : singleCharStat(i > -1 ? this.getPower(i) : this.stats[0])}${this.model.no_sacrifice?":":"/"}${this.stats[1]}] ${Card.costEmojiDisplay(this.cost, this.stats[2], this.mox)}`;
 	}
 	getEmbedDisplay(i: number=-1, inline: boolean=false): EmbedField {
 		const stats = `Stats: \`${i >= 0 ? this.getPower(i) : (this.powerCalc ? "*" : this.stats[0])}/${this.stats[1]}\``;
