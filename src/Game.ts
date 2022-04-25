@@ -387,14 +387,6 @@ export class Card {
 					await this.onDeath(i);
 				}
 			}
-		} else {
-			for (let j = 0; j < this.battle.fieldSize; j++) {
-				const card = this.battle.field[other][j];
-				if (i != j && card?.sigils.has("guardian")) {
-					await card.move(j,i);
-					break;
-				}
-			}
 		}
 		for (let j = 0; j < this.battle.fieldSize; j++) {
 			const card = this.battle.field[this.owner][j];
@@ -496,6 +488,15 @@ export class Card {
 		if (this.sigils.has("gem_dependent") && !this.battle.countMox(this.owner)) {
 			await this.onDeath(i);
 			return;
+		}
+		if (!this.battle.field[other][i]) {
+			for (let j = 0; j < this.battle.fieldSize; j++) {
+				const card = this.battle.field[other][j];
+				if (i != j && card?.sigils.has("guardian")) {
+					await card.move(j,i);
+					break;
+				}
+			}
 		}
 		await this.onMovement(i);
 	}
@@ -2203,6 +2204,9 @@ for (const name in card_models) {
 			break;
 		case "bones":
 			model.themes.add("bones");
+			break;
+		case "discharge":
+			model.themes.add("energy");
 			break;
 	}
 	
