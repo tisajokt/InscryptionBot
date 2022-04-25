@@ -4,7 +4,7 @@ import card_models from "../data/game/cards.json";
 import game_config from "../data/game/config.json";
 import { padTrim, pickRandom, sleep, randomSelectionFrom, toProperCase, abbreviate, toProperFormat, singleCharStat, costEmoji, sidedeckEmoji } from "./util";
 import { EmbedField, Embed } from "src/Display";
-import { jsonArrayMember, jsonMember, jsonObject, jsonSetMember } from "typedjson";
+import { jsonArrayMember, jsonMapMember, jsonMember, jsonObject, jsonSetMember } from "typedjson";
 import { BattleOptions } from "./commands/battle";
 
 export const playerDeckCards: cardName[] = [];
@@ -31,6 +31,8 @@ export const MAX_TOTAL_RARES: number = game_config.maxTotalRares;
 export const MAX_RARE_DUPLICATES: number = game_config.maxRareDuplicates;
 export const MAX_NONRARE_DUPLICATES: number = game_config.maxNonrareDuplicates;
 export const MIN_COMPETITIVE_CARDS: number = game_config.minCompetitiveCards;
+export const SEALED_AWAY_DEFAULT: cardName = game_config.sealedAwayDefault;
+export const TRANSFORMER_DEFAULT: cardName = game_config.transformerDefault;
 
 export const slow_mode = false;
 export const AI_SPEED: number = slow_mode ? 500 : 0;
@@ -61,8 +63,7 @@ export type CardModel = {
 	chime_trigger?: cardName,
 	fish_gifts?: boolean,
 	kraken?: boolean,
-	transformer_attack?: number,
-	transformer_sigil?: sigil,
+	beast_mode?: cardName,
 	trail?: cardName,
 	sealed_away?: cardName,
 	uncuttable?: boolean,
@@ -181,8 +182,18 @@ export class Card {
 		if (this.noBones) arr.push("Yields no bones on death");
 		if (this.isConduit) arr.push("Acts as a conduit");
 		if (this.inspectText) arr.push(`"${this.inspectText}"`);
+		const sigilExtraDesc = (sigil: sigil) => {
+			switch (sigil) {
+				case "sealed_away":
+					return ` [${this.sealedCard.replaceAll("_"," ")}]`;
+				case "transformer":
+					return ` [${this.beastMode.replaceAll("_"," ")}]`;
+				default:
+					return "";
+			}
+		}
 		this.sigils.forEach(s => {
-			arr.push(`_${s.split("_").join(" ")}_ ― ${sigil_data[s].desc}${s === "sealed_away" ? ` [${this.sealedCard.replaceAll("_"," ")}]` : ""}`);
+			arr.push(`_${s.split("_").join(" ")}_ ― ${sigil_data[s].desc}${sigilExtraDesc(s)}`);
 		});
 		return {
 			name: `${this.rare ? "✨ " : ""}${this.nameSummary}`,
@@ -708,12 +719,11 @@ export class Card {
 		}
 		if (this.sigils.has("transformer")) {
 			this.awakened = !this.awakened;
-			if (this.awakened) {
-				this.stats[0] += this.model.transformer_attack || 0;
-				if (this.model.transformer_sigil) this.addSigil(this.model.transformer_sigil);
-			} else {
-				this.stats[0] -= this.model.transformer_attack || 0;
-				if (this.model.transformer_sigil) this.removeSigil(this.model.transformer_sigil);
+			const beastModel = card_models[this.beastMode];
+			this.stats[0] += (this.awakened ? 1 : -1) * (beastModel.stats[0] - this.model.stats[0]);
+			for (const sigil of beastModel.sigils) {
+				if (this.awakened) this.addSigil(sigil);
+				else this.removeSigil(sigil);
 			}
 		}
 		if (this.humanOwner) {
@@ -1027,7 +1037,10 @@ export class Card {
 		}
 	}
 	get sealedCard(): cardName {
-		return this.model.sealed_away ?? "opossum";
+		return this.model.sealed_away ?? SEALED_AWAY_DEFAULT;
+	}
+	get beastMode(): cardName {
+		return this.model.beast_mode ?? TRANSFORMER_DEFAULT;
 	}
 	get cost(): cardCost {
 		return getModel(this.name).cost || "free";
@@ -1075,8 +1088,12 @@ export class Card {
 		}).reduce((acc, cur) => (acc + cur), 0);
 		var extraValue = 0;
 		if (this.sigils.has("transformer")) {
-			extraValue += this.model.transformer_attack ?? 0;
-			extraValue += this.model.transformer_sigil ? sigil_data[this.model.transformer_sigil].power : 0;
+			const beastModel = card_models[this.beastMode];
+			extraValue += beastModel.stats[0];
+			for (const sigil of beastModel.sigils) {
+				extraValue += sigil_data[sigil].power / 2;
+			}
+			extraValue = Math.ceil(extraValue);
 		}
 		if (this.sigils.has("sealed_away") && this.model.sealed_away) {
 			extraValue += Math.ceil((getModel(this.model.sealed_away).rawValue ?? (new Card(this.model.sealed_away)).cardRawValue) / 2);

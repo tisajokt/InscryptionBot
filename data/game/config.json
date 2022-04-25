@@ -11,5 +11,7 @@
 	"maxTotalRares": 5,
 	"maxRareDuplicates": 1,
 	"maxNonrareDuplicates": 3,
-	"minCompetitiveCards": 20
+	"minCompetitiveCards": 20,
+	"sealedAwayDefault": "opossum",
+	"transformerDefault": "wolf"
 }

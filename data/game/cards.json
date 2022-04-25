@@ -928,22 +928,19 @@
 		"stats": [1,1,3],
 		"cost": "energy",
 		"sigils": ["transformer"],
-		"transformer_attack": 1,
-		"transformer_sigil": "flying"
+		"beast_mode": "raven"
 	},
 	"qu177": {
 		"stats": [2,2,4],
 		"cost": "energy",
 		"sigils": ["transformer"],
-		"transformer_attack": -1,
-		"transformer_sigil": "spikey"
+		"beast_mode": "porcupine"
 	},
 	"gr1zz": {
 		"stats": [0,4,6],
 		"cost": "energy",
 		"sigils": ["transformer"],
-		"transformer_attack": 4,
-		"transformer_sigil": "fisher",
+		"beast_mode": "grizzly",
 		"bot_playable": true
 	},
 	"ghost_ship": {
@@ -1453,6 +1450,34 @@
 
 
 
+	"1upu5": {
+		"stats": [1,1,4],
+		"cost": "energy",
+		"sigils": ["transformer"],
+		"beast_mode": "wolf",
+		"modded": "PO3+"
+	},
+	"m0o53": {
+		"stats": [0,5,5],
+		"cost": "energy",
+		"sigils": ["transformer"],
+		"beast_mode": "moose_buck",
+		"modded": "PO3+"
+	},
+	"f31in3": {
+		"stats": [1,1,2],
+		"cost": "energy",
+		"sigils": ["transformer"],
+		"beast_mode": "cat",
+		"modded": "PO3+"
+	},
+	"51ith3r": {
+		"stats": [2,1,4],
+		"cost": "energy",
+		"sigils": ["transformer"],
+		"beast_mode": "adder",
+		"modded": "PO3+"
+	},
 	"discharge_bot": {
 		"stats": [-2,2,3],
 		"cost": "energy",
@@ -1634,6 +1659,7 @@
 	},
 	"lemming": {
 		"stats": [0,1,0],
+		"modded": "Vanilla+",
 		"#comment": "NOT IMPLEMENTED: 'eager sacrifice': may be used directly from your hand as a sacrifice (even with insufficient board space)"
 	},
 
