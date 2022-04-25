@@ -627,15 +627,17 @@ export class Card {
 			}
 		}
 		// Last green mox is destroyed, update health of gemified cards
-		/*if (this.sigils.has("green_mox") && !battle.hasMoxColor(owner, "green")) {
-			for (let j = 0; j < battle.fieldSize; j++) {
-				const card = battle.field[owner][j];
-				if (!card) continue;
-				if (card.sigils.has("gemified")) {
+		if (this.sigils.has("green_mox") && !this.battle.hasMoxColor(this.owner, "green")) {
+			for (let j = 0; j < this.battle.fieldSize; j++) {
+				const card = this.battle.field[this.owner][j];
+				if (card?.sigils.has("gemified")) {
 					card.stats[1] -= 2;
+					if (card.stats[1] <= 0) {
+						await card.onDeath(j);
+					}
 				}
 			}
-		}*/
+		}
 	}
 	async onSacrifice(i: number, card: Card, t: number): Promise<void> {
 		if (!this.blood) return;

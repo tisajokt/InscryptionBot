@@ -1632,6 +1632,10 @@
 		"event": "none",
 		"modded": "special"
 	},
+	"lemming": {
+		"stats": [0,1,0],
+		"#comment": "NOT IMPLEMENTED: 'eager sacrifice': may be used directly from your hand as a sacrifice (even with insufficient board space)"
+	},
 
 
 
