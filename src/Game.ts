@@ -931,6 +931,10 @@ export class Card {
 				return true;
 		}
 	}
+	get moveDirection(): number {
+		const movementSigils: sigil[] = ["sprinter", "skeleton_crew", "hefty", "rampager", "jumper", "rolling"];
+		return movementSigils.some(s => this.sigils.has(s)) ? (this.sprintToLeft ? -1 : 1) : 0;
+	}
 	get model(): CardModel {
 		return card_models[this.name];
 	}

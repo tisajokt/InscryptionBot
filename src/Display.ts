@@ -35,9 +35,10 @@ export class Display {
 	}
 	static cardStatsMiniMono(card: Card, i: number): string {
 		const numSigils = [...card.sigils].length;
-		const conduit = (card.isConduit ? "~" : " ");
-		const sigilIcon = numSigils ? (card.hasUnfamiliarSigils ? (card.ability ? `@${numSigils}` : `?${numSigils}`) : (card.ability ? " @" : " *")) : "  ";
-		return (padTrim(`${singleCharStat(card.getPower(i))}${card.noSacrifice ? ":" : "/"}${singleCharStat(card.stats[1])}`, miniMonoSize-2) + sigilIcon).replaceAll(" ", conduit);
+		const dir = card.moveDirection;
+		const conduit = card.isConduit ? "~" : " ";
+		const sigilIcon = numSigils ? (card.hasUnfamiliarSigils ? (card.ability ? `@${singleCharStat(numSigils)}` : `?${singleCharStat(numSigils)}`) : (card.ability ? " @" : " *")) : "  ";
+		return (padTrim(`${singleCharStat(card.getPower(i))}${card.noSacrifice ? ":" : "/"}${singleCharStat(card.stats[1])}${dir !== 0 ? (dir > 0 ? "→" : "←") : ""}`, miniMonoSize-2) + sigilIcon).replaceAll(" ", conduit);
 	}
 	static displayBattleFullMono(battle: Battle): string {
 		const header = ``;
