@@ -1451,6 +1451,13 @@
 
 
 
+	"lightning_bugs": {
+		"stats": [0,1,1],
+		"cost": "blood",
+		"sigils": ["powered_buff", "battery"],
+		"tribe": "insect",
+		"modded": "Vanilla+"
+	},
 	"pillbug": {
 		"stats": [0,4,1],
 		"cost": "blood",
