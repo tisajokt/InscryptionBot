@@ -928,7 +928,8 @@
 		"stats": [1,1,3],
 		"cost": "energy",
 		"sigils": ["transformer"],
-		"beast_mode": "raven"
+		"beast_mode": "raven",
+		"tribe": "avian"
 	},
 	"qu177": {
 		"stats": [2,2,4],
@@ -1468,6 +1469,7 @@
 		"cost": "energy",
 		"sigils": ["transformer"],
 		"beast_mode": "wolf",
+		"tribe": "canine",
 		"modded": "PO3+"
 	},
 	"m0o53": {
@@ -1475,6 +1477,7 @@
 		"cost": "energy",
 		"sigils": ["transformer"],
 		"beast_mode": "moose_buck",
+		"tribe": "hooved",
 		"modded": "PO3+"
 	},
 	"f31in3": {
@@ -1484,11 +1487,20 @@
 		"beast_mode": "cat",
 		"modded": "PO3+"
 	},
+	"m4nt15": {
+		"stats": [2,2,4],
+		"cost": "energy",
+		"sigils": ["transformer"],
+		"beast_mode": "mantis",
+		"tribe": "insect",
+		"modded": "PO3+"
+	},
 	"51ith3r": {
 		"stats": [2,1,4],
 		"cost": "energy",
 		"sigils": ["transformer"],
 		"beast_mode": "adder",
+		"tribe": "reptile",
 		"modded": "PO3+"
 	},
 	"discharge_bot": {
