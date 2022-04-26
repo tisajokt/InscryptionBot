@@ -19,14 +19,16 @@
 		"desc": "at the end of your turn, moves as far as it can in a direction"
 	},
 	"beast_summon": {
-		"desc": "at the start of your turn, draw a gem dependent beast card"
+		"desc": "at the start of your turn, draw a gem dependent beast card",
+		"theme": "blood"
 	},
 	"opportunist": {
 		"desc": "gains +1 power while unopposed"
 	},
 	"phase_shift": {
 		"desc": "activate: randomly move to another position on your side of the field for 1x🔋 energy",
-		"active": true
+		"active": true,
+		"theme": "energy"
 	},
 	"stinger": {
 		"desc": "upon striking a card, deals an additional 2 damage, then loses its power and begins to wither"
@@ -42,18 +44,20 @@
 	},
 	"capacitor": {
 		"desc": "activate: sacrifice self and regenerate 1x🔋 energy",
-		"active": true
+		"active": true,
+		"theme": "energy"
 	},
 	"painter": {
 		"desc": "if you control all mox colors, you may activate: choose a card to gain a randomly chosen sigil for 4x🔋 energy",
-		"active": true
+		"active": true,
+		"theme": "mox"
 	},
 	"free_paint": {
 		"desc": "activate: choose a card to gain a randomly chosen sigil",
 		"active": true
 	},
 	"fisher": {
-		"desc": "may strike waterborne cards while submerged"
+		"desc": "may strike waterborne cards that are submerged"
 	},
 	"blood_guzzler": {
 		"desc": "gains +1 health after dealing damage to another card"
