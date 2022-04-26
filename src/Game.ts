@@ -87,12 +87,12 @@ export type itemType = "squirrel"|"black_goat"|"boulder"|"frozen_opossum"|"mrs._
 export type moxColor = "blue"|"green"|"orange"|"any";
 export type sigil = "immutable"|"moon_strike"|"free_paint"|
 "gem_dependent"|"stunned"|"annoying"|"brittle"|"withering"|
-"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"skellify"|"animate_blood"|"fisher"|"stun_latch"|"painter"|"clinger"|"capacitor"|"opportunist"|"combative"|"beast_summon"|"exploding_guts"|"phase_shift"|"stinger";
+"spawn_ant"|"rabbit_hole"|"fecundity"|"battery"|"item_bearer"|"dam_builder"|"bellist"|"beehive"|"spikey"|"swapper"|"corpse_eater"|"undying"|"steel_trap"|"four_bones"|"scavenger"|"blood_lust"|"fledgling"|"armored"|"death_touch"|"stone"|"piercing"|"leader"|"stinky"|"mighty_leap"|"waterborne"|"flying"|"sentry"|"trifurcated"|"bifurcated"|"double_strike"|"looter"|"many_lives"|"worthy_sacrifice"|"gem_animator"|"gemified"|"random_mox"|"digger"|"morsel"|"amorphous"|"blue_mox"|"green_mox"|"orange_mox"|"repulsive"|"cuckoo"|"guardian"|"sealed_away"|"sprinter"|"scholar"|"gemnastics"|"stimulate"|"enlarge"|"energy_gun"|"haunter"|"blood_guzzler"|"disentomb"|"powered_buff"|"powered_trifurcated"|"buff_conduit"|"gems_conduit"|"factory_conduit"|"gem_guardian"|"sniper"|"transformer"|"burrower"|"vessel_printer"|"bonehorn"|"skeleton_crew"|"rampager"|"detonator"|"bomb_spewer"|"power_dice"|"gem_detonator"|"brittle_latch"|"bomb_latch"|"shield_latch"|"hefty"|"jumper"|"hydra_egg"|"loose_tail"|"hovering"|"energy_conduit"|"magic_armor"|"handy"|"double_death"|"hoarder"|"gift_bearer"|"skellify"|"animate_blood"|"fisher"|"stun_latch"|"painter"|"clinger"|"capacitor"|"opportunist"|"combative"|"beast_summon"|"exploding_guts"|"phase_shift"|"stinger"|"annoying_latch"|"rolling";
 export type playerIndex = 0|1;
 export type bossType = "prospector"|"angler"|"trader"|"moon";
 export type selectSource = "magpie"|"skinning_knife"|"sniper"|"hammer"|"latch"|"paint";
 
-export const amorphousSigils: sigil[] = ["spawn_ant", "rabbit_hole", "fecundity", "battery", "item_bearer", "dam_builder", "bellist", "beehive", "spikey", "swapper", "corpse_eater", "undying", "steel_trap", "four_bones", "scavenger", "blood_lust", "fledgling", "armored", "death_touch", "stone", "piercing", "leader", "stinky", "mighty_leap", "waterborne", "flying", "sentry", "trifurcated", "bifurcated", "double_strike", "looter", "many_lives", "worthy_sacrifice", "gem_animator", "gemified", "random_mox", "digger", "morsel", "repulsive", "cuckoo", "guardian", "sealed_away", "sprinter", "scholar", "gemnastics", "stimulate", "enlarge", "energy_gun", "disentomb", "powered_buff", "powered_trifurcated", "gem_guardian", "sniper", "transformer", "burrower", "vessel_printer", "bonehorn", "skeleton_crew", "rampager", "detonator", "bomb_spewer", "power_dice", "gem_detonator", "brittle_latch", "bomb_latch", "shield_latch", "hefty", "jumper", "loose_tail", "hovering", "energy_conduit", "magic_armor", "handy", "double_death", "gift_bearer", "hoarder", "skellify", "animate_blood", "fisher", "stun_latch", "painter", "clinger", "capacitor", "opportunist", "combative", "beast_summon", "exploding_guts", "phase_shift", "stinger"];
+export const amorphousSigils: sigil[] = ["spawn_ant", "rabbit_hole", "fecundity", "battery", "item_bearer", "dam_builder", "bellist", "beehive", "spikey", "swapper", "corpse_eater", "undying", "steel_trap", "four_bones", "scavenger", "blood_lust", "fledgling", "armored", "death_touch", "stone", "piercing", "leader", "stinky", "mighty_leap", "waterborne", "flying", "sentry", "trifurcated", "bifurcated", "double_strike", "looter", "many_lives", "worthy_sacrifice", "gem_animator", "gemified", "random_mox", "digger", "morsel", "repulsive", "cuckoo", "guardian", "sealed_away", "sprinter", "scholar", "gemnastics", "stimulate", "enlarge", "energy_gun", "disentomb", "powered_buff", "powered_trifurcated", "gem_guardian", "sniper", "transformer", "burrower", "vessel_printer", "bonehorn", "skeleton_crew", "rampager", "detonator", "bomb_spewer", "power_dice", "gem_detonator", "brittle_latch", "bomb_latch", "shield_latch", "hefty", "jumper", "loose_tail", "hovering", "energy_conduit", "magic_armor", "handy", "double_death", "gift_bearer", "hoarder", "skellify", "animate_blood", "fisher", "stun_latch", "painter", "clinger", "capacitor", "opportunist", "combative", "beast_summon", "exploding_guts", "phase_shift", "stinger", "annoying_latch", "rolling"];
 export const botSigils = amorphousSigils.filter((sigil) => {
 	return !sigil_data[sigil].active && !sigil_data.__player_sigils.includes(sigil);
 });
@@ -618,6 +618,7 @@ export class Card {
 			if (this.sigils.has("brittle_latch")) await this.latchEffect("brittle");
 			if (this.sigils.has("bomb_latch")) await this.latchEffect("detonator");
 			if (this.sigils.has("shield_latch")) await this.latchEffect("armored");
+			if (this.sigils.has("annoying_latch")) await this.latchEffect("annoying");
 			if (this.sigils.has("stun_latch")) await this.latchEffect("stunned");
 			if (this.sigils.has("detonator") || this.isMox &&
 			this.battle.getCardsWithSigil(this.owner, "gem_detonator").length + this.battle.getCardsWithSigil(other, "gem_detonator").length > 0) {
@@ -1558,11 +1559,12 @@ export abstract class Battle {
 		for (let i = 0; i < this.fieldSize; i++) {
 			const card = this.field[actor][i];
 			if (!card || card.moved) continue;
+			const rolling = card.sigils.has("rolling");
 			const rampager = card.sigils.has("rampager");
 			const hefty = card.sigils.has("hefty");
 			const jumper = card.sigils.has("jumper");
 			const trail = card.model.trail;
-			if (card.sigils.has("sprinter") || card.sigils.has("skeleton_crew") || rampager || hefty || jumper) {
+			if (card.sigils.has("sprinter") || card.sigils.has("skeleton_crew") || rolling || rampager || hefty || jumper) {
 				let d = (card.sprintToLeft ? -1 : 1);
 				let t = i + d;
 				if (t < 0 || t >= this.fieldSize || (this.field[actor][t] && !rampager && !(jumper && this.emptySpaceInDirection(actor, i, d) > -1))) {
@@ -1571,7 +1573,14 @@ export abstract class Battle {
 					t = i + d;
 				}
 				if (t < 0 || t >= this.fieldSize) continue;
-				if (jumper) {
+				if (rolling) {
+					while (t >= 0 && t < this.fieldSize && !this.field[actor][t]) t += d;
+					t -= d;
+					if (t !== i && !this.field[actor][t]) {
+						card.moved = true;
+						await card.move(i, t);
+					}
+				} else if (jumper) {
 					t = this.emptySpaceInDirection(actor, i, d);
 					if (t > -1) {
 						card.moved = true;

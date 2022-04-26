@@ -1450,6 +1450,19 @@
 
 
 
+	"pillbug": {
+		"stats": [0,4,1],
+		"cost": "blood",
+		"sigils": ["rolling"],
+		"tribe": "insect",
+		"modded": "Vanilla+"
+	},
+	"buzzer_latcher": {
+		"stats": [0,1,2],
+		"cost": "energy",
+		"sigils": ["annoying", "annoying_latch"],
+		"modded": "PO3+"
+	},
 	"1upu5": {
 		"stats": [1,1,4],
 		"cost": "energy",
