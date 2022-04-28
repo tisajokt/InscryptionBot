@@ -56,9 +56,9 @@ export const costEmoji = {
 	bones: "🦴",
 	mox: "💎",
 	energy: "🔋",
-	blue_mox: "🔵",
 	green_mox: "💚",
 	orange_mox: "🔶",
+	blue_mox: "🔵",
 	any_mox: "❔"
 };
 export const sidedeckEmoji = {
@@ -67,6 +67,7 @@ export const sidedeckEmoji = {
 	skeleton: "☠️",
 	mox_crystal: "💠",
 	"squirrel-ish": "🦤",
+	lemming: "🐹",
 	bee: "🐝",
 	tadpole: "🐸"
 };

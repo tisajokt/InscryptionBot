@@ -137,7 +137,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 						fields: [card.getEmbedDisplay()]
 					}],
 					components: [new MessageActionRow().addComponents(
-						this.makeButton("deck", ["cards"]).setEmoji("👈"),
+						this.makeButton("deck", [this.lastMenu]).setEmoji("👈"),
 						this.makeButton("card", ["special", "remove", arg]).setEmoji("🗑️")
 					)]
 				});
@@ -179,7 +179,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 					deck._cardNames.splice(deck._cardNames.indexOf(arg), 1);
 					AppUser.saveUsersData();
 					if (count === 1) {
-						await this.deckAction(["cards"]);
+						await this.deckAction([this.lastMenu]);
 					} else {
 						await this.cardAction(["name", arg]);
 					}

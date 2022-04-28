@@ -467,6 +467,7 @@
 	"broken_egg": {
 		"stats": [0,1,0],
 		"tribe": "bird",
+		"sigils": ["pesky"],
 		"no_sacrifice": true,
 		"no_bones": true,
 		"event": "none",
@@ -683,12 +684,13 @@
 		"sigils": ["scavenger"]
 	},
 	"red_hart": {
-		"stats": [0,2,2],
+		"stats": [1,2,2],
 		"cost": "blood",
 		"sigils": ["sprinter"],
 		"power_calc": "sacrifices",
 		"tribe": "hooved",
-		"bot_playable": true
+		"bot_playable": true,
+		"#comment": "buffed base power from 0 to 1"
 	},
 	"strange_frog": {
 		"stats": [1,2,1],
@@ -1064,7 +1066,7 @@
 		"cost": "energy",
 		"sigils": ["phase_shift"],
 		"rare": true,
-		"#comment": "added phase shift sigil, allowing it to 'hop' elsewhere"
+		"#comment": "added phase shift sigil, allowing it to 'hop' elsewhere (yes I know the name is a reference to its stats, not literal hopping)"
 	},
 	"thick_droid": {
 		"stats": [1,4,5],
@@ -1314,8 +1316,10 @@
 		"cost": "bones"
 	},
 	"zombie": {
-		"stats": [1,1,2],
-		"cost": "bones"
+		"stats": [1,3,2],
+		"sigils": ["withering"],
+		"cost": "bones",
+		"#comment": "added withering sigil, and buffed health from 1 to 3 (to distinguish from opossum)"
 	},
 	"tomb_robber": {
 		"stats": [0,2,0],
@@ -1450,8 +1454,36 @@
 	},
 
 
-
-	"lightning_bugs": {
+	
+	"skele-leech": {
+		"stats": [1,1,3],
+		"cost": "bones",
+		"sigils": ["brittle", "brittle_latch"],
+		"tribe": "insect",
+		"modded": "GrimoraRulebook"
+	},
+	"show_magician": {
+		"stats": [0,1,0],
+		"cost": "mox",
+		"sigils": ["rabbit_hole", "amorphous"],
+		"mox": ["orange"],
+		"modded": "MoxExpansion"
+	},
+	"green_oracle": {
+		"stats": [0,1,0],
+		"cost": "mox",
+		"sigils": ["hoarder"],
+		"mox": ["green"],
+		"modded": "MoxExpansion"
+	},
+	"blue_oracle": {
+		"stats": [0,2,0],
+		"cost": "mox",
+		"sigils": ["gem_specialist"],
+		"mox": ["blue"],
+		"modded": "MoxExpansion"
+	},
+	"lightning_bug": {
 		"stats": [0,1,1],
 		"cost": "blood",
 		"sigils": ["powered_buff", "battery"],
@@ -1471,7 +1503,7 @@
 		"sigils": ["annoying", "annoying_latch"],
 		"modded": "PO3+"
 	},
-	"1upu5": {
+	"w01f": {
 		"stats": [1,1,4],
 		"cost": "energy",
 		"sigils": ["transformer"],
@@ -1636,8 +1668,8 @@
 		"#comment": "card name used for player-made cards"
 	},
 	"bug_tester": {
-		"stats": [1,1,0],
-		"sigils": ["guardian", "burrower", "sentry", "death_touch", "detonator", "undying", "fecundity", "beehive", "steel_trap", "spikey", "hefty"],
+		"stats": [0,40,0],
+		"sigils": ["undying", "burrower", "stone", "brittle_latch"],
 		"modded": "debug"
 	},
 	"developer": {
@@ -1691,12 +1723,42 @@
 	},
 	"lemming": {
 		"stats": [0,1,0],
-		"modded": "Vanilla+",
-		"#comment": "NOT IMPLEMENTED: 'eager sacrifice': may be used directly from your hand as a sacrifice (even with insufficient board space)"
+		"sigils": ["lemming"],
+		"modded": "Vanilla+"
+	},
+	"ant_hill": {
+		"stats": [0,4,3],
+		"cost": "blood",
+		"sigils": ["ant_source", "sealed_away"],
+		"sealed_away": "queen_ant",
+		"tribe": "insect",
+		"modded": "Vanilla+"
+	},
+	"ant_larva": {
+		"stats": [0,1,0],
+		"sigils": ["fledgling"],
+		"tribe": "insect",
+		"grows_into": "worker_ant",
+		"modded": "Vanilla+"
+	},
+	"decoy_bot": {
+		"stats": [0,1,1],
+		"cost": "energy",
+		"sigils": ["decoy", "pesky"],
+		"no_sacrifice": true,
+		"no_bones": true,
+		"modded": "PO3+"
 	},
 
 
 
+	"zombie_zak": {
+		"stats": [1,1,5],
+		"cost": "bones",
+		"sigils": ["withering", "infectious"],
+		"rare": true,
+		"modded": "Zak"
+	},
 	"z_+_t": {
 		"stats": [3,2,1],
 		"cost": "blood",

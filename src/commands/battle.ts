@@ -181,12 +181,21 @@ class BattleInteraction extends PersistentCommandInteraction {
 			case "latch":
 				title = `${source === "latch" ? "💫 Latch" : "🎨 Paint"}: ${toProperFormat(args[0])}`;
 				description = `Choose a card to receive the _${args[0].replaceAll("_", " ")}_ sigil`;
-				actions.addComponents(this.makeSelectMenu("select", this.getFieldOptions(c => c && !c.sigils.has(<sigil>args[0]))));
+				actions.addComponents(this.makeSelectMenu("select", this.getFieldOptions(c => c && !c.sigils.has(<sigil>args[0]) && !c.sigils.has("immutable"))));
 				break;
 			case "skinning_knife":
 				title = "🔪 Skinning Knife";
 				description = "Choose a card on the field to skin";
 				actions.addComponents(this.makeSelectMenu("select", this.getFieldOptions()));
+				break;
+			case "mox_decision":
+				title = "💠 Gem Specialist";
+				description = "Choose which mox color to draw";
+				actions.addComponents(new MessageActionRow().addComponents(
+					this.makeButton("select", ["0"]).setEmoji("💚"),
+					this.makeButton("select", ["1"]).setEmoji("🔶"),
+					this.makeButton("select", ["2"]).setEmoji("🔵")
+				));
 				break;
 			default:
 				return defaultVal;
@@ -194,7 +203,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 		await this.interaction.followUp({
 			embeds: [{
 				title: title,
-				description: description
+				description: `${description}${this.twoPlayers ? `\n<@${this.playerIDs[player]}>` : ""}`
 			}],
 			components: [actions]
 		});
@@ -666,21 +675,17 @@ class BattleInteraction extends PersistentCommandInteraction {
 		) : null;
 	}
 	getFieldOptions(filter: (card: Card)=>boolean = (c)=>!!c): any[] {
-		return this.battle.field[0].map((card, i) => {
-			return card ? {
-				card: card,
-				label: card.fullSummary(i),
-				description: `From player 1's field, column ${i+1}`,
-				value: `${card.absoluteIndex(i)}`
-			} : null;
-		}).concat(this.battle.field[1].map((card, i) => {
-			return card ? {
-				card: card,
-				label: card.fullSummary(i),
-				description: `From player 2's field, column ${i+1}`,
-				value: `${card.absoluteIndex(i)}`
-			} : null;
-		})).filter(option => filter(option?.card));
+		const makeOption = (playerLabel: string) => {
+			return (card: Card, i: number) => {
+				return card && (!card.isWide || i === 0) ? {
+					card: card,
+					label: card.fullSummary(i),
+					description: `From ${playerLabel}'s field${card.isWide ? "" : `, column ${i+1}`}`,
+					value: `${card.absoluteIndex(i)}`
+				} : null;
+			};
+		}
+		return this.battle.field[0].map(makeOption("player 1")).concat(this.battle.field[1].map(makeOption("player 2"))).filter(option => filter(option?.card));
 	}
 	makeFieldButtons(action: battleAction, args: string[], field: Card[], disable: (c: Card) => boolean, row?: MessageActionRow): MessageActionRow {
 		const actions = row || new MessageActionRow();
