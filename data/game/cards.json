@@ -1602,7 +1602,7 @@
 	"bloodstone": {
 		"stats": [0,1,2],
 		"cost": "blood",
-		"sigils": ["worthy_sacrifice"],
+		"sigils": ["worthy_sacrifice", "stone"],
 		"no_sacrifice": true,
 		"event": "none",
 		"modded": "MoxExpansion"

@@ -191,11 +191,11 @@ class BattleInteraction extends PersistentCommandInteraction {
 			case "mox_decision":
 				title = "💠 Gem Specialist";
 				description = "Choose which mox color to draw";
-				actions.addComponents(new MessageActionRow().addComponents(
+				actions.addComponents(
 					this.makeButton("select", ["0"]).setEmoji("💚"),
 					this.makeButton("select", ["1"]).setEmoji("🔶"),
 					this.makeButton("select", ["2"]).setEmoji("🔵")
-				));
+				);
 				break;
 			default:
 				return defaultVal;

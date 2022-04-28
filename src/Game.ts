@@ -384,7 +384,7 @@ export class Card {
 		const hasMoxSpecialist = this.battle.getCardsWithSigil(this.owner, "gem_specialist").length > 0;
 		if (this.sigils.has("random_mox")) {
 			const possibleSigils: sigil[] = ["green_mox", "orange_mox", "blue_mox"];
-			if (hasMoxSpecialist) {
+			if (!hasMoxSpecialist) {
 				this.addSigil(pickRandom(possibleSigils));
 			} else {
 				this.addSigil(possibleSigils[await this.battle.waitForSelection("mox_decision", this.owner, Math.floor(Math.random() * 3))]);
@@ -393,7 +393,7 @@ export class Card {
 		}
 		if (this.name === "mox_crystal") {
 			const possibleMox: cardName[] = ["emerald_mox", "ruby_mox", "sapphire_mox"];
-			if (hasMoxSpecialist) {
+			if (!hasMoxSpecialist) {
 				this.transformInto(pickRandom(possibleMox));
 			} else {
 				this.transformInto(possibleMox[await this.battle.waitForSelection("mox_decision", this.owner, Math.floor(Math.random() * 3))]);
