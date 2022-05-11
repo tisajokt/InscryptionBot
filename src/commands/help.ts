@@ -23,7 +23,7 @@ helpPages.set("credits", {
 });
 
 helpPages.set("invite", {
-	content: "https://discord.com/api/oauth2/authorize?client_id=968924687163859024&permissions=2147745792&scope=bot%20applications.commands"
+	content: "https://discord.com/api/oauth2/authorize?client_id=968924687163859024&permissions=262144&scope=bot%20applications.commands"
 });
 
 export const help: SlashCommand = {

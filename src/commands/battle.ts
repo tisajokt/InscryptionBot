@@ -1,4 +1,4 @@
-import { MessageActionRow, ButtonInteraction, CommandInteraction, InteractionReplyOptions, SelectMenuInteraction, MessageComponentInteraction, User } from "discord.js";
+import { MessageActionRow, ButtonInteraction, CommandInteraction, InteractionReplyOptions, SelectMenuInteraction, MessageComponentInteraction } from "discord.js";
 import { DLM, PersistentCommandInteraction, SlashCommand } from "../Command";
 import { SoloBattle, DuelBattle, Battle, Player, Card, terrains, cardName, PlayerBattler, playerIndex, sidedecks, selectSource, modelSummary, sigil, Deck, getModel } from "../Game";
 import { Display } from "../Display";
@@ -212,7 +212,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 			this.selectCallback = (value: number) => {
 				delete this.selectCallback;
 				resolve(value);
-				this.refresh();
+				this.reply();
 			}
 		});
 	}
@@ -257,8 +257,7 @@ class BattleInteraction extends PersistentCommandInteraction {
 				await this.battle.getPlayer(<playerIndex>k).addToHand(card);
 			}
 		}
-		await this.battle.placeTerrain(this.battle.terrain);
-		await this.battle.setupTurn();
+		await this.battle.setupFirstTurn();
 		return this.battle;
 	}
 	static get(id: string): BattleInteraction {
@@ -281,15 +280,20 @@ class BattleInteraction extends PersistentCommandInteraction {
 		// on init of duel battle
 		if (!args[0]) {
 			if (!this.twoPlayers) return;
+			const options = this.options;
 			const actions = new MessageActionRow().addComponents(
 				this.makeButton("confirm", ["accept", "0"]).setEmoji(numberEmoji[1]),
 				this.makeButton("confirm", ["accept", "1"]).setEmoji(numberEmoji[2]),
 				this.makeButton("confirm", ["decline"]).setLabel("Decline").setStyle("DANGER")
 			)
+			const _makePlayerTag = (id: string) => {
+				return options.customDeck && AppUser.get(id).getActivePlayer(this.mode === "duel")?.name || `random ${options.sidedeck.replaceAll("_", " ")} deck`;
+			};
+			const description = [`<@${this.userID}> (${_makePlayerTag(this.userID)}) vs. <@${this.playerIDs[1]}> (${_makePlayerTag(this.playerIDs[1])})`];
 			await this.interaction.editReply({
 				embeds: [{
 					title: "Battle request",
-					description: `<@${this.userID}> vs. <@${this.playerIDs[1]}>`
+					description: description.join("\n")
 				}],
 				components: [actions]
 			});

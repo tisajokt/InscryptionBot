@@ -3,15 +3,18 @@
 		["gem_dependent", "zombified"],
 		["brittle", "withering"],
 		["annoying", "stunned", "pesky"],
-		["flying", "detonator", "swapper", "clinger", "skellify", "immutable", "stinger", "lemming", "decoy"],
+		["airborne", "detonator", "swapper", "clinger", "skellify", "immutable", "stinger", "lemming", "decoy", "frenzying"],
 		["sprinter", "burrower", "waterborne", "hefty", "jumper", "guardian", "mighty_leap", "null_conduit", "shield_latch", "transformer", "gem_detonator", "rampager", "hovering", "green_mox", "orange_mox", "blue_mox", "random_mox", "fisher", "stun_latch", "capacitor", "rolling"],
 		["fledgling", "loose_tail", "four_bones", "undying", "spikey", "worthy_sacrifice", "stinky", "digger", "battery", "energy_conduit", "bomb_latch", "gem_guardian", "vessel_printer", "powered_buff", "stone", "scavenger", "piercing", "magic_armor", "exploding_guts", "annoying_latch"],
-		["gift_bearer", "rabbit_hole", "beehive", "dam_builder", "fecundity", "corpse_eater", "spawn_ant", "sealed_away", "amorphous", "leader", "skeleton_crew", "gem_animator", "ruby_heart", "gemnastics", "buff_conduit", "factory_conduit", "sentry", "double_death", "disentomb", "scholar", "sniper", "brittle_latch", "powered_trifurcated", "blood_lust", "morsel", "gemified", "animate_blood", "beast_summon", "opportunist", "combative", "infectious", "ant_source", "gem_specialist"],
+		["gift_bearer", "rabbit_hole", "beehive", "dam_builder", "fecundity", "corpse_eater", "spawn_ant", "sealed_away", "amorphous", "leader", "skeleton_crew", "gem_animator", "ruby_heart", "gemnastics", "buff_conduit", "factory_conduit", "sentry", "double_death", "disentomb", "scholar", "sniper", "brittle_latch", "powered_trifurcated", "blood_lust", "morsel", "gem_empowered", "animate_blood", "beast_summon", "opportunist", "combative", "infectious", "ant_source", "gem_specialist"],
 		["death_touch", "hoarder", "many_lives", "repulsive", "bifurcated", "bellist", "handy", "bomb_spewer", "enlarge", "energy_gun", "looter", "stimulate", "bonehorn", "armored", "cuckoo", "double_strike", "hydra_egg", "blood_guzzler", "phase_shift"],
 		["trifurcated", "item_bearer", "steel_trap", "power_dice", "painter", "haunter"],
 		["moon_strike", "free_paint"]
 	],
-	"__player_sigils": ["hovering", "four_bones", "undying", "worthy_sacrifice", "digger", "battery", "energy_conduit", "vessel_printer", "scavenger", "piercing", "haunter", "rabbit_hole", "beehive", "fecundity", "corpse_eater", "spawn_ant", "gemnastics", "disentomb", "scholar", "morsel", "hoarder", "many_lives", "handy", "enlarge", "energy_gun", "looter", "stimulate", "bonehorn", "item_bearer", "power_dice", "random_mox", "skellify", "painter", "gift_bearer", "painter"],
+	"__player_sigils": ["hovering", "four_bones", "undying", "worthy_sacrifice", "digger", "battery", "energy_conduit", "vessel_printer", "scavenger", "piercing", "haunter", "rabbit_hole", "beehive", "fecundity", "corpse_eater", "spawn_ant", "gemnastics", "disentomb", "scholar", "morsel", "hoarder", "many_lives", "handy", "enlarge", "energy_gun", "looter", "stimulate", "bonehorn", "item_bearer", "power_dice", "random_mox", "skellify", "painter", "gift_bearer", "painter", "gem_specialist", "ant_source", "beast_summon"],
+	"frenzying": {
+		"desc": "when played, all cards on the field gain a random movement sigil facing a random direction"
+	},
 	"lemming": {
 		"desc": "will play itself from your hand to block incoming damage"
 	},
@@ -170,7 +173,7 @@
 	"magic_armor": {
 		"desc": "when played to an unopposed position, gains the armored sigil"
 	},
-	"gemified": {
+	"gem_empowered": {
 		"desc": "gains +1 power if you control an orange mox; +2 health for green; -1 cost to play for blue",
 		"theme": "mox"
 	},
@@ -334,11 +337,11 @@
 	"annoying": {
 		"desc": "an opposing card gains +1 power"
 	},
-	"flying": {
+	"airborne": {
 		"desc": "strikes the opponent directly, over opposing cards"
 	},
 	"mighty_leap": {
-		"desc": "blocks cards with the flying sigil"
+		"desc": "blocks cards with the airborne sigil"
 	},
 	"detonator": {
 		"desc": "upon death, kills all adjacent cards"
@@ -384,7 +387,7 @@
 		"desc": "at the end of your turn, moves to an adjacent spot, shoving cards behind it"
 	},
 	"hovering": {
-		"desc": "activate: toggle flying sigil (for free)",
+		"desc": "activate: toggle airborne sigil (for free)",
 		"active": true
 	},
 	"exploding_guts": {
@@ -406,7 +409,7 @@
 		"theme": "bones"
 	},
 	"power_dice": {
-		"desc": "activate: rerolls power (1-6) for 1x🔋 energy",
+		"desc": "activate: rerolls power (1-6) for 2x🔋 energy",
 		"active": true
 	},
 	"energy_gun": {

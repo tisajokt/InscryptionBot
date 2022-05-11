@@ -1,4 +1,4 @@
-import { readFileSync, writeFile } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import { jsonArrayMember, jsonMember, jsonObject, TypedJSON } from "typedjson";
 import { BattleOptions } from "./commands/battle";
 import { Card, cardName, MIN_COMPETITIVE_CARDS, Player } from "./Game";
@@ -46,20 +46,15 @@ export class AppUser {
 		this.usersMap.set(id, user);
 		return user;
 	}
-	static savePromise: Promise<void>;
-	static async saveUsersData(): Promise<void> {
-		if (AppUser.savePromise) {
-			await AppUser.savePromise;
-		}
-		const data = userSerializer.stringifyAsArray(AppUser.usersList);
-		AppUser.savePromise = new Promise((resolve, reject) => {
-			writeFile(usersDataFilePath, data, (err) => {
-				delete AppUser.savePromise;
-				if (err) reject(err);
-				else resolve();
-			});
-		});
-		return AppUser.savePromise;
+	static isSavePending: boolean;
+	static saveUsersData(immediate: boolean=false): void {
+		if (AppUser.isSavePending) return;
+		AppUser.isSavePending = true;
+		setTimeout(() => {
+			const data = userSerializer.stringifyAsArray(AppUser.usersList);
+			writeFileSync(usersDataFilePath, data);
+			AppUser.isSavePending = false;
+		}, immediate ? 0 : 10000);
 	}
 	onDeserialized(): void {
 		AppUser.usersMap.set(this.id, this);
@@ -85,4 +80,3 @@ export class AppUser {
 	}
 }
 const userSerializer = new TypedJSON(AppUser);
-AppUser.initUsersData();

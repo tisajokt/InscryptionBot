@@ -40,7 +40,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 		return "deck";
 	}
 	getCardOptions(): any[] {
-		return this.getPagedOptions(sortedCards).map((name) => {
+		return this.getPagedOptions(sortedCards.filter(c => !this.player.deck._cardNames.includes(c))).map((name) => {
 			return {
 				label: `${getModel(name).rare?"✨ ":""}${modelSummary(name)} (${getModel(name).playerValue})`,
 				value: `name${DLM}${name}`,
@@ -203,6 +203,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 			case 1:
 				if (args[0] == "create" && this.user.players.length < 5) {
 					this.player = this.user.createPlayer("squirrel", ["stoat", "bullfrog", "wolf", "stinkbug"]);
+					AppUser.saveUsersData();
 					await this.deckAction();
 				}
 				break;
@@ -237,6 +238,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 			// .deck.sidedeck
 			case "sidedeck":
 				this.player.sidedeck = sidedecks[(sidedecks.indexOf(this.player.sidedeck) + 1) % sidedecks.length];
+				AppUser.saveUsersData();
 				await this.deckAction();
 				break;
 			case "view.next":
@@ -311,6 +313,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 				}
 				this.user.players.splice(idx, 1);
 				delete this.player;
+				AppUser.saveUsersData();
 				await this.mainAction();
 				break;
 		}
@@ -403,6 +406,7 @@ export const deck: SlashCommand = {
 				} else {
 					delete user.activePlayer;
 				}
+				AppUser.saveUsersData();
 				await interaction.reply({
 					content: !!user.getActivePlayer() ? `Selected deck #${active}, "${user.getActivePlayer().name ?? "Unnamed Deck"}"` : "Unselected all decks",
 					ephemeral: true
@@ -413,6 +417,7 @@ export const deck: SlashCommand = {
 				const player = user.players[idx-1];
 				if (player) {
 					player.name = interaction.options.getString("name", true);
+					AppUser.saveUsersData();
 					await interaction.reply({
 						content: `Renamed deck #${idx} to "${player.name}"!`,
 						ephemeral: true

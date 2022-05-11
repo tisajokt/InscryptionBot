@@ -17,7 +17,9 @@
 		"sigils": ["brittle"],
 		"no_sacrifice": true,
 		"event": "none",
-		"#comment": "now cannot be sacrificed (would be superior to squirrel as sidedeck)"
+		"vanilla_override": {
+			"no_sacrifice": false
+		}
 	},
 	"empty_vessel": {
 		"stats": [0,2,1],
@@ -46,12 +48,18 @@
 		"no_sacrifice": true,
 		"no_bones": true,
 		"event": "none",
-		"#comment": "gains armored if not opposed by anything when it's played (to help balance in duels)"
+		"#comment": "gains armored if not opposed by anything when it's played (to help balance in duels)",
+		"vanilla_override": {
+			"sigils": []
+		}
 	},
 	"rabbit": {
 		"sigils": ["jumper"],
 		"vanilla_cabin": true,
-		"#comment": "added jumper sigil"
+		"#comment": "added jumper sigil",
+		"vanilla_override": {
+			"sigils": []
+		}
 	},
 	"warren": {
 		"stats": [0,2,1],
@@ -188,15 +196,23 @@
 		"cost": "bones",
 		"event": "none",
 		"vanilla_cabin": true,
-		"#comment": "costs bones instead (barely matters since it's so rare)"
+		"#comment": "costs bones instead (barely matters since it's so rare)",
+		"vanilla_override": {
+			"stats": [3,6,1],
+			"cost": "blood"
+		}
 	},
 	"bee": {
 		"stats": [1,1,0],
-		"sigils": ["flying", "stinger"],
+		"sigils": ["airborne", "stinger"],
 		"tribe": "insect",
 		"grows_into": "queen_bee",
 		"event": "none",
-		"vanilla_cabin": true
+		"vanilla_cabin": true,
+		"vanilla_override": {
+			"sigils": ["airborne"],
+			"grows_into": null
+		}
 	},
 	"beehive": {
 		"stats": [0,2,1],
@@ -204,7 +220,10 @@
 		"sigils": ["beehive"],
 		"tribe": "insect",
 		"grows_into": "queen_bee",
-		"vanilla_cabin": true
+		"vanilla_cabin": true,
+		"vanilla_override": {
+			"grows_into": null
+		}
 	},
 	"great_white": {
 		"stats": [4,2,3],
@@ -217,7 +236,9 @@
 		"cost": "blood",
 		"sigils": ["fisher"],
 		"vanilla_cabin": true,
-		"#comment": "added fisher sigil"
+		"vanilla_override": {
+			"sigils": []
+		}
 	},
 	"urayuli": {
 		"stats": [7,7,4],
@@ -228,7 +249,7 @@
 	"turkey_vulture": {
 		"stats": [3,3,8],
 		"cost": "bones",
-		"sigils": ["flying"],
+		"sigils": ["airborne"],
 		"tribe": "avian",
 		"vanilla_cabin": true
 	},
@@ -258,7 +279,10 @@
 		"sigils": ["burrower"],
 		"grows_into": "moleman",
 		"bot_playable": true,
-		"vanilla_cabin": true
+		"vanilla_cabin": true,
+		"vanilla_override": {
+			"grows_into": null
+		}
 	},
 	"moleman": {
 		"stats": [0,6,1],
@@ -271,7 +295,7 @@
 	"magpie": {
 		"stats": [1,1,2],
 		"cost": "blood",
-		"sigils": ["flying", "hoarder"],
+		"sigils": ["airborne", "hoarder"],
 		"tribe": "avian",
 		"vanilla_cabin": true
 	},
@@ -285,7 +309,7 @@
 	"kingfisher": {
 		"stats": [1,1,1],
 		"cost": "blood",
-		"sigils": ["waterborne", "flying"],
+		"sigils": ["waterborne", "airborne"],
 		"tribe": "avian",
 		"vanilla_cabin": true
 	},
@@ -298,7 +322,7 @@
 	"bat": {
 		"stats": [2,1,4],
 		"cost": "bones",
-		"sigils": ["flying"],
+		"sigils": ["airborne"],
 		"vanilla_cabin": true
 	},
 	"adder": {
@@ -352,9 +376,11 @@
 		"no_sacrifice": true,
 		"tribe": "canine",
 		"pelt_value": 2,
-		"#comment": "canine tribe added because lol",
 		"event": "pelt",
-		"vanilla_cabin": true
+		"vanilla_cabin": true,
+		"vanilla_override": {
+			"tribe": null
+		}
 	},
 	"golden_pelt": {
 		"stats": [0,3,0],
@@ -402,7 +428,6 @@
 		"stats": [1,3,0],
 		"sigils": ["four_bones"],
 		"event": "none",
-		"rare": true,
 		"bot_playable": false,
 		"vanilla_cabin": true
 	},
@@ -471,7 +496,10 @@
 		"no_sacrifice": true,
 		"no_bones": true,
 		"event": "none",
-		"#comment": "now gives no bones, since cuckoo is significantly weaker against humans since they have hammer"
+		"vanilla_override": {
+			"sigils": [],
+			"no_bones": false
+		}
 	},
 	"stoat": {
 		"stats": [1,2,1],
@@ -490,7 +518,7 @@
 	"flying_ant": {
 		"stats": [0,1,1],
 		"cost": "blood",
-		"sigils": ["flying"],
+		"sigils": ["airborne"],
 		"tribe": "insect",
 		"power_calc": "ant",
 		"grows_into": "queen_ant",
@@ -544,19 +572,22 @@
 		"cost": "blood",
 		"sigils": ["waterborne", "fisher"],
 		"vanilla_cabin": true,
-		"#comment": "added fisher sigil"
+		"#comment": "added fisher sigil",
+		"vanilla_override": {
+			"sigils": ["waterborne"]
+		}
 	},
 	"sparrow": {
 		"stats": [1,2,1],
 		"cost": "blood",
-		"sigils": ["flying"],
+		"sigils": ["airborne"],
 		"tribe": "avian",
 		"vanilla_cabin": true
 	},
 	"raven": {
 		"stats": [2,3,2],
 		"cost": "blood",
-		"sigils": ["flying"],
+		"sigils": ["airborne"],
 		"tribe": "avian",
 		"vanilla_cabin": true
 	},
@@ -585,7 +616,7 @@
 		"vanilla_cabin": true
 	},
 	"strange_larva": {
-		"stats": [0,3,1],
+		"stats": [0,3,2],
 		"cost": "blood",
 		"sigils": ["fledgling"],
 		"tribe": "insect",
@@ -595,7 +626,7 @@
 		"vanilla_cabin": true
 	},
 	"strange_pupa": {
-		"stats": [0,3,1],
+		"stats": [0,3,2],
 		"cost": "blood",
 		"sigils": ["fledgling"],
 		"tribe": "insect",
@@ -605,9 +636,9 @@
 		"event": "none"
 	},
 	"mothman": {
-		"stats": [7,3,1],
+		"stats": [7,3,2],
 		"cost": "blood",
-		"sigils": ["flying"],
+		"sigils": ["airborne"],
 		"tribe": "insect",
 		"rare": true,
 		"bot_playable": false,
@@ -654,13 +685,13 @@
 	"cuckoo": {
 		"stats": [1,1,1],
 		"cost": "blood",
-		"sigils": ["flying", "cuckoo"],
+		"sigils": ["airborne", "cuckoo"],
 		"tribe": "avian"
 	},
 	"lammergeier": {
 		"stats": [0,4,3],
 		"cost": "blood",
-		"sigils": ["flying"],
+		"sigils": ["airborne"],
 		"tribe": "avian",
 		"power_calc": "bones",
 		"bot_playable": true
@@ -690,7 +721,9 @@
 		"power_calc": "sacrifices",
 		"tribe": "hooved",
 		"bot_playable": true,
-		"#comment": "buffed base power from 0 to 1"
+		"vanilla_override": {
+			"stats": [0,2,2]
+		}
 	},
 	"strange_frog": {
 		"stats": [1,2,1],
@@ -716,12 +749,19 @@
 		"no_sacrifice": true,
 		"bot_playable": true,
 		"vanilla_cabin": true,
-		"inspect": "Go fish."
+		"inspect": "Go fish.",
+		"vanilla_override": {
+			"stats": [0,1,0],
+			"cost": null
+		}
 	},
 	"wolverine": {
-		"stats": [1,3,5],
+		"stats": [1,3,4],
 		"cost": "bones",
-		"sigils": ["blood_lust"]
+		"sigils": ["blood_lust"],
+		"vanilla_override": {
+			"stats": [1,3,5]
+		}
 	},
 	"hodag": {
 		"stats": [1,5,2],
@@ -754,7 +794,7 @@
 		"cost": "bones",
 		"sigils": ["hydra_egg"],
 		"rare": true,
-		"#comment": "todo: properly implement hydra, except only applying to the field & hand"
+		"#comment": "todo: properly implement hydra?"
 	},
 	"hydra": {
 		"stats": [1,5,1],
@@ -789,15 +829,19 @@
 	"fishbot": {
 		"stats": [1,3,3],
 		"cost": "energy",
-		"sigils": ["fisher", "gift_bearer"],
+		"sigils": ["gift_bearer", "fisher"],
 		"fish_gifts": true,
-		"#comment": "added fisher sigil"
+		"vanilla_override": {
+			"sigils": ["gift_bearer"]
+		}
 	},
 	"lonely_wizbot": {
 		"stats": [2,1,3],
 		"cost": "energy",
 		"sigils": ["clinger"],
-		"#comment": "increased cost to 3 energy"
+		"vanilla_override": {
+			"stats": [2,1,2]
+		}
 	},
 	"good_fish": {
 		"stats": [2,2,6],
@@ -845,8 +889,8 @@
 	"gem_detonator": {
 		"stats": [1,2,3],
 		"cost": "energy",
-		"sigils": ["gem_detonator", "gemified"],
-		"#comment": "gemified by default"
+		"sigils": ["gem_detonator", "gem_empowered"],
+		"#comment": "gem_empowered by default"
 	},
 	"squirrel_ball": {
 		"stats": [0,2,1],
@@ -867,7 +911,10 @@
 		"sigils": ["fledgling", "magic_armor", "random_mox"],
 		"grows_into": "crystal_growth",
 		"is_mox": true,
-		"rare": true
+		"rare": true,
+		"vanilla_override": {
+			"event": "none"
+		}
 	},
 	"crystal_growth": {
 		"stats": [0,3,0],
@@ -890,7 +937,10 @@
 		"sigils": ["sealed_away"],
 		"sealed_away": "skeleton",
 		"no_sacrifice": true,
-		"#comment": "removed cost"
+		"vanilla_override": {
+			"stats": [0,1,1],
+			"cost": "bones"
+		}
 	},
 	"gravedigger": {
 		"stats": [0,3,1],
@@ -914,7 +964,10 @@
 		"cost": "energy",
 		"sigils": ["hovering"],
 		"tribe": "insect",
-		"#comment": "added insect tribe, and replaced flying with hovering"
+		"vanilla_override": {
+			"sigils": ["airborne"],
+			"tribe": null
+		}
 	},
 	"3D_printer": {
 		"stats": [0,3,3],
@@ -968,7 +1021,9 @@
 	"automaton": {
 		"stats": [1,1,2],
 		"cost": "energy",
-		"#comment": "reduced cost from 3 to 2"
+		"vanilla_override": {
+			"stats": [1,1,3]
+		}
 	},
 	"l33pb0t": {
 		"stats": [0,2,1],
@@ -1047,11 +1102,14 @@
 		"sigils": ["bifurcated"]
 	},
 	"mox_module": {
-		"stats": [0,3,3],
+		"stats": [0,3,4],
 		"cost": "energy",
 		"sigils": ["green_mox", "blue_mox", "orange_mox"],
 		"is_mox": true,
-		"rare": true
+		"rare": true,
+		"vanilla_override": {
+			"stats": [0,3,3]
+		}
 	},
 	"shutterbug": {
 		"stats": [1,1,5],
@@ -1066,12 +1124,16 @@
 		"cost": "energy",
 		"sigils": ["phase_shift"],
 		"rare": true,
-		"#comment": "added phase shift sigil, allowing it to 'hop' elsewhere (yes I know the name is a reference to its stats, not literal hopping)"
+		"vanilla_override": {
+			"sigils": []
+		}
 	},
 	"thick_droid": {
 		"stats": [1,4,5],
 		"cost": "energy",
-		"#comment": "buffed health from 3 to 4"
+		"vanilla_override": {
+			"stats": [1,3,5]
+		}
 	},
 	"sniper_bot": {
 		"stats": [1,1,3],
@@ -1081,7 +1143,9 @@
 	"steambot": {
 		"stats": [3,2,6],
 		"cost": "energy",
-		"#comment": "buffed power from 2 to 3"
+		"vanilla_override": {
+			"stats": [2,2,6]
+		}
 	},
 	"amoeba": {
 		"stats": [1,2,2],
@@ -1119,17 +1183,32 @@
 		"mox": ["blue"]
 	},
 	"gem_fiend": {
-		"stats": [2,1,0],
+		"stats": [1,1,0],
+		"cost": "mox",
+		"sigils": ["gem_dependent", "fledgling"],
+		"mox": ["blue"],
+		"grows_into": "true_fiend",
+		"vanilla_override": {
+			"stats": [2,1,0],
+			"sigils": ["gem_dependent"],
+			"grows_into": null
+		}
+	},
+	"true_fiend": {
+		"stats": [3,1,0],
 		"cost": "mox",
 		"sigils": ["gem_dependent"],
-		"mox": ["blue"]
+		"mox": ["blue"],
+		"event": "none"
 	},
 	"hover_mage": {
 		"stats": [1,1,0],
 		"cost": "mox",
 		"sigils": ["hovering"],
 		"mox": ["blue"],
-		"#comment": "now has hovering instead, which is toggleable"
+		"vanilla_override": {
+			"sigils": ["airborne"]
+		}
 	},
 	"force_mage": {
 		"stats": [0,1,0],
@@ -1150,10 +1229,23 @@
 		"mox": ["orange"]
 	},
 	"mage_knight": {
+		"stats": [1,2,0],
+		"cost": "mox",
+		"sigils": ["gem_dependent", "fledgling"],
+		"mox": ["orange"],
+		"grows_into": "true_knight",
+		"vanilla_override": {
+			"stats": [1,3,0],
+			"sigils": ["gem_dependent"],
+			"grows_into": null
+		}
+	},
+	"true_knight": {
 		"stats": [1,3,0],
 		"cost": "mox",
-		"sigils": ["gem_dependent"],
-		"mox": ["orange"]
+		"sigils": ["gem_dependent", "gem_empowered"],
+		"mox": ["orange"],
+		"event": "none"
 	},
 	"ruby_golem": {
 		"stats": [1,1,0],
@@ -1168,21 +1260,30 @@
 		"sigils": ["orange_mox", "magic_armor"],
 		"is_mox": true,
 		"no_sacrifice": true,
-		"event": "none"
+		"event": "none",
+		"vanilla_override": {
+			"sigils": ["orange_mox"]
+		}
 	},
 	"sapphire_mox": {
 		"stats": [0,1,0],
 		"sigils": ["blue_mox", "magic_armor"],
 		"is_mox": true,
 		"no_sacrifice": true,
-		"event": "none"
+		"event": "none",
+		"vanilla_override": {
+			"sigils": ["blue_mox"]
+		}
 	},
 	"emerald_mox": {
 		"stats": [0,1,0],
 		"sigils": ["green_mox", "magic_armor"],
 		"is_mox": true,
 		"no_sacrifice": true,
-		"event": "none"
+		"event": "none",
+		"vanilla_override": {
+			"sigils": ["green_mox"]
+		}
 	},
 	"practice_wizard": {
 		"stats": [0,3,0],
@@ -1190,7 +1291,9 @@
 		"mox": ["orange"],
 		"power_calc": "damage",
 		"bot_playable": true,
-		"#comment": "powers up from receiving damage"
+		"vanilla_override": {
+			"power_calc": null
+		}
 	},
 	"green_mage": {
 		"stats": [0,2,0],
@@ -1201,9 +1304,24 @@
 		"#comment": "now powered by all mox, not just green"
 	},
 	"junior_sage": {
-		"stats": [1,2,0],
+		"stats": [1,1,0],
 		"cost": "mox",
-		"mox": ["green"]
+		"sigils": ["fledgling"],
+		"mox": ["green"],
+		"grows_into": "true_sage",
+		"vanilla_override": {
+			"stats": [1,2,0],
+			"sigils": [],
+			"grows_into": null
+		}
+	},
+	"true_sage": {
+		"stats": [0,1,0],
+		"cost": "mox",
+		"sigils": ["gem_empowered"],
+		"mox": ["green"],
+		"power_calc": "mox",
+		"event": "none"
 	},
 	"stim_mage": {
 		"stats": [0,2,0],
@@ -1222,61 +1340,77 @@
 		"sigils": ["blue_mox", "green_mox", "magic_armor"],
 		"is_mox": true,
 		"no_sacrifice": true,
-		"rare": true
+		"rare": true,
+		"vanilla_override": {
+			"sigils": ["blue_mox", "green_mox"]
+		}
 	},
 	"bleene's_vessel": {
 		"stats": [0,1,2],
 		"cost": "energy",
-		"sigils": ["gemified", "blue_mox", "green_mox"],
+		"sigils": ["gem_empowered", "blue_mox", "green_mox"],
 		"is_mox": true,
 		"no_sacrifice": true
 	},
 	"master_bleene": {
 		"stats": [0,4,0],
 		"cost": "mox",
-		"sigils": ["scholar"],
+		"sigils": ["scholar", "magic_armor"],
 		"mox": ["blue", "green"],
-		"rare": true
+		"rare": true,
+		"vanilla_override": {
+			"sigils": ["scholar"]
+		}
 	},
 	"goranj's_mox": {
 		"stats": [0,3,0],
 		"sigils": ["orange_mox", "green_mox", "magic_armor"],
 		"is_mox": true,
 		"no_sacrifice": true,
-		"rare": true
+		"rare": true,
+		"vanilla_override": {
+			"sigils": ["orange_mox", "green_mox"]
+		}
 	},
 	"goranj's_vessel": {
 		"stats": [0,1,2],
 		"cost": "energy",
-		"sigils": ["gemified", "orange_mox", "green_mox"],
+		"sigils": ["gem_empowered", "orange_mox", "green_mox"],
 		"is_mox": true,
 		"no_sacrifice": true
 	},
 	"master_goranj": {
-		"stats": [2,6,0],
+		"stats": [2,4,0],
 		"cost": "mox",
-		"sigils": ["gem_dependent"],
+		"sigils": ["gem_dependent", "gem_empowered"],
 		"mox": ["orange", "green"],
-		"rare": true
+		"rare": true,
+		"vanilla_override": {
+			"stats": [2,6,0],
+			"sigils": ["gem_dependent"]
+		}
 	},
 	"orlu's_mox": {
 		"stats": [0,3,0],
 		"sigils": ["blue_mox", "orange_mox", "magic_armor"],
 		"is_mox": true,
 		"no_sacrifice": true,
-		"rare": true
+		"rare": true,
+		"vanilla_override": {
+			"sigils": ["blue_mox", "orange_mox"]
+		}
 	},
 	"orlu's_vessel": {
 		"stats": [0,1,2],
 		"cost": "energy",
-		"sigils": ["gemified", "blue_mox", "orange_mox"],
+		"sigils": ["gem_empowered", "blue_mox", "orange_mox"],
 		"is_mox": true,
 		"no_sacrifice": true
 	},
 	"master_orlu": {
 		"stats": [1,1,0],
 		"cost": "mox",
-		"sigils": ["flying", "looter"],
+		"sigils": ["airborne", "looter"],
 		"mox": ["blue", "orange"],
 		"rare": true
 	},
@@ -1319,7 +1453,11 @@
 		"stats": [1,3,2],
 		"sigils": ["withering"],
 		"cost": "bones",
-		"#comment": "added withering sigil, and buffed health from 1 to 3 (to distinguish from opossum)"
+		"#comment": "added withering sigil, and buffed health from 1 to 3 (to distinguish from opossum)",
+		"vanilla_override": {
+			"stats": [1,1,2],
+			"sigils": []
+		}
 	},
 	"tomb_robber": {
 		"stats": [0,2,0],
@@ -1335,15 +1473,17 @@
 	"banshee": {
 		"stats": [1,1,2],
 		"cost": "bones",
-		"sigils": ["flying"]
+		"sigils": ["airborne"]
 	},
 	"headless_horseman": {
 		"stats": [5,5,13],
 		"cost": "bones",
-		"sigils": ["flying", "sprinter", "stunned"],
+		"sigils": ["airborne", "sprinter", "stunned"],
 		"tribe": "hooved",
 		"rare": true,
-		"#comment": "added hooved tribe, and gave stunned sigil"
+		"vanilla_override": {
+			"sigils": ["airborne", "sprinter"]
+		}
 	},
 	"obol": {
 		"stats": [0,2,3],
@@ -1386,7 +1526,7 @@
 	"hawk": {
 		"stats": [3,1,2],
 		"cost": "blood",
-		"sigils": ["flying"],
+		"sigils": ["airborne"],
 		"tribe": "avian"
 	},
 	"salmon": {
@@ -1397,14 +1537,14 @@
 	"gem_guardian": {
 		"stats": [1,2,3],
 		"cost": "energy",
-		"sigils": ["gem_guardian", "gemified"],
-		"#comment": "gemified by default"
+		"sigils": ["gem_guardian", "gem_empowered"],
+		"#comment": "gem-empowered by default"
 	},
 	"gembound_ripper": {
 		"stats": [3,1,5],
 		"cost": "energy",
-		"sigils": ["gemified"],
-		"#comment": "gemified by default"
+		"sigils": ["gem_empowered"],
+		"#comment": "gem-empowered by default"
 	},
 	"exeskeleton": {
 		"stats": [2,2,2],
@@ -1455,6 +1595,13 @@
 
 
 	
+	"chaos_mage": {
+		"stats": [0,1,0],
+		"cost": "mox",
+		"sigils": ["frenzying"],
+		"mox": ["orange"],
+		"modded": "MoxExpansion"
+	},
 	"skele-leech": {
 		"stats": [1,1,3],
 		"cost": "bones",
@@ -1552,7 +1699,7 @@
 	"queen_bee": {
 		"stats": [1,3,2],
 		"cost": "blood",
-		"sigils": ["leader", "beehive", "flying", "stinger"],
+		"sigils": ["leader", "beehive", "airborne", "stinger"],
 		"tribe": "insect",
 		"rare": true,
 		"modded": "Vanilla+"
@@ -1576,15 +1723,15 @@
 	"summoning_circle": {
 		"stats": [0,1,0],
 		"cost": "mox",
-		"sigils": ["beast_summon"],
+		"sigils": ["beast_summon", "magic_armor"],
 		"mox": ["orange"],
 		"no_sacrifice": true,
 		"modded": "MoxExpansion"
 	},
 	"defense_mage": {
-		"stats": [0,1,0],
+		"stats": [0,2,0],
 		"cost": "mox",
-		"sigils": ["magic_armor", "opportunist"],
+		"sigils": ["armored", "opportunist"],
 		"mox": ["blue"],
 		"modded": "MoxExpansion",
 		"bot_playable": true

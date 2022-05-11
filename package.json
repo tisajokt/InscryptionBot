@@ -1,7 +1,7 @@
 {
-  "name": "inscryptionbot",
+  "name": "discryption",
   "version": "1.0.0",
-  "description": "",
+  "description": "Inscryption bot for discord",
   "main": "app.js",
   "dependencies": {
     "discord.js": "^13.6.0",
