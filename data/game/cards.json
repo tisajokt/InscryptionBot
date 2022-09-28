@@ -1899,37 +1899,6 @@
 
 
 
-	"zombie_zak": {
-		"stats": [1,1,5],
-		"cost": "bones",
-		"sigils": ["withering", "infectious"],
-		"rare": true,
-		"modded": "Zak"
-	},
-	"z_+_t": {
-		"stats": [3,2,1],
-		"cost": "blood",
-		"sigils": ["many_lives"],
-		"deathcard": true,
-		"rare": true,
-		"inspect": "<3",
-		"modded": "Zak"
-	},
-	"love_you": {
-		"stats": [0,17,0],
-		"sigils": ["undying", "free_paint"],
-		"rare": true,
-		"inspect": "so heckin much :>",
-		"modded": "Zak"
-	},
-	"nipple": {
-		"stats": [1,3,1],
-		"cost": "blood",
-		"sigils": ["many_lives"],
-		"deathcard": true,
-		"rare": true,
-		"modded": "Zak"
-	},
 	"goobert": {
 		"stats": [0,1,0],
 		"sigils": ["withering", "death_touch", "spikey"],
