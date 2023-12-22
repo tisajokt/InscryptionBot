@@ -727,9 +727,15 @@ class BattleInteraction extends PersistentCommandInteraction {
 		}
 		if (this.twoPlayers) {
 			if (this.battle.ended) {
-				reply.content = `<@${this.playerIDs[this.battle.winner]}> wins vs. <@${this.playerIDs[1-this.battle.winner]}>!\n${reply.content||""}`;
+				reply.content = `<@${this.playerIDs[this.battle.winner]}> won vs. <@${this.playerIDs[1-this.battle.winner]}>!\n${reply.content||""}`;
 			} else {
 				reply.content = `<@${this.playerIDs[this.battle.actor]}>'s turn\n${reply.content||""}`;
+			}
+		} else if (this.battle.ended) {
+			if (this.battle.isHuman(this.battle.winner)) {
+				reply.content = `<@${this.playerIDs[0]}> won vs. the computer! 🥳🎉\n${reply.content||""}`;
+			} else {
+				reply.content = `<@${this.playerIDs[0]}> lost vs. the computer! 😔🎺\n${reply.content||""}`;
 			}
 		}
 		return reply;
