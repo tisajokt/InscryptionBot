@@ -43,7 +43,7 @@ export const help: SlashCommand = {
 	run: async(interaction: CommandInteraction) => {
 		const page = interaction.options.getString("page") ?? "credits";
 		if (helpPages.has(page)) {
-			interaction.reply(helpPages[page]);
+			interaction.reply(helpPages.get(page));
 		} else {
 			console.error(`Help page "${page}" not found`);
 		}
