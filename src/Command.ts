@@ -50,12 +50,18 @@ export abstract class PersistentCommandInteraction {
 			await interaction.deferUpdate();
 			await this.receiveComponent(interaction, action, args);
 		} catch (e) {
-			console.error("Caught an error!");
 			if (e instanceof DiscordAPIError) {
-				await this.tokenExpired();
+				console.error("Caught a DiscordAPIError! Token expired?");
+				try {
+					await this.tokenExpired();
+				} catch (e) {}
+				console.error(e);
 			} else {
-				await this.internalError();
-				throw e;
+				console.error("Caught an internal server error!");
+				try {
+					await this.internalError();
+				} catch (e) {}
+				console.error(e);
 			}
 		}
 	}
