@@ -1,7 +1,7 @@
 {
 	"__powers": [
 		["gem_dependent", "zombified"],
-		["brittle", "withering"],
+		["brittle", "withering", "short_circuit"],
 		["annoying", "stunned", "pesky"],
 		["airborne", "detonator", "swapper", "clinger", "skellify", "immutable", "stinger", "lemming", "decoy", "frenzying"],
 		["sprinter", "burrower", "waterborne", "hefty", "jumper", "guardian", "mighty_leap", "null_conduit", "shield_latch", "transformer", "gem_detonator", "rampager", "hovering", "green_mox", "orange_mox", "blue_mox", "random_mox", "fisher", "stun_latch", "capacitor", "rolling"],
@@ -333,6 +333,9 @@
 	},
 	"withering": {
 		"desc": "loses 1 health at the start of your turn"
+	},
+	"short_circuit": {
+		"desc": "loses a random amount of power at the start of your turn"
 	},
 	"annoying": {
 		"desc": "an opposing card gains +1 power"

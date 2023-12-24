@@ -760,6 +760,9 @@ export class Card {
 				this.stats[1] += 2;
 			}
 		}
+		if (this.sigils.has("short_circuit") && this.stats[0] > 0) {
+			this.stats[0] = Math.floor(Math.random() * this.stats[0]);
+		}
 		if (this.sigils.has("withering")) {
 			this.stats[1]--;
 			if (this.stats[1] <= 0) {

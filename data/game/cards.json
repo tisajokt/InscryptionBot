@@ -1046,7 +1046,10 @@
 	"gamblobot": {
 		"stats": [0,1,3],
 		"cost": "energy",
-		"sigils": ["power_dice"]
+		"sigils": ["power_dice", "short_circuit"],
+		"vanilla_override": {
+			"sigils": ["power_dice"]
+		}
 	},
 	"energy_bot": {
 		"stats": [0,1,2],
