@@ -2243,9 +2243,12 @@ export class Player {
 	totem: Totem;
 	@jsonMember
 	boonBones: number = 0;
-	constructor(sidedeck?: cardName, deck?: (cardName|Card)[]) {
+	@jsonMember
+	noSandbox: boolean;
+	constructor(sidedeck?: cardName, deck?: (cardName|Card)[], noSandbox=false) {
 		this.sidedeck = sidedeck ?? pickRandom(sidedecks);
 		this.deck = deck ? new Deck(deck) : Player.generateDeck(this.sidedeck);
+		this.noSandbox = noSandbox;
 	}
 	countDistinctCards(): number {
 		const distinctCards = new Set<cardName>();

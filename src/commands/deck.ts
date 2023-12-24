@@ -157,15 +157,15 @@ class DeckInteraction extends PersistentCommandInteraction {
 					}],
 					components: [new MessageActionRow().addComponents(
 						this.makeButton("deck", [this.lastMenu]).setEmoji("👈"),
-						this.makeButton("card", ["name", "remove", arg]).setEmoji("⬇️"),
-						this.makeButton("card", ["name", "add", arg]).setEmoji("⬆️")
+						this.makeButton("card", ["name", "remove", arg]).setEmoji("⬇️").setDisabled(this.player.noSandbox),
+						this.makeButton("card", ["name", "add", arg]).setEmoji("⬆️").setDisabled(this.player.noSandbox)
 					)]
 				});
 				break;
 			// .card.name.add.[card name]
 			case "name.add":
 				const model = getModel(arg);
-				if (count < (model.rare ? MAX_RARE_DUPLICATES : MAX_NONRARE_DUPLICATES) && (!model.rare || rares < MAX_TOTAL_RARES)) {
+				if (count < (model.rare ? MAX_RARE_DUPLICATES : MAX_NONRARE_DUPLICATES) && (!model.rare || rares < MAX_TOTAL_RARES) && !this.player.noSandbox) {
 					deck.cards.push(arg);
 					deck._cardNames.push(arg);
 					AppUser.saveUsersData();
@@ -174,7 +174,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 				break;
 			// .card.name.remove.[card name]
 			case "name.remove":
-				if (count > 0) {
+				if (count > 0 && !this.player.noSandbox) {
 					deck.cards.splice(deck.cards.indexOf(arg), 1);
 					deck._cardNames.splice(deck._cardNames.indexOf(arg), 1);
 					AppUser.saveUsersData();
@@ -227,7 +227,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 					this.makeButton("main").setEmoji("👈"),
 					this.makeButton("deck", ["sidedeck"]).setEmoji(sidedeckEmoji[this.player.sidedeck] || sidedeckEmoji.squirrel),
 					this.makeButton("deck", ["view"]).setEmoji("🗃️"),
-					this.makeButton("special").setEmoji("✨"),
+					this.makeButton("special").setEmoji("✨").setDisabled(true),
 					this.makeButton("deck", ["delete"]).setEmoji("🗑️").setStyle("DANGER"),
 				);
 				await this.interaction.editReply({
@@ -251,7 +251,7 @@ class DeckInteraction extends PersistentCommandInteraction {
 				}
 				const components = [
 					this.makeButton("deck").setEmoji("👈"),
-					this.makeButton("deck", ["cards"]).setEmoji("🆕"),
+					this.makeButton("deck", ["cards"]).setEmoji("🆕").setDisabled(this.player.noSandbox),
 					this.makeButton("deck", ["view", "next"]).setEmoji("▶️")
 				];
 				const deckCardsMenu = new MessageActionRow().addComponents(components);
