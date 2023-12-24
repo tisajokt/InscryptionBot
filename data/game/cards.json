@@ -1899,6 +1899,33 @@
 		"no_bones": true,
 		"modded": "PO3+"
 	},
+	"derelict": {
+		"stats": [4,3,5],
+		"cost": "energy",
+		"sigils": ["short_circuit"],
+		"modded": "PO3+"
+	},
+	"b0n3b0t": {
+		"stats": [0,1,2],
+		"cost": "energy",
+		"sigils": ["four_bones"],
+		"modded": "PO3+"
+	},
+	"strange_smoke": {
+		"stats": [1,3,0],
+		"sigils": ["four_bones", "random_mox", "capacitor"],
+		"is_mox": true,
+		"event": "none",
+		"bot_playable": false,
+		"modded": "Vanilla+"
+	},
+	"wild_smoke": {
+		"stats": [1,1,0],
+		"sigils": ["hoarder", "jumper"],
+		"event": "none",
+		"bot_playable": false,
+		"modded": "Vanilla+"
+	},
 
 
 
